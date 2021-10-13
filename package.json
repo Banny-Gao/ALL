@@ -1,0 +1,23 @@
+{
+  "name": "all",
+  "version": "0.0.1",
+  "description": "杂记",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mackkkk/ALL.git"
+  },
+  "author": "mackkkk",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mackkkk/ALL/issues"
+  },
+  "homepage": "https://github.com/Mackkkk/ALL#readme",
+  "dependencies": {
+    "plop": "^2.7.4",
+    "webpack": "^5.58.2"
+  }
+}
