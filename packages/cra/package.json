@@ -1,0 +1,31 @@
+{
+  "name": "cra",
+  "version": "0.0.1",
+  "description": "Create React apps with no build configuration.",
+  "keywords": [
+    "react"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mackkkk/ALL.git",
+    "directory": "packages/cra"
+  },
+  "license": "ISC",
+  "engines": {
+    "node": ">=14"
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "index.js",
+    "lib"
+  ],
+  "bin": {
+    "cra": "./index.js"
+  },
+  "scripts": {
+    "test": "cross-env FORCE_COLOR=true jest"
+  }
+}
