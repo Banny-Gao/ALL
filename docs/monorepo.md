@@ -84,6 +84,7 @@ _package.json_
     "@commitlint/cz-commitlint": "^13.2.1",
     "@commitlint/format": "^13.2.0",
     "commitizen": "^4.2.4",
+    "inquirer": "^8.2.0",
     "conventional-changelog-conventionalcommits": "^4.6.1",
     "husky": "^7.0.2"
   }
@@ -104,4 +105,62 @@ module.exports = {
 }
 ```
 
-配置 eslint
+配置 eslint 和 prettier
+
+*package.json*
+```json
+{
+  "devDependencies": {
+    // ...
+    "eslint": "7.2.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-react": "^7.26.1",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "prettier": "^2.4.1",
+    "lint-staged": "^11.2.3",
+  }
+}
+```
+*.editorconfig*
+```spell
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+max_line_length = 80
+trim_trailing_whitespace = true
+
+[*.md]
+max_line_length = 0
+trim_trailing_whitespace = false
+
+[COMMIT_EDITMSG]
+max_line_length = 0
+```
+*.eslintignore*
+```
+**/node_modules
+build/
+```
+*.eslintrc.js*
+```js
+module.exports = {extends: ['airbnb', 'prettier']};
+```
+*.prettierrc.js*
+```js
+module.exports = {
+  bracketSpacing: false,
+  singleQuote: true,
+  jsxBracketSameLine: true,
+  trailingComma: 'all',
+  printWidth: 80,
+  parser: 'babel',
+}
+```
