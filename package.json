@@ -4,22 +4,21 @@
     "packages/*"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "commit": "git add -A && git-cz"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
+  "config": {
+    "commitizen": {
+      "path": "@commitlint/cz-commitlint"
     }
   },
-  "lint-staged": {
-    "*.{js,json,yml,yaml,css,scss,ts,tsx,md}": [
-      "prettier --write"
-    ]
-  },
-  "dependencies": {},
   "devDependencies": {
     "@commitlint/cli": "^13.2.1",
     "@commitlint/config-conventional": "^13.2.0",
+    "@commitlint/config-lerna-scopes": "^13.2.0",
+    "@commitlint/cz-commitlint": "^13.2.1",
+    "@commitlint/format": "^13.2.0",
+    "commitizen": "^4.2.4",
+    "conventional-changelog-conventionalcommits": "^4.6.1",
     "husky": "^7.0.2",
     "lerna": "^4.0.0",
     "plop": "^2.7.4",

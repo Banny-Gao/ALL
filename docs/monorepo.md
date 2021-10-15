@@ -1,6 +1,6 @@
 # cra 实现
 
-## 从搭建 monorepo 开始
+## 从 monorepo 开始
 
 - [monorepo](https://juejin.cn/post/6950561371394146318)
 - [yarn workspace](https://classic.yarnpkg.com/lang/en/docs/workspaces/)
@@ -58,8 +58,50 @@ _packages/cra/package.json_
 }
 ```
 
-添加一些常用全局依赖
+添加 husky，配置 commitlint
 
-```shell
-yarn add @commitlint/config-conventional @commitlint/cli husky prettier webpack plop -W -D
+- [husky](https://typicode.github.io/husky/#/)
+- [commitlint](https://commitlint.js.org/#/)
+
+_package.json_
+
+```json
+{
+  "scripts": {
+    // ...
+    "commit": "git add -A && git-cz"
+  },
+  "config": {
+    "commitizen": {
+      "path": "@commitlint/cz-commitlint"
+    }
+  },
+  "devDependencies": {
+    // ...
+    "@commitlint/cli": "^13.2.1",
+    "@commitlint/config-conventional": "^13.2.0",
+    "@commitlint/config-lerna-scopes": "^13.2.0",
+    "@commitlint/cz-commitlint": "^13.2.1",
+    "@commitlint/format": "^13.2.0",
+    "commitizen": "^4.2.4",
+    "conventional-changelog-conventionalcommits": "^4.6.1",
+    "husky": "^7.0.2"
+  }
+}
 ```
+
+_commitlint.config.js_
+
+```js
+module.exports = {
+  parserPreset: 'conventional-changelog-conventionalcommits',
+  extends: [
+    '@commitlint/config-conventional',
+    '@commitlint/config-lerna-scopes',
+  ],
+  formatter: '@commitlint/format',
+  defaultIgnores: true,
+}
+```
+
+配置 eslint
