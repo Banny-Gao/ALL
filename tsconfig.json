@@ -6,7 +6,7 @@
     "lib": ["esnext", "dom"],
     "sourceMap": true,
     "baseUrl": ".",
-    "jsx": "react-jsx",
+    "jsx": "react",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
@@ -22,6 +22,6 @@
       "@/*": ["./packages/*"]
     }
   },
-  "include": ["packages/**/*", ".eslintrc.js", ".stylelintrc.js", ".prettierrc.js"],
+  "include": ["**/*"],
   "exclude": ["node_modules", "build", "dist", "scripts", "webpack", "jest"]
 }

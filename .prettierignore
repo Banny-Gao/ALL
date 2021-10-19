@@ -1,15 +1,1 @@
-**/*.svg
-**/*.png
-**/package.json
-**/dist
-**/build
-**/.eslintignore
-**/.editorconfig
-**/.gitignore
-**/.prettierignore
-**/LICENSE
-**/.eslintcache
-**/*.lock
-**/yarn-error.log
-**/.history
-**/.husky
+**/node_modules
