@@ -81,6 +81,7 @@ _package.json_
     "@commitlint/config-lerna-scopes": "^13.2.0",
     "@commitlint/cz-commitlint": "^13.2.1",
     "@commitlint/format": "^13.2.0",
+    "@typescript-eslint/parser": "^4.29.3",
     "commitizen": "^4.2.4",
     "inquirer": "^8.2.0",
     "conventional-changelog-conventionalcommits": "^4.6.1",
