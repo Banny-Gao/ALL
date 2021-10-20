@@ -27,5 +27,16 @@
   },
   "scripts": {
     "test": "cross-env FORCE_COLOR=true jest"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^8.2.0",
+    "envinfo": "^7.8.1",
+    "semver": "^7.3.5",
+    "utils": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/commander": "^2.12.2",
+    "@types/envinfo": "^7.8.1"
   }
 }

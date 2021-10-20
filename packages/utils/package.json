@@ -1,0 +1,27 @@
+{
+  "name": "utils",
+  "version": "0.0.1",
+  "description": "utils of work",
+  "author": "gaozhipeng <gaozhipeng@huohua.cn>",
+  "homepage": "https://github.com/Mackkkk/ALL#readme",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mackkkk/ALL.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/Mackkkk/ALL/issues"
+  }
+}

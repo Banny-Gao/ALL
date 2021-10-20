@@ -95,7 +95,10 @@ _commitlint.config.js_
 ```js
 module.exports = {
   parserPreset: 'conventional-changelog-conventionalcommits',
-  extends: ['@commitlint/config-conventional', '@commitlint/config-lerna-scopes'],
+  extends: [
+    '@commitlint/config-conventional',
+    '@commitlint/config-lerna-scopes',
+  ],
   formatter: '@commitlint/format',
   defaultIgnores: true,
 };
@@ -180,7 +183,7 @@ _.eslintrc.json_
 {
   "extends": ["airbnb", "airbnb-typescript", "prettier"],
   "parser": "@typescript-eslint/parser",
-  "plugins": ["react", "jest", "unicorn", "react-hooks"],
+  "plugins": ["react", "jest", "unicorn", "react-hooks", "import"],
   "env": {
     "browser": true,
     "node": true,
@@ -190,23 +193,37 @@ _.eslintrc.json_
     "jasmine": true
   },
   "settings": {
-    "import/resolver": { "node": { "extensions": [".js", ".jsx", ".ts", ".tsx", ".d.ts"] } },
-    "import/parsers": { "@typescript-eslint/parser": [".ts", ".tsx", ".d.ts"] },
-    "import/extensions": [".js", ".mjs", ".jsx", ".ts", ".tsx", ".d.ts"],
-    "import/external-module-folders": ["node_modules", "node_modules/@types"],
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx", ".d.ts"]
+      }
+    },
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx", ".d.ts"]
+    },
+    "import/extensions": [
+      ".js",
+      ".mjs",
+      ".jsx",
+      ".ts",
+      ".tsx",
+      ".d.ts"
+    ],
+    "import/external-module-folders": [
+      "node_modules",
+      "node_modules/@types"
+    ],
     "polyfills": ["fetch", "Promise", "URL", "object-assign"]
   },
   "parserOptions": {
-    "ecmaFeatures": { "jsx": true },
-    "babelOptions": {
-      "presets": ["@babel/preset-env", "@babel/preset-react", "@babel/preset-typescript"],
-      "plugins": [
-        ["@babel/plugin-proposal-decorators", { "legacy": true }],
-        ["@babel/plugin-proposal-class-properties", { "loose": true }]
-      ]
+    "ecmaFeatures": {
+      "jsx": true
     },
     "requireConfigFile": false,
     "project": "./tsconfig.json"
+  },
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "off"
   }
 }
 ```
@@ -256,7 +273,14 @@ _tsconfig.json_
     }
   },
   "include": ["./packages/**/*"],
-  "exclude": ["node_modules", "build", "dist", "scripts", "webpack", "jest"]
+  "exclude": [
+    "node_modules",
+    "build",
+    "dist",
+    "scripts",
+    "webpack",
+    "jest"
+  ]
 }
 ```
 
