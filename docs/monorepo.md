@@ -56,7 +56,7 @@ _package.json_
 }
 ```
 
-添加 husky，配置 commitlint
+添加 husky，配置 commitlint, 自动生成 CHANGELOG
 
 - [husky](https://typicode.github.io/husky/#/)
 - [commitlint](https://commitlint.js.org/#/)
@@ -67,7 +67,8 @@ _package.json_
 {
   "scripts": {
     // ...
-    "commit": "git add -A && git-cz"
+    "cz": "prettier -c -w . && git add -A && git-cz",
+    "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s"
   },
   "config": {
     "commitizen": {
@@ -81,9 +82,9 @@ _package.json_
     "@commitlint/config-lerna-scopes": "^13.2.0",
     "@commitlint/cz-commitlint": "^13.2.1",
     "@commitlint/format": "^13.2.0",
-    "@typescript-eslint/parser": "^4.29.3",
     "commitizen": "^4.2.4",
     "inquirer": "^8.2.0",
+    "conventional-changelog": "^3.1.24",
     "conventional-changelog-conventionalcommits": "^4.6.1",
     "husky": "^7.0.2"
   }
@@ -138,7 +139,9 @@ _package.json_
     "stylelint-config-prettier": "^9.0.3",
     "stylelint-config-standard": "^22.0.0",
     "stylelint-declaration-block-no-ignored-properties": "^2.4.0",
-    "typescript": "^4.4.4"
+    "typescript": "^4.4.4",
+    "@typescript-eslint/eslint-plugin": "4.29.3",
+    "@typescript-eslint/parser": "^4.29.3"
   }
 }
 ```
