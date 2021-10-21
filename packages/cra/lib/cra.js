@@ -1,13 +1,23 @@
-#!/usr/bin/env node
 /* eslint-disable no-console */
 
 const commander = require('commander');
 const chalk = require('chalk');
 const envinfo = require('envinfo');
 const semver = require('semver');
-const path = require('path');
 
-const { isUsingYarn } = require('utils');
+const path = require('path');
+const fs = require('fs-extra');
+const os = require('os');
+const { execSync } = require('child_process');
+
+const {
+  isUsingYarn,
+  checkAppName,
+  isSafeToCreateProjectIn,
+  checkNpmCanReadCwd,
+  checkNpmVersion,
+  checkYarnVersion,
+} = require('utils');
 
 const pkg = require('../package.json');
 
@@ -41,12 +51,24 @@ const logInfo = () => {
   );
 };
 
+const run = ({
+  root,
+  appName,
+  scriptsVersion,
+  verbose,
+  originalDirectory,
+  template,
+  useYarn,
+  usePnp,
+}) => {};
+
 const createApp = ({
   name,
   verbose,
   scriptsVersion,
   template,
   usePnp,
+  directory,
 }) => {
   const unSupportNode = !semver.satisfies(
     semver.coerce(process.version),
@@ -63,9 +85,66 @@ const createApp = ({
     process.exit(1);
   }
 
-  const root = path.resolve(name);
+  const root = path.resolve(path.join(directory, name));
   const appName = path.basename(root);
-  console.log(appName);
+
+  if (!checkAppName(appName)) process.exit(1);
+  fs.ensureDirSync(root);
+  !isSafeToCreateProjectIn(root, appName) && process.exit(1);
+
+  console.log();
+  console.log(`Creating a new React app in ${chalk.green(root)}.`);
+  console.log();
+
+  const packageJson = {
+    name: appName,
+    version: '0.1.0',
+    private: true,
+  };
+  fs.writeFileSync(
+    path.join(root, 'package.json'),
+    JSON.stringify(packageJson, null, 2) + os.EOL,
+  );
+
+  // 获取当前 node 进程目录
+  const originalDirectory = process.cwd();
+  // 改变 node 进程目录
+  process.chdir(root);
+
+  const useYarn = isUsingYarn();
+  if (!useYarn && !checkNpmCanReadCwd()) process.exit(1);
+
+  if (!useYarn) {
+    const npmInfo = checkNpmVersion();
+    console.log(npmInfo);
+  } else if (usePnp) {
+    const yarnInfo = checkYarnVersion();
+    console.log(yarnInfo);
+  }
+
+  if (useYarn) {
+    const yarnUsesDefaultRegistry =
+      execSync('yarnpkg config get registry').toString().trim() ===
+      'https://registry.yarnpkg.com';
+    console.log('yarnUsesDefaultRegistry', yarnUsesDefaultRegistry);
+    if (yarnUsesDefaultRegistry) {
+      fs.copySync(
+        require.resolve('./yarn.lock.cached'),
+        path.join(root, 'yarn.lock'),
+      );
+    }
+  }
+
+  run({
+    root,
+    appName,
+    scriptsVersion,
+    verbose,
+    originalDirectory,
+    template,
+    useYarn,
+    usePnp,
+  });
 };
 
 const init = async () => {
@@ -86,11 +165,12 @@ const init = async () => {
       '--template <path-to-template>',
       'specify a template for the created project',
     )
-    .option('--use-pnp')
+    .option('-u, --use-pnp')
+    .option('-d, --directory [path]', 'base directory', '.')
     .allowUnknownOption()
     .parse(process.argv);
 
-  const { info, verbose, scriptsVersion, template, usePnp } =
+  const { info, verbose, scriptsVersion, template, usePnp, directory } =
     program.opts();
 
   info && logInfo();
@@ -103,6 +183,7 @@ const init = async () => {
     scriptsVersion,
     template,
     usePnp,
+    directory,
   });
 };
 
