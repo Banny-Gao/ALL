@@ -6,7 +6,8 @@
   "scripts": {
     "cz": "prettier -c -w . && git add -A && git-cz",
     "cra": "node packages/cra/index.js",
-    "clean": "lerna clean"
+    "clean": "lerna clean",
+    "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s"
   },
   "config": {
     "commitizen": {
@@ -27,6 +28,7 @@
     "@typescript-eslint/parser": "^4.29.3",
     "chalk": "^4.1.2",
     "commitizen": "^4.2.4",
+    "conventional-changelog": "^3.1.24",
     "conventional-changelog-conventionalcommits": "^4.6.1",
     "eslint": "^7.5.0",
     "eslint-config-airbnb": "^18.2.1",
