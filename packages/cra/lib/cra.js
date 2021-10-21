@@ -20,6 +20,7 @@ const {
 } = require('utils');
 
 const pkg = require('../package.json');
+const run = require('./run');
 
 let projectName;
 
@@ -50,17 +51,6 @@ const logInfo = () => {
       .then(console.log)
   );
 };
-
-const run = ({
-  root,
-  appName,
-  scriptsVersion,
-  verbose,
-  originalDirectory,
-  template,
-  useYarn,
-  usePnp,
-}) => {};
 
 const createApp = ({
   name,
@@ -126,10 +116,9 @@ const createApp = ({
     const yarnUsesDefaultRegistry =
       execSync('yarnpkg config get registry').toString().trim() ===
       'https://registry.yarnpkg.com';
-    console.log('yarnUsesDefaultRegistry', yarnUsesDefaultRegistry);
     if (yarnUsesDefaultRegistry) {
       fs.copySync(
-        require.resolve('./yarn.lock.cached'),
+        require.resolve('../yarn.lock.cached'),
         path.join(root, 'yarn.lock'),
       );
     }
