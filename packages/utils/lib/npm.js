@@ -2,6 +2,11 @@
 const spawn = require('cross-spawn');
 const semver = require('semver');
 const tmp = require('tmp');
+const fs = require('fs-extra');
+const { unpack } = require('tar-pack');
+
+const dns = require('dns');
+const path = require('path');
 
 const { execSync } = require('child_process');
 
@@ -125,24 +130,35 @@ const getTemporaryDirectory = () =>
     });
   });
 
+const extractStream = (stream, dest) =>
+  new Promise((resolve, reject) => {
+    stream.pipe(
+      unpack(dest, (err) => {
+        if (err) reject;
+        else resolve(dest);
+      }),
+    );
+  });
+
 const getPackageInfo = async (installPackage) => {
   if (installPackage.match(/^.+\.(tgz|tar\.gz)$/)) {
     try {
-      const obj = await getTemporaryDirectory();
+      const { tmpdir, cleanup } = await getTemporaryDirectory();
+
       let stream;
       if (/^http/.test(installPackage)) {
         stream = hyperquest(installPackage);
       } else {
         stream = fs.createReadStream(installPackage);
       }
-      const obj2 = await extractStream(stream, obj.tmpdir).then(
-        () => obj,
-      );
+
+      await extractStream(stream, tmpdir);
 
       const { name, version } = require.resolve(
-        path.join(obj2.tmpdir, 'package.json'),
+        path.join(tmpdir, 'package.json'),
       );
-      obj2.cleanup();
+
+      cleanup();
       return { name, version };
     } catch (err) {
       console.log(
@@ -156,38 +172,164 @@ const getPackageInfo = async (installPackage) => {
           assumedProjectName,
         )}"`,
       );
-      return Promise.resolve({ name: assumedProjectName });
+      return { name: assumedProjectName };
     }
   }
-  if (installPackage.startsWith('git+')) {
-    // Pull package name out of git urls e.g:
-    // git+https://github.com/mycompany/react-scripts.git
-    // git+ssh://github.com/mycompany/react-scripts.git#v1.2.3
-    return Promise.resolve({
+
+  if (installPackage.startsWith('git+'))
+    return {
       name: installPackage.match(/([^/]+)\.git(#.*)?$/)[1],
-    });
-  }
-  if (installPackage.match(/.+@/)) {
-    // Do not match @scope/ when stripping off @version or @tag
-    return Promise.resolve({
+    };
+
+  if (installPackage.match(/.+@/))
+    return {
       name:
         installPackage.charAt(0) +
         installPackage.substr(1).split('@')[0],
       version: installPackage.split('@')[1],
-    });
-  }
+    };
+
   if (installPackage.match(/^file:/)) {
     const installPackagePath = installPackage.match(/^file:(.*)?$/)[1];
     const { name, version } = require.resolve(
       path.join(installPackagePath, 'package.json'),
     );
-    return Promise.resolve({ name, version });
+    return { name, version };
   }
-  return Promise.resolve({ name: installPackage });
+
+  return { name: installPackage };
+};
+
+const getProxy = () => {
+  let httpsProxy;
+
+  if (process.env.https_proxy) httpsProxy = process.env.https_proxy;
+  else {
+    try {
+      const npmProxy = execSync('npm config get https-proxy');
+      npmProxy && (httpsProxy = npmProxy.toString().trim());
+    } catch (e) {
+      //
+    }
+  }
+
+  return httpsProxy;
+};
+
+const checkIfOnline = (useYarn) =>
+  new Promise((resolve) => {
+    if (!useYarn) resolve(true);
+
+    dns.lookup('registry.yarnpkg.com', (err) => {
+      let proxy;
+      if (err !== null && (proxy = getProxy())) {
+        dns.lookup(new URL(proxy).hostname, (proxyErr) => {
+          resolve(proxyErr == null);
+        });
+      } else resolve(err == null);
+    });
+  });
+
+const install = ({
+  root,
+  useYarn,
+  usePnp,
+  dependencies,
+  verbose,
+  isOnline,
+}) =>
+  new Promise((resolve, reject) => {
+    let command;
+    let args;
+
+    if (useYarn) {
+      command = 'yarnpkg';
+      args = ['add', '--exact'];
+
+      !isOnline && args.push('--offline');
+      usePnp && args.push('--enable-pnp');
+      args.push(...dependencies);
+      args.push('--cwd');
+      args.push(root);
+
+      if (!isOnline) {
+        console.log(chalk.yellow('You appear to be offline.'));
+        console.log(
+          chalk.yellow('Falling back to the local Yarn cache.'),
+        );
+        console.log();
+      }
+    } else {
+      command = 'npm';
+      args = [
+        'install',
+        '--no-audit', // https://github.com/facebook/create-react-app/issues/11174
+        '--save',
+        '--save-exact',
+        '--loglevel',
+        'error',
+        ...dependencies,
+      ];
+
+      if (usePnp) {
+        console.log(chalk.yellow("NPM doesn't support PnP."));
+        console.log(
+          chalk.yellow('Falling back to the regular installs.'),
+        );
+        console.log();
+      }
+    }
+
+    verbose && args.push('--verbose');
+
+    spawn(command, args, { stdio: 'inherit' }).on('close', (code) => {
+      if (code !== 0) {
+        reject({
+          command: `${command} ${args.join(' ')}`,
+        });
+        return;
+      }
+      resolve();
+    });
+  });
+
+const checkNodeVersion = (packageName, root) => {
+  const packageJsonPath = path.resolve(
+    root || process.cwd(),
+    'node_modules',
+    packageName,
+    'package.json',
+  );
+
+  if (!fs.existsSync(packageJsonPath)) return;
+
+  const { engines } = require(packageJsonPath);
+
+  if (!engines || !engines.node) return;
+
+  if (!semver.satisfies(process.version, engines.node)) {
+    console.error(
+      chalk.red(
+        `You are running Node %s.\n 
+        ${packageName} requires Node %s or higher. \n
+        Please update your version of Node.`,
+      ),
+      process.version,
+      engines.node,
+    );
+
+    process.exit(1);
+  }
 };
 
 module.exports = {
   checkNpmCanReadCwd,
   checkNpmVersion,
   checkYarnVersion,
+  extractStream,
+  getPackageInfo,
+  getProxy,
+  checkIfOnline,
+  install,
+  checkNodeVersion,
 };

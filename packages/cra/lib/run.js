@@ -2,24 +2,36 @@
 const prompts = require('prompts');
 const chalk = require('chalk');
 const semver = require('semver');
+const fs = require('fs-extra');
+
+const path = require('path');
+const os = require('os');
+
+const {
+  getPackageInfo,
+  checkIfOnline,
+  install,
+  checkNodeVersion,
+  executeNodeScript,
+} = require('utils');
 
 const getInstallPackage = (version, originalDirectory) => {
-  let packageToInstall = 'react-scripts';
+  let scriptsToInstall = 'react-scripts';
 
   const validSemver = semver.valid(version);
   if (validSemver) {
-    packageToInstall += `@${validSemver}`;
+    scriptsToInstall += `@${validSemver}`;
   } else if (version) {
     if (version[0] === '@' && !version.includes('/')) {
-      packageToInstall += version;
+      scriptsToInstall += version;
     } else if (version.match(/^file:/)) {
-      packageToInstall = `file:${path.resolve(
+      scriptsToInstall = `file:${path.resolve(
         originalDirectory,
         version.match(/^file:(.*)?$/)[1],
       )}`;
     } else {
       // for tar.gz or alternative paths
-      packageToInstall = version;
+      scriptsToInstall = version;
     }
   }
 
@@ -35,7 +47,7 @@ const getInstallPackage = (version, originalDirectory) => {
   ];
 
   for (const script of scriptsToWarn) {
-    if (packageToInstall.startsWith(script.name)) {
+    if (scriptsToInstall.startsWith(script.name)) {
       return prompts({
         type: 'confirm',
         name: 'useScript',
@@ -46,12 +58,12 @@ const getInstallPackage = (version, originalDirectory) => {
           process.exit(0);
         }
 
-        return packageToInstall;
+        return scriptsToInstall;
       });
     }
   }
 
-  return Promise.resolve(packageToInstall);
+  return Promise.resolve(scriptsToInstall);
 };
 
 const getTemplateInstallPackage = (template, originalDirectory) => {
@@ -91,6 +103,66 @@ const getTemplateInstallPackage = (template, originalDirectory) => {
   return Promise.resolve(templateToInstall);
 };
 
+const makeCaretRange = (dependencies, name) => {
+  const version = dependencies[name];
+
+  if (typeof version === 'undefined') {
+    console.error(
+      chalk.red(`Missing ${name} dependency in package.json`),
+    );
+    process.exit(1);
+  }
+
+  let patchedVersion = `^${version}`;
+
+  if (!semver.validRange(patchedVersion)) {
+    console.error(
+      `Unable to patch ${name} dependency version because version ${chalk.red(
+        version,
+      )} will become invalid ${chalk.red(patchedVersion)}`,
+    );
+    patchedVersion = version;
+  }
+
+  return { [name]: patchedVersion };
+};
+
+const setCaretRangeForRuntimeDeps = (packageName, root) => {
+  const packagePath = path.join(root || process.cwd(), 'package.json');
+  const packageJson = require(packagePath);
+
+  const { dependencies } = packageJson;
+
+  if (typeof dependencies === 'undefined') {
+    console.error(chalk.red('Missing dependencies in package.json'));
+    process.exit(1);
+  }
+
+  const packageVersion = dependencies[packageName];
+  if (typeof packageVersion === 'undefined') {
+    console.error(
+      chalk.red(`Unable to find ${packageName} in package.json`),
+    );
+    process.exit(1);
+  }
+
+  fs.writeFileSync(
+    packagePath,
+    JSON.stringify(
+      {
+        ...packageJson,
+        dependencies: {
+          ...dependencies,
+          ...makeCaretRange(dependencies, 'react'),
+          ...makeCaretRange(dependencies, 'react-dom'),
+        },
+      },
+      null,
+      2,
+    ) + os.EOL,
+  );
+};
+
 module.exports = async ({
   root,
   appName,
@@ -101,7 +173,7 @@ module.exports = async ({
   useYarn,
   usePnp,
 }) => {
-  const [packageToInstall, templateToInstall] = await Promise.all([
+  const [scriptsToInstall, templateToInstall] = await Promise.all([
     getInstallPackage(scriptsVersion, originalDirectory),
     getTemplateInstallPackage(template, originalDirectory),
   ]);
@@ -111,4 +183,100 @@ module.exports = async ({
       'Installing packages. This might take a couple of minutes.',
     ),
   );
+
+  const dependencies = [
+    'react',
+    'react-dom',
+    scriptsToInstall,
+    templateToInstall,
+  ];
+
+  const [packageInfo, templateInfo] = await Promise.all([
+    getPackageInfo(scriptsToInstall),
+    getPackageInfo(templateToInstall),
+  ]);
+
+  const isOnline = await checkIfOnline(useYarn);
+  const { name: scriptsName } = packageInfo;
+  const { name: templateName } = templateInfo;
+
+  console.log(
+    `Installing ${chalk.cyan('react')}, ${chalk.cyan(
+      'react-dom',
+    )}, and ${chalk.cyan(scriptsName)} with ${chalk.cyan(
+      templateName,
+    )}...`,
+  );
+  console.log();
+
+  try {
+    await install({
+      root,
+      useYarn,
+      usePnp,
+      dependencies,
+      verbose,
+      isOnline,
+    });
+
+    checkNodeVersion(scriptsName, root);
+    setCaretRangeForRuntimeDeps(scriptsName, root);
+
+    const pnpPath = path.resolve(process.cwd(), '.pnp.js');
+    const nodeArgs = fs.existsSync(pnpPath)
+      ? ['--require', pnpPath]
+      : [];
+
+    await executeNodeScript(
+      {
+        cwd: process.cwd(),
+        args: nodeArgs,
+      },
+      [root, appName, verbose, originalDirectory, templateName],
+      `
+        const init = require('${scriptsName}/scripts/init.js');
+        init.apply(null, JSON.parse(process.argv[1]));
+      `,
+    );
+  } catch (reason) {
+    console.log();
+    console.log('Aborting installation.');
+    if (reason.command) {
+      console.log(`  ${chalk.cyan(reason.command)} has failed.`);
+    } else {
+      console.log(
+        chalk.red('Unexpected error. Please report it as a bug:'),
+      );
+      console.log(reason);
+    }
+    console.log();
+
+    const knownGeneratedFiles = [
+      'package.json',
+      'yarn.lock',
+      'node_modules',
+    ];
+    const currentFiles = fs.readdirSync(path.join(root));
+    currentFiles.forEach((file) => {
+      knownGeneratedFiles.forEach((fileToMatch) => {
+        if (file === fileToMatch) {
+          console.log(`Deleting generated file... ${chalk.cyan(file)}`);
+          fs.removeSync(path.join(root, file));
+        }
+      });
+    });
+
+    const remainingFiles = fs.readdirSync(path.join(root));
+    if (!remainingFiles.length) {
+      console.log(
+        `Deleting ${chalk.cyan(`${appName}/`)} from ${chalk.cyan(
+          path.resolve(root, '..'),
+        )}`,
+      );
+      process.chdir(path.resolve(root, '..'));
+      fs.removeSync(path.join(root));
+    }
+    console.log('Done.');
+    process.exit(1);
+  }
 };

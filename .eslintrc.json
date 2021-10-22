@@ -52,6 +52,10 @@
     "@typescript-eslint/no-unused-vars": "warn",
     "no-console": "warn",
     "no-restricted-syntax": "off",
-    "no-undef": "off"
+    "no-undef": "off",
+    "no-cond-assign": "off",
+    "prefer-promise-reject-errors": "off",
+    "import/no-dynamic-require": "off",
+    "global-require": "off"
   }
 }
