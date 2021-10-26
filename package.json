@@ -5,7 +5,7 @@
   ],
   "scripts": {
     "cz": "prettier -c -w . && git add -A && git-cz",
-    "cra": "node packages/cra/index.js",
+    "cra": "node scripts/cra.js",
     "clean": "lerna clean",
     "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s"
   },
