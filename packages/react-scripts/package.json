@@ -1,0 +1,33 @@
+{
+  "name": "react-scripts",
+  "version": "1.0.0",
+  "description": "Configuration and scripts for Create React App.",
+  "homepage": "https://github.com/Mackkkk/ALL#readme",
+  "license": "ISC",
+  "files": [
+    "lib"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mackkkk/ALL.git",
+    "directory": "packages/react-scripts"
+  },
+  "bin": {
+    "react-scripts": "./bin/react-scripts.js"
+  },
+  "bugs": {
+    "url": "https://github.com/Mackkkk/ALL/issues"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "cross-spawn": "^7.0.3",
+    "fs-extra": "^10.0.0",
+    "utils": "file:../utils"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.13"
+  }
+}

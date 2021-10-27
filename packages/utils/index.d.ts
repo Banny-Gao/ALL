@@ -60,3 +60,14 @@ export const executeNodeScript: (
   evaluateArgs: any[],
   evaluate: string,
 ) => Promise<void>;
+
+export const defaultBrowsers: {
+  production: string[];
+  development: string[];
+};
+
+export const checkBrowsers: (
+  dir: string,
+  isInteractive: boolean,
+  retry?: boolean,
+) => Promise<string[] | boolean>;

@@ -1,14 +1,11 @@
-const fs = require('fs-extra');
+const fs = require('fs');
 const path = require('path');
 
 const { execSync } = require('child_process');
 
 const cleanup = () => {
   console.log('Cleaning up.');
-  // Reset changes made to package.json files.
   execSync(`git checkout -- packages/*/package.json`);
-  // Uncomment when snapshot testing is enabled by default:
-  // rm ./template/src/__snapshots__/App.test.js.snap
 };
 
 const handleExit = () => {
@@ -28,18 +25,9 @@ const handleError = (e) => {
 process.on('SIGINT', handleExit);
 process.on('uncaughtException', handleError);
 
-console.log();
-console.log('-------------------------------------------------------');
-console.log(
-  'Assuming you have already run `npm install` to update the deps.',
-);
-console.log('If not, remember to do this before testing!');
-console.log('-------------------------------------------------------');
-console.log();
-
 const gitStatus = execSync(`git status --porcelain`).toString();
 
-if (gitStatus.trim() !== '') {
+if (gitStatus.trim().startsWith('packages')) {
   console.log('Please commit your changes before running this script!');
   console.log('Exiting because `git status` is not empty:');
   console.log();
@@ -87,6 +75,7 @@ Object.keys(packagePathsByName).forEach((name) => {
         'file:' + packagePathsByName[otherName];
     }
   });
+  console.log(json);
 
   fs.writeFileSync(packageJson, JSON.stringify(json, null, 2), 'utf8');
   console.log(
@@ -111,11 +100,7 @@ execSync('npm cache clean');
 
 const args = process.argv.slice(2);
 
-const craScriptPath = path.join(
-  packagesDir,
-  'create-react-app',
-  'index.js',
-);
+const craScriptPath = path.join(packagesDir, 'cra', 'index.js');
 execSync(
   `node ${craScriptPath} ${args.join(
     ' ',

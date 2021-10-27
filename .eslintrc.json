@@ -56,6 +56,8 @@
     "no-cond-assign": "off",
     "prefer-promise-reject-errors": "off",
     "import/no-dynamic-require": "off",
-    "global-require": "off"
+    "global-require": "off",
+    "@typescript-eslint/no-throw-literal": "off",
+    "no-bitwise": "off"
   }
 }
