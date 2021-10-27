@@ -173,43 +173,45 @@ module.exports = async ({
   useYarn,
   usePnp,
 }) => {
-  const [scriptsToInstall, templateToInstall] = await Promise.all([
-    getInstallPackage(scriptsVersion, originalDirectory),
-    getTemplateInstallPackage(template, originalDirectory),
-  ]);
-
-  console.log(
-    chalk.cyan(
-      'Installing packages. This might take a couple of minutes.',
-    ),
-  );
-
-  const dependencies = [
-    'react',
-    'react-dom',
-    scriptsToInstall,
-    templateToInstall,
-  ];
-
-  const [packageInfo, templateInfo] = await Promise.all([
-    getPackageInfo(scriptsToInstall),
-    getPackageInfo(templateToInstall),
-  ]);
-
-  const isOnline = await checkIfOnline(useYarn);
-  const { name: scriptsName } = packageInfo;
-  const { name: templateName } = templateInfo;
-
-  console.log(
-    `Installing ${chalk.cyan('react')}, ${chalk.cyan(
-      'react-dom',
-    )}, and ${chalk.cyan(scriptsName)} with ${chalk.cyan(
-      templateName,
-    )}...`,
-  );
-  console.log();
-
   try {
+    const [scriptsToInstall, templateToInstall] = await Promise.all([
+      getInstallPackage(scriptsVersion, originalDirectory),
+      getTemplateInstallPackage(template, originalDirectory),
+    ]);
+
+    console.log(
+      chalk.cyan(
+        'Installing packages. This might take a couple of minutes.',
+      ),
+    );
+
+    const dependencies = [
+      'react',
+      'react-dom',
+      scriptsToInstall,
+      templateToInstall,
+    ];
+
+    const [packageInfo, templateInfo] = await Promise.all([
+      getPackageInfo(scriptsToInstall),
+      getPackageInfo(templateToInstall),
+    ]);
+
+    console.log(packageInfo, 'packageInfo');
+
+    const isOnline = await checkIfOnline(useYarn);
+    const { name: scriptsName } = packageInfo;
+    const { name: templateName } = templateInfo;
+
+    console.log(
+      `Installing ${chalk.cyan('react')}, ${chalk.cyan(
+        'react-dom',
+      )}, and ${chalk.cyan(scriptsName)} with ${chalk.cyan(
+        templateName,
+      )}...`,
+    );
+    console.log();
+
     await install({
       root,
       useYarn,

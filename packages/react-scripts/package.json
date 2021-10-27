@@ -25,7 +25,7 @@
     "chalk": "^4.1.2",
     "cross-spawn": "^7.0.3",
     "fs-extra": "^10.0.0",
-    "utils": "file:../utils"
+    "utils": "^0.0.1"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.13"

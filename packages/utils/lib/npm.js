@@ -134,8 +134,11 @@ const extractStream = (stream, dest) =>
   new Promise((resolve, reject) => {
     stream.pipe(
       unpack(dest, (err) => {
-        if (err) reject;
-        else resolve(dest);
+        if (err) reject(err);
+        else {
+          console.log('done');
+          resolve(dest);
+        }
       }),
     );
   });
@@ -150,19 +153,21 @@ const getPackageInfo = async (installPackage) => {
         stream = hyperquest(installPackage);
       } else {
         stream = fs.createReadStream(installPackage);
+        stream.pipe();
       }
+      console.log('extractStream start');
 
-      await extractStream(stream, tmpdir);
+      // await extractStream(stream, tmpdir);
 
-      const { name, version } = require.resolve(
-        path.join(tmpdir, 'package.json'),
-      );
+      // const { name, version } = require.resolve(
+      //   path.join(tmpdir, 'package.json'),
+      // );
 
-      cleanup();
-      return { name, version };
+      // cleanup();
+      // return { name, version };
     } catch (err) {
       console.log(
-        `Could not extract the package name from the archive: ${err.message}`,
+        `Could not extract the package name from the archive: ${err.toString()}`,
       );
       const assumedProjectName = installPackage.match(
         /^.+\/(.+?)(?:-\d+.+)?\.(tgz|tar\.gz)$/,

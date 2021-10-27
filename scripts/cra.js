@@ -75,9 +75,8 @@ Object.keys(packagePathsByName).forEach((name) => {
         'file:' + packagePathsByName[otherName];
     }
   });
-  console.log(json);
 
-  fs.writeFileSync(packageJson, JSON.stringify(json, null, 2), 'utf8');
+  fs.writeFileSync(packageJson, JSON.stringify(json, null, 2));
   console.log(
     'Replaced local dependencies in packages/' + name + '/package.json',
   );
@@ -96,11 +95,12 @@ const scriptsPath = path.join(
   scriptsFileName,
 );
 
-execSync('npm cache clean');
+// execSync('npm cache clean --force');
 
 const args = process.argv.slice(2);
 
 const craScriptPath = path.join(packagesDir, 'cra', 'index.js');
+
 execSync(
   `node ${craScriptPath} ${args.join(
     ' ',
