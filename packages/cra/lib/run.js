@@ -197,8 +197,6 @@ module.exports = async ({
       getPackageInfo(templateToInstall),
     ]);
 
-    console.log(packageInfo, 'packageInfo');
-
     const isOnline = await checkIfOnline(useYarn);
     const { name: scriptsName } = packageInfo;
     const { name: templateName } = templateInfo;

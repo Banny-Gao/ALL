@@ -92,10 +92,12 @@ const scriptsFileName = execSync(`npm pack`, {
 const scriptsPath = path.join(
   packagesDir,
   'react-scripts',
-  scriptsFileName,
+  // scriptsFileName,
 );
 
-// execSync('npm cache clean --force');
+const scriptsFilePath = 'file:../packages/react-scripts';
+
+execSync('npm cache clean --force');
 
 const args = process.argv.slice(2);
 
@@ -104,7 +106,7 @@ const craScriptPath = path.join(packagesDir, 'cra', 'index.js');
 execSync(
   `node ${craScriptPath} ${args.join(
     ' ',
-  )} --scripts-version="${scriptsPath}"`,
+  )} --scripts-version=${scriptsPath}`,
   {
     cwd: rootDir,
     stdio: 'inherit',
