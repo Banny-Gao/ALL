@@ -154,9 +154,10 @@ const getPackageInfo = async (installPackage) => {
 
       await extractStream(stream, tmpdir);
 
-      const { name, version } = require.resolve(
-        path.join(tmpdir, 'package.json'),
-      );
+      const { name, version } = require(path.join(
+        tmpdir,
+        'package.json',
+      ));
 
       cleanup();
       return { name, version };
@@ -191,9 +192,10 @@ const getPackageInfo = async (installPackage) => {
 
   if (installPackage.match(/^file:/)) {
     const installPackagePath = installPackage.match(/^file:(.*)?$/)[1];
-    const { name, version } = require.resolve(
-      path.join(installPackagePath, 'package.json'),
-    );
+    const { name, version } = require(path.join(
+      installPackagePath,
+      'package.json',
+    ));
     return { name, version };
   }
 
