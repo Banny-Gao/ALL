@@ -71,3 +71,14 @@ export const checkBrowsers: (
   isInteractive: boolean,
   retry?: boolean,
 ) => Promise<string[] | boolean>;
+
+export const tryGitInit: () => boolean;
+export const isInMercurialRepository: () => boolean;
+export const isInGitRepository: () => boolean;
+
+export const clearConsole: () => void;
+
+export const getProcessIdOnPort: (port: number) => string;
+export const getDirectoryOfProcessById: (processId: string) => string;
+export const getProcessCommand: (processId: string) => string;
+export const getProcessForPort: (port: number) => string | null;

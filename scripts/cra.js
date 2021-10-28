@@ -84,19 +84,6 @@ Object.keys(packagePathsByName).forEach((name) => {
 console.log('Replaced all local dependencies for testing.');
 console.log('Do not edit any package.json while this task is running.');
 
-const scriptsFileName = execSync(`npm pack`, {
-  cwd: path.join(packagesDir, 'react-scripts'),
-})
-  .toString()
-  .trim();
-const scriptsPath = path.join(
-  packagesDir,
-  'react-scripts',
-  scriptsFileName,
-);
-
-execSync('npm cache clean --force');
-
 const args = process.argv.slice(2);
 
 const craScriptPath = path.join(packagesDir, 'cra', 'index.js');
