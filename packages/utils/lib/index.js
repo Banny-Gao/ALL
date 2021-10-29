@@ -3,6 +3,7 @@ const project = require('./project');
 const npm = require('./npm');
 const browser = require('./browser');
 const git = require('./git');
+const webpackUtils = require('./webpackUtils');
 
 module.exports = {
   ...platform,
@@ -10,4 +11,5 @@ module.exports = {
   ...npm,
   ...browser,
   ...git,
+  ...webpackUtils,
 };

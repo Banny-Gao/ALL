@@ -27,7 +27,7 @@
     "dotenv": "^10.0.0",
     "dotenv-expand": "^5.1.0",
     "fs-extra": "^10.0.0",
-    "utils": "^0.0.1",
+    "utils": "file:../utils",
     "webpack": "^5.60.0",
     "webpack-dev-server": "^4.4.0"
   },

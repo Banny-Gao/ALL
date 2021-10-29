@@ -34,9 +34,8 @@ const tryGitInit = () => {
   }
 };
 
-
 module.exports = {
   tryGitInit,
   isInMercurialRepository,
   isInGitRepository,
-}
+};

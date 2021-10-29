@@ -82,3 +82,18 @@ export const getProcessIdOnPort: (port: number) => string;
 export const getDirectoryOfProcessById: (processId: string) => string;
 export const getProcessCommand: (processId: string) => string;
 export const getProcessForPort: (port: number) => string | null;
+
+export const formatWebpackMessages: (message: any) => string;
+export const prepareUrls: (
+  protocol: string,
+  host: string,
+  port: number | string,
+  pathname: string,
+) => {
+  lanUrlForConfig: any;
+  lanUrlForTerminal?: string;
+  localUrlForTerminal: string;
+  localUrlForBrowser: string;
+};
+
+export const checkRequiredFiles: (files: string[]) => boolean;
