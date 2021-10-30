@@ -1,13 +1,19 @@
+/* eslint-disable no-console */
 const address = require('address');
 const fs = require('fs-extra');
 const path = require('path');
 const url = require('url');
 const chalk = require('chalk');
-const detect = require('detect-port-alt');
-const isRoot = require('is-root');
+const detect = require('detect-port');
 const prompts = require('prompts');
+const forkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
-const { clearConsole, getProcessForPort } = require('./platform');
+const {
+  clearConsole,
+  getProcessForPort,
+  isRoot,
+  isUsingYarn,
+} = require('./platform');
 
 const friendlySyntaxErrorLabel = 'Syntax error:';
 
@@ -171,7 +177,281 @@ const prepareUrls = (protocol, host, port, pathname = '/') => {
   };
 };
 
+const printInstructions = (appName, urls) => {
+  console.log();
+  console.log(
+    `You can now view ${chalk.bold(appName)} in the browser.`,
+  );
+  console.log();
+
+  if (urls.lanUrlForTerminal) {
+    console.log(
+      `  ${chalk.bold('Local:')}            ${
+        urls.localUrlForTerminal
+      }`,
+    );
+    console.log(
+      `  ${chalk.bold('On Your Network:')}  ${urls.lanUrlForTerminal}`,
+    );
+  } else {
+    console.log(`  ${urls.localUrlForTerminal}`);
+  }
+
+  console.log();
+  console.log('Note that the development build is not optimized.');
+  console.log(
+    `To create a production build, use ` +
+      `${chalk.cyan(`${isUsingYarn() ? 'yarn' : 'npm run'} build`)}.`,
+  );
+  console.log();
+};
+
+const createCompiler = (
+  { appName, config, urls, useTypeScript, webpack },
+  isPrintInstruction = true,
+) => {
+  let compiler;
+  try {
+    compiler = webpack(config);
+  } catch (error) {
+    console.log(chalk.red('Failed to compile.'));
+    console.log();
+    console.log(err.message || err);
+    console.log();
+    process.exit(1);
+  }
+
+  compiler.hooks.invalid.tap('invalid', () => {
+    isInteractive && clearConsole();
+    console.log(chalk.cyan('Compiling...'));
+  });
+
+  if (useTypeScript) {
+    forkTsCheckerWebpackPlugin
+      .getCompilerHooks(compiler)
+      .waiting.tap('awaitingTypeScriptCheck', () => {
+        console.log(
+          chalk.yellow(
+            'Files successfully emitted, waiting for typecheck results...',
+          ),
+        );
+      });
+  }
+
+  let isFirstCompile = true;
+
+  compiler.hooks.done.tap('done', async (stats) => {
+    isInteractive && clearConsole();
+
+    const statsData = stats.toJson({
+      all: false,
+      warnings: true,
+      errors: true,
+    });
+
+    const messages = formatWebpackMessages(statsData);
+    const isSuccessful =
+      !messages.errors.length && !messages.warnings.length;
+
+    isSuccessful && console.log(chalk.green('Compiled successfully!'));
+    isSuccessful &&
+      (isInteractive || isFirstCompile) &&
+      isPrintInstruction &&
+      printInstructions(appName, urls);
+
+    isFirstCompile = false;
+
+    if (messages.errors.length) {
+      if (messages.errors.length > 1) {
+        messages.errors.length = 1;
+      }
+      console.log(chalk.red('Failed to compile.\n'));
+      console.log(messages.errors.join('\n\n'));
+      return;
+    }
+
+    if (messages.warnings.length) {
+      console.log(chalk.yellow('Compiled with warnings.\n'));
+      console.log(messages.warnings.join('\n\n'));
+
+      console.log(
+        `\nSearch for the ${chalk.underline(
+          chalk.yellow('keywords'),
+        )} to learn more about each warning.`,
+      );
+      console.log(
+        `To ignore, add ${chalk.cyan(
+          '// eslint-disable-next-line',
+        )} to the line before.\n`,
+      );
+    }
+  });
+
+  return compiler;
+};
+
+const resolveLoopback = (proxy) => {
+  const o = url.parse(proxy);
+  o.host = undefined;
+
+  if (o.hostname !== 'localhost') return proxy;
+
+  try {
+    if (!address.ip()) o.hostname = '127.0.0.1';
+  } catch {
+    o.hostname = '127.0.0.1';
+  }
+
+  return url.format(o);
+};
+
+const onProxyError = (proxy) => (err, req, res) => {
+  const host = req.headers && req.headers.host;
+  console.log(
+    `${chalk.red('Proxy error:')} Could not proxy request ${chalk.cyan(
+      req.url,
+    )} from ${chalk.cyan(host)} to ${chalk.cyan(proxy)}.`,
+  );
+  console.log(
+    `See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (${chalk.cyan(
+      err.code,
+    )}).`,
+  );
+  console.log();
+
+  // And immediately send the proper error response to the client.
+  // Otherwise, the request will eventually timeout with ERR_EMPTY_RESPONSE on the client side.
+  if (res.writeHead && !res.headersSent) {
+    res.writeHead(500);
+  }
+  res.end(
+    `Proxy error: Could not proxy request ${req.url} from ${host} to ${proxy} (${err.code}).`,
+  );
+};
+
+const prepareProxy = (proxy, appPublicFolder, servedPathname) => {
+  if (!proxy) return;
+  if (typeof proxy !== 'string') {
+    console.log(
+      chalk.red(
+        'When specified, "proxy" in package.json must be a string.',
+      ),
+    );
+    console.log(
+      chalk.red(`Instead, the type of "proxy" was "${typeof proxy}".`),
+    );
+    console.log(
+      chalk.red(
+        'Either remove "proxy" from package.json, or make it a string.',
+      ),
+    );
+    process.exit(1);
+  }
+
+  if (!/^http(s)?:\/\//.test(proxy)) {
+    console.log(
+      chalk.red(
+        'When "proxy" is specified in package.json it must start with either http:// or https://',
+      ),
+    );
+    process.exit(1);
+  }
+
+  const sockPath = process.env.WDS_SOCKET_PATH || '/ws';
+  const isDefaultSockHost = !process.env.WDS_SOCKET_HOST;
+
+  const mayProxy = (pathname) => {
+    const maybePublicPath = path.resolve(
+      appPublicFolder,
+      pathname.replace(new RegExp(`^${servedPathname}`), ''),
+    );
+    const isPublicFileRequest = fs.existsSync(maybePublicPath);
+
+    const isWdsEndpointRequest =
+      isDefaultSockHost && pathname.startsWith(sockPath);
+    return !(isPublicFileRequest || isWdsEndpointRequest);
+  };
+
+  let target;
+  if (process.platform === 'win32') {
+    target = resolveLoopback(proxy);
+  } else {
+    target = proxy;
+  }
+
+  return [
+    {
+      target,
+      logLevel: 'silent',
+      context: (pathname, req) =>
+        req.method !== 'GET' ||
+        (mayProxy(pathname) &&
+          req.headers.accept &&
+          req.headers.accept.indexOf('text/html') === -1),
+      onProxyReq: (proxyReq) => {
+        if (proxyReq.getHeader('origin')) {
+          proxyReq.setHeader('origin', target);
+        }
+      },
+      onError: onProxyError(target),
+      secure: false,
+      changeOrigin: true,
+      ws: true,
+      xfwd: true,
+    },
+  ];
+};
+
+const choosePort = async (host, defaultPort) => {
+  try {
+    const { port } = await detect(defaultPort, host);
+
+    return await new Promise((resolve) => {
+      if (port === defaultPort) {
+        return resolve(port);
+      }
+      const message =
+        process.platform !== 'win32' && defaultPort < 1024 && !isRoot()
+          ? `Admin permissions are required to run a server on a port below 1024.`
+          : `Something is already running on port ${defaultPort}.`;
+      if (isInteractive) {
+        clearConsole();
+        const existingProcess = getProcessForPort(defaultPort);
+        const question = {
+          type: 'confirm',
+          name: 'shouldChangePort',
+          message: `${chalk.yellow(
+            `${message}${
+              existingProcess ? ` Probably:\n  ${existingProcess}` : ''
+            }`,
+          )}\n\nWould you like to run the app on another port instead?`,
+          initial: true,
+        };
+        prompts(question).then((answer) => {
+          if (answer.shouldChangePort) {
+            resolve(port);
+          } else {
+            resolve(null);
+          }
+        });
+      } else {
+        console.log(chalk.red(message));
+        resolve(null);
+      }
+    });
+  } catch (err) {
+    throw new Error(
+      `${chalk.red(
+        `Could not find an open port at ${chalk.bold(host)}.`,
+      )}\n${`Network error message: ${err.message}` || err}\n`,
+    );
+  }
+};
+
 module.exports = {
   formatWebpackMessages,
   prepareUrls,
+  createCompiler,
+  prepareProxy,
+  choosePort,
 };

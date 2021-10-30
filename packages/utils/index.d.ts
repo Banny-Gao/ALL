@@ -1,4 +1,7 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import fs from 'fs';
+import { Compiler, webpack } from '@types/webpack';
+import WebpackDevServer from '@types/webpack-dev-server';
 
 export interface INpmVersion {
   hasMinNpm: boolean;
@@ -9,6 +12,13 @@ export interface IYarnVersion {
   hasMinYarnPnp: boolean;
   hasMaxYarnPnp: boolean;
   yarnVersion: string;
+}
+
+export interface IUrls {
+  lanUrlForConfig: any;
+  lanUrlForTerminal?: string;
+  localUrlForTerminal: string;
+  localUrlForBrowser: string;
 }
 
 export const getNodeSemver: () => string[];
@@ -89,11 +99,23 @@ export const prepareUrls: (
   host: string,
   port: number | string,
   pathname: string,
-) => {
-  lanUrlForConfig: any;
-  lanUrlForTerminal?: string;
-  localUrlForTerminal: string;
-  localUrlForBrowser: string;
-};
+) => IUrls;
 
 export const checkRequiredFiles: (files: string[]) => boolean;
+export const isRoot: () => boolean;
+
+export const createCompiler: (
+  config: {
+    appName: string;
+    urls: IUrls;
+    useTypeScript: boolean;
+    webpack: typeof webpack;
+  },
+  isPrintInstruction?: boolean,
+) => Compiler;
+export const prepareProxy: (
+  proxy: string | undefined,
+  appPublicFolder: string,
+  servedPathname: string,
+) => WebpackDevServer.ProxyConfigArray;
+export const choosePort;

@@ -77,6 +77,8 @@ const getProcessForPort = (port) => {
   }
 };
 
+const isRoot = () => process.getuid && process.getuid() === 0;
+
 module.exports = {
   getNodeSemver,
   isUsingYarn,
@@ -86,4 +88,5 @@ module.exports = {
   getDirectoryOfProcessById,
   getProcessCommand,
   getProcessForPort,
+  isRoot,
 };

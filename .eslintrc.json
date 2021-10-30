@@ -59,6 +59,7 @@
     "global-require": "off",
     "@typescript-eslint/no-throw-literal": "off",
     "no-bitwise": "off",
-    "no-param-reassign": "off"
+    "no-param-reassign": "off",
+    "consistent-return": "off"
   }
 }
