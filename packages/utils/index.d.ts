@@ -81,6 +81,7 @@ export const checkBrowsers: (
   isInteractive: boolean,
   retry?: boolean,
 ) => Promise<string[] | boolean>;
+export const openBrowser: (url: string) => boolean;
 
 export const tryGitInit: () => boolean;
 export const isInMercurialRepository: () => boolean;
@@ -118,4 +119,7 @@ export const prepareProxy: (
   appPublicFolder: string,
   servedPathname: string,
 ) => WebpackDevServer.ProxyConfigArray;
-export const choosePort;
+export const choosePort: (
+  host: string,
+  defaultPort: number,
+) => Promise<number | null>;

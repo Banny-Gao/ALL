@@ -6487,7 +6487,7 @@ onetime@^5.1.0, onetime@^5.1.2:
   dependencies:
     mimic-fn "^2.1.0"
 
-open@^8.0.9:
+open@^8.0.9, open@^8.4.0:
   version "8.4.0"
   resolved "https://registry.yarnpkg.com/open/-/open-8.4.0.tgz#345321ae18f8138f82565a910fdc6b39e8c244f8"
   integrity sha512-XgFPPM+B28FtCCgSb9I+s9szOC1vZRSwgWsRUA5ylIxRTgKozqjOCrVOqGsYABPYK5qnfqClxZTFBa8PKt2v6Q==
@@ -7158,7 +7158,8 @@ react-is@^17.0.1:
     dotenv "^10.0.0"
     dotenv-expand "^5.1.0"
     fs-extra "^10.0.0"
-    utils "file:../../../AppData/Local/Yarn/Cache/v6/npm-react-scripts-1.0.0-fffd1dec-6c5f-4850-9c99-7962d1d26a9b-1635573707264/node_modules/utils"
+    semver "^7.3.5"
+    utils "file:../../../AppData/Local/Yarn/Cache/v6/npm-react-scripts-1.0.0-b579b43b-266a-468a-9e98-43256e8ed13b-1635683866975/node_modules/utils"
     webpack "^5.60.0"
     webpack-dev-server "^4.4.0"
 
@@ -8713,6 +8714,7 @@ utils-merge@1.0.1:
     fork-ts-checker-webpack-plugin "^6.4.0"
     fs-extra "^10.0.0"
     hyperquest "^2.1.3"
+    open "^8.4.0"
     pkg-up "^3.1.0"
     prompts "^2.4.2"
     semver "^7.3.5"
