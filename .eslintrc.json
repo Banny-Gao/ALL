@@ -60,6 +60,8 @@
     "@typescript-eslint/no-throw-literal": "off",
     "no-bitwise": "off",
     "no-param-reassign": "off",
-    "consistent-return": "off"
+    "consistent-return": "off",
+    "class-methods-use-this": "off",
+    "max-classes-per-file": "off"
   }
 }

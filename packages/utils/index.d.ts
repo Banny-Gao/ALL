@@ -2,6 +2,7 @@
 import fs from 'fs';
 import { Compiler, webpack } from '@types/webpack';
 import WebpackDevServer from '@types/webpack-dev-server';
+import HtmlWebpackPlugin from '@types/html-webpack-plugin';
 
 export interface INpmVersion {
   hasMinNpm: boolean;
@@ -123,3 +124,16 @@ export const choosePort: (
   host: string,
   defaultPort: number,
 ) => Promise<number | null>;
+
+declare class InlineChunkHtmlPlugin extends webpack.Plugin {
+  constructor(
+    htmlWebpackPlugin: typeof HtmlWebpackPlugin,
+    tests: ReadonlyArray<RegExp>,
+  );
+}
+export = InlineChunkHtmlPlugin;
+
+declare class InterpolateHtmlPlugin extends webpack.Plugin {
+  constructor(htmlWebpackPlugin: typeof HtmlWebpackPlugin, replacements: { [key: string]: string });
+}
+export = InterpolateHtmlPlugin;
