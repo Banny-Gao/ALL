@@ -62,6 +62,8 @@
     "no-param-reassign": "off",
     "consistent-return": "off",
     "class-methods-use-this": "off",
-    "max-classes-per-file": "off"
+    "max-classes-per-file": "off",
+    "no-underscore-dangle": "off",
+    "no-nested-ternary": "off"
   }
 }

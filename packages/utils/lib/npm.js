@@ -4,6 +4,7 @@ const semver = require('semver');
 const tmp = require('tmp');
 const fs = require('fs-extra');
 const { unpack } = require('tar-pack');
+const { createHash } = require('crypto');
 
 const dns = require('dns');
 const path = require('path');
@@ -324,6 +325,27 @@ const checkNodeVersion = (packageName, root) => {
   }
 };
 
+const getCacheIdentifier = (environment, packages) => {
+  let cacheIdentifier =
+    environment == null ? '' : environment.toString();
+  for (const packageName of packages) {
+    cacheIdentifier += `:${packageName}@`;
+    try {
+      cacheIdentifier += require(`${packageName}/package.json`).version;
+    } catch (_) {
+      // ignored
+    }
+  }
+  return cacheIdentifier;
+};
+
+const createEnvironmentHash = env => {
+  const hash = createHash('md5');
+  hash.update(JSON.stringify(env));
+
+  return hash.digest('hex');
+};
+
 module.exports = {
   checkNpmCanReadCwd,
   checkNpmVersion,
@@ -334,4 +356,6 @@ module.exports = {
   checkIfOnline,
   install,
   checkNodeVersion,
+  getCacheIdentifier,
+  createEnvironmentHash,
 };

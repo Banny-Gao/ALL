@@ -125,15 +125,40 @@ export const choosePort: (
   defaultPort: number,
 ) => Promise<number | null>;
 
-declare class InlineChunkHtmlPlugin extends webpack.Plugin {
+export declare class InlineChunkHtmlPlugin extends webpack.Plugin {
   constructor(
     htmlWebpackPlugin: typeof HtmlWebpackPlugin,
     tests: ReadonlyArray<RegExp>,
   );
 }
-export = InlineChunkHtmlPlugin;
-
-declare class InterpolateHtmlPlugin extends webpack.Plugin {
-  constructor(htmlWebpackPlugin: typeof HtmlWebpackPlugin, replacements: { [key: string]: string });
+export declare class InterpolateHtmlPlugin extends webpack.Plugin {
+  constructor(
+    htmlWebpackPlugin: typeof HtmlWebpackPlugin,
+    replacements: { [key: string]: string },
+  );
 }
-export = InterpolateHtmlPlugin;
+
+export declare class ModuleScopePlugin extends webpack.Plugin {
+  constructor(
+    appSrc: string | ReadonlyArray<string>,
+    allowedFiles?: ReadonlyArray<string>,
+  );
+}
+
+export declare class ModuleNotFoundPlugin extends webpack.Plugin {
+  constructor(appPath: string);
+}
+
+export declare const getCSSModuleLocalIdent: (
+  context: webpack.loader.LoaderContext,
+  localIdentName: string,
+  localName: string,
+  options: object,
+) => string;
+
+export declare const getCacheIdentifier: (
+  environment: string,
+  packages: ReadonlyArray<string>,
+) => string;
+
+export declare const createEnvironmentHash: (env: any) => string;
