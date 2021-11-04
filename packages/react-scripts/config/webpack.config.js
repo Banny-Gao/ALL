@@ -162,5 +162,80 @@ module.exports = (webpackEnv) => {
         ? 'source-map'
         : false
       : isEnvDevelopment && 'eval',
+    entry: paths.appIndexJs,
+    output: {
+      path: paths.appBuild,
+      pathinfo: isEnvDevelopment,
+      filename: isEnvProduction
+        ? 'static/js/[name].[contenthash:8].js'
+        : isEnvDevelopment && 'static/js/bundle.js',
+      chunkFilename: isEnvProduction
+        ? 'static/js/[name].[contenthash:8].chunk.js'
+        : isEnvDevelopment && 'static/js/[name].chunk.js',
+      assetModuleFilename: 'static/media/[name].[hash][ext]',
+      publicPath: paths.publicPath,
+      devtoolModuleFilenameTemplate: isEnvProduction
+        ? (info) =>
+            path
+              .relative(paths.appSrc, info.absoluteResourcePath)
+              .replace(/\\/g, '/')
+        : isEnvDevelopment &&
+          ((info) =>
+            path
+              .resolve(info.absoluteResourcePath)
+              .replace(/\\/g, '/')),
+    },
+    cache: {
+      type: 'filesystem',
+      version: createEnvironmentHash(env.raw),
+      cacheDirectory: paths.appWebpackCache,
+      store: 'pack',
+      buildDependencies: {
+        defaultWebpack: ['webpack/lib/'],
+        config: [__filename],
+        tsconfig: [paths.appTsConfig, paths.appJsConfig].filter((f) =>
+          fs.existsSync(f),
+        ),
+      },
+      compression: 'gzip',
+      infrastructureLogging: {
+        level: 'none',
+      },
+      optimization: {
+        chunkIds: true,
+        emitOnErrors: isEnvProduction,
+        mangleWasmImports: isEnvProduction,
+        moduleIds: true,
+        minimize: isEnvProduction,
+        minimizer: [
+          new TerserPlugin({
+            terserOptions: {
+              parse: {
+                ecma: 8,
+              },
+              compress: {
+                ecma: 5,
+                warnings: false,
+                comparisons: false,
+                inline: 2,
+              },
+              mangle: {
+                safari10: true,
+              },
+              keep_classnames:
+                isEnvDevelopment || isEnvProductionProfile,
+              keep_fnames: isEnvDevelopment || isEnvProductionProfile,
+              output: {
+                ecma: 5,
+                comments: false,
+                ascii_only: true,
+              },
+            },
+          }),
+          new CssMinimizerPlugin(),
+          '...',
+        ],
+      },
+    },
   };
 };

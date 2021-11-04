@@ -53,6 +53,7 @@ module.exports = {
     'node_modules/.cache/tsconfig.tsbuildinfo',
   ),
   swSrc: resolveModule(resolveApp, 'src/service-worker'),
+  publicPath: process.env.PUBLIC_URL || '/'
 };
 
 const resolveOwn = (relativePath) =>
@@ -78,6 +79,7 @@ module.exports = {
     'node_modules/.cache/tsconfig.tsbuildinfo',
   ),
   swSrc: resolveModule(resolveApp, 'src/service-worker'),
+  publicPath: process.env.PUBLIC_URL || '/',
   // These properties only exist before ejecting:
   ownPath: resolveOwn('.'),
   ownNodeModules: resolveOwn('node_modules'), // This is empty on npm 3
@@ -128,6 +130,7 @@ if (
       resolveOwn,
       `${templatePath}/src/service-worker`,
     ),
+    publicPath: process.env.PUBLIC_URL || '/',
     // These properties only exist before ejecting:
     ownPath: resolveOwn('.'),
     ownNodeModules: resolveOwn('node_modules'),
