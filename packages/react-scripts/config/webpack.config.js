@@ -198,44 +198,71 @@ module.exports = (webpackEnv) => {
         ),
       },
       compression: 'gzip',
-      infrastructureLogging: {
-        level: 'none',
-      },
-      optimization: {
-        chunkIds: true,
-        emitOnErrors: isEnvProduction,
-        mangleWasmImports: isEnvProduction,
-        moduleIds: true,
-        minimize: isEnvProduction,
-        minimizer: [
-          new TerserPlugin({
-            terserOptions: {
-              parse: {
-                ecma: 8,
-              },
-              compress: {
-                ecma: 5,
-                warnings: false,
-                comparisons: false,
-                inline: 2,
-              },
-              mangle: {
-                safari10: true,
-              },
-              keep_classnames:
-                isEnvDevelopment || isEnvProductionProfile,
-              keep_fnames: isEnvDevelopment || isEnvProductionProfile,
-              output: {
-                ecma: 5,
-                comments: false,
-                ascii_only: true,
-              },
-            },
-          }),
-          new CssMinimizerPlugin(),
-          '...',
-        ],
-      },
     },
+    infrastructureLogging: {
+      level: 'none',
+    },
+    optimization: {
+      chunkIds: true,
+      emitOnErrors: isEnvProduction,
+      mangleWasmImports: isEnvProduction,
+      moduleIds: true,
+      minimize: isEnvProduction,
+      minimizer: [
+        new TerserPlugin({
+          terserOptions: {
+            parse: {
+              ecma: 8,
+            },
+            compress: {
+              ecma: 5,
+              warnings: false,
+              comparisons: false,
+              inline: 2,
+            },
+            mangle: {
+              safari10: true,
+            },
+            keep_classnames: isEnvDevelopment || isEnvProductionProfile,
+            keep_fnames: isEnvDevelopment || isEnvProductionProfile,
+            output: {
+              ecma: 5,
+              comments: false,
+              ascii_only: true,
+            },
+          },
+        }),
+        new CssMinimizerPlugin(),
+        '...',
+      ],
+    },
+    resolve: {
+      alias: {
+        ...(isEnvProductionProfile && {
+          'react-dom$': 'react-dom/profiling',
+          'scheduler/tracing': 'scheduler/tracing-profiling',
+        }),
+        ...(modules.webpackAliases || {}),
+      },
+      extensions: paths.moduleFileExtensions
+        .map((ext) => `.${ext}`)
+        .filter((ext) => useTypeScript || !ext.includes('ts')),
+      modules: [
+        'node_modules',
+        paths.appNodeModules,
+        ...(modules.additionalModulePaths || []),
+      ],
+      plugins: [
+        new ModuleScopePlugin(paths.appSrc, [
+          paths.appPackageJson,
+          reactRefreshRuntimeEntry,
+          reactRefreshWebpackPluginRuntimeEntry,
+          babelRuntimeEntry,
+          babelRuntimeEntryHelpers,
+          babelRuntimeRegenerator,
+        ]),
+      ],
+    },
+    module: {},
   };
 };

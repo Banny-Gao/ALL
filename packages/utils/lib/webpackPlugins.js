@@ -107,7 +107,7 @@ class ModuleScopePlugin {
           ~descriptionFileRoot.indexOf('/node_modules/') ||
           ~descriptionFileRoot.indexOf('\\node_modules\\');
 
-        if (isNodeModulesRoot || compilation.__innerRequest_request)
+        if (isNodeModulesRoot || !compilation.__innerRequest_request)
           return callback();
 
         if (
