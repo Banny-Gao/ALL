@@ -339,7 +339,7 @@ const getCacheIdentifier = (environment, packages) => {
   return cacheIdentifier;
 };
 
-const createEnvironmentHash = env => {
+const createEnvironmentHash = (env) => {
   const hash = createHash('md5');
   hash.update(JSON.stringify(env));
 

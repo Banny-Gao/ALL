@@ -53,7 +53,7 @@ module.exports = {
     'node_modules/.cache/tsconfig.tsbuildinfo',
   ),
   swSrc: resolveModule(resolveApp, 'src/service-worker'),
-  publicPath: process.env.PUBLIC_URL || '/'
+  publicPath: process.env.PUBLIC_URL || '/',
 };
 
 const resolveOwn = (relativePath) =>

@@ -35,8 +35,7 @@ const HOST = process.env.HOST || '0.0.0.0';
 checkBrowsers(paths.appPath)
   .then(() => choosePort(HOST, DEFAULT_PORT))
   .then((port) => {
-    if (port === null) return
-    
+    if (port === null) return;
   })
   .catch((err) => {
     if (err && err.message) {
