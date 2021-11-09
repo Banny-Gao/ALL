@@ -26,6 +26,8 @@ const {
 
 const paths = require('../config/paths');
 
+const configFactory = require('../config/webpack.config');
+
 if (!checkRequiredFiles([paths.appHtml, paths.appIndexJs]))
   process.exit(1);
 
@@ -36,6 +38,9 @@ checkBrowsers(paths.appPath)
   .then(() => choosePort(HOST, DEFAULT_PORT))
   .then((port) => {
     if (port === null) return;
+
+    const config = configFactory('development');
+    console.log(config);
   })
   .catch((err) => {
     if (err && err.message) {

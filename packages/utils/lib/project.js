@@ -2,6 +2,7 @@
 const chalk = require('chalk');
 const validateProjectName = require('validate-npm-package-name');
 const fs = require('fs-extra');
+const path = require('path');
 
 const checkAppName = (appName) => {
   const validationResult = validateProjectName(appName);

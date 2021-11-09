@@ -405,7 +405,7 @@ const prepareProxy = (proxy, appPublicFolder, servedPathname) => {
 
 const choosePort = async (host, defaultPort) => {
   try {
-    const { port } = await detect(defaultPort, host);
+    const port = await detect(defaultPort);
 
     return await new Promise((resolve) => {
       if (port === defaultPort) {

@@ -13,7 +13,6 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 
 const {
-  defaultBrowsers,
   InlineChunkHtmlPlugin,
   InterpolateHtmlPlugin,
   ModuleScopePlugin,
@@ -85,7 +84,7 @@ module.exports = (webpackEnv) => {
   const isEnvProductionProfile =
     isEnvProduction && process.argv.includes('--profile');
 
-  const env = getClientEnvironment(paths.publicUrlOrPath.slice(0, -1));
+  const env = getClientEnvironment(paths.publicPath.slice(0, -1));
   const shouldUseReactRefresh = env.raw.FAST_REFRESH;
 
   const getStyleLoaders = (cssOptions, preProcessor) => {
@@ -93,7 +92,7 @@ module.exports = (webpackEnv) => {
       isEnvDevelopment && require.resolve('style-loader'),
       isEnvProduction && {
         loader: MiniCssExtractPlugin.loader,
-        options: paths.publicUrlOrPath.startsWith('.')
+        options: paths.publicPath.startsWith('.')
           ? { publicPath: '../../' }
           : {},
       },
