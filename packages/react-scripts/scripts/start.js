@@ -27,6 +27,7 @@ const {
 const paths = require('../config/paths');
 
 const configFactory = require('../config/webpack.config');
+const createDevServerConfig = require('../config/webpackDevServer.config');
 
 if (!checkRequiredFiles([paths.appHtml, paths.appIndexJs]))
   process.exit(1);
@@ -40,7 +41,37 @@ checkBrowsers(paths.appPath)
     if (port === null) return;
 
     const config = configFactory('development');
-    console.log(config);
+    const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
+    const appName = require(paths.appPackageJson).name;
+
+    const useTypeScript = fs.existsSync(paths.appTsConfig);
+    const urls = prepareUrls(
+      protocol,
+      HOST,
+      port,
+      paths.appPublic.slice(0, -1),
+    );
+
+    const compiler = createCompiler({
+      appName,
+      urls,
+      config,
+      useTypeScript,
+      webpack,
+    });
+
+    const proxySetting = require(paths.appPackageJson).proxy;
+    const proxyConfig = prepareProxy(
+      proxySetting,
+      paths.appPublic,
+      paths.publicUrlOrPath,
+    );
+
+    const serverConfig = {
+      ...createDevServerConfig(proxyConfig, urls.lanUrlForConfig),
+      host: HOST,
+      port,
+    };
   })
   .catch((err) => {
     if (err && err.message) {

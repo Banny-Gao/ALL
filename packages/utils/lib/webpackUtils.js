@@ -217,7 +217,7 @@ const createCompiler = (
   } catch (error) {
     console.log(chalk.red('Failed to compile.'));
     console.log();
-    console.log(err.message || err);
+    console.log(error.message || error);
     console.log();
     process.exit(1);
   }

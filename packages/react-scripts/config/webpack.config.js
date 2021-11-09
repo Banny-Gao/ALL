@@ -11,6 +11,7 @@ const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const webpack = require('webpack');
 
 const {
   InlineChunkHtmlPlugin,
@@ -199,10 +200,8 @@ module.exports = (webpackEnv) => {
       level: 'none',
     },
     optimization: {
-      chunkIds: true,
       emitOnErrors: isEnvProduction,
       mangleWasmImports: isEnvProduction,
-      moduleIds: true,
       minimize: isEnvProduction,
       minimizer: [
         new TerserPlugin({
