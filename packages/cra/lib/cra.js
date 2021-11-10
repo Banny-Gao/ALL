@@ -114,10 +114,14 @@ const createApp = ({
       execSync('yarnpkg config get registry').toString().trim() ===
       'https://registry.yarnpkg.com';
     if (yarnUsesDefaultRegistry) {
-      fs.copySync(
-        require.resolve('../yarn.lock.cached'),
-        path.join(root, 'yarn.lock'),
-      );
+      try {
+        fs.copySync(
+          require.resolve('../yarn.lock.cached'),
+          path.join(root, 'yarn.lock'),
+        );
+      } catch (e) {
+        
+      }
     }
   }
 
