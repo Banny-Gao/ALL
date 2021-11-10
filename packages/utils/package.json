@@ -48,6 +48,7 @@
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.2",
+    "@types/express": "^4.17.13",
     "@types/fs-extra": "^9.0.13",
     "@types/semver": "^7.3.9",
     "@types/tmp": "^0.2.1",

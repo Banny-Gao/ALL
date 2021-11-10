@@ -99,7 +99,7 @@ class ModuleScopePlugin {
     const { appSrc, allowedFiles, allowedPaths } = this;
     compiler.hooks.file.tapAsync(
       'ModuleScopePlugin',
-      (compilation, callback) => {
+      (compilation, context, callback) => {
         if (!compilation.context.issuer) return callback();
 
         const { descriptionFileRoot } = compilation;

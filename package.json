@@ -7,7 +7,8 @@
     "cz": "prettier -c -w . && git add -A && git-cz",
     "cra": "node scripts/cra.js",
     "clean": "lerna clean",
-    "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s"
+    "changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s",
+    "eslint": "eslint packages --ext .js,.jsx,.ts,.tsx "
   },
   "config": {
     "commitizen": {
@@ -16,7 +17,7 @@
   },
   "lint-staged": {
     "**/.*{css,scss,less}": "stylelint",
-    "*.{js,jsx,ts,jsx}": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "*.{js,jsx,ts,jsx}": "eslint --ext .js,.jsx,.ts,.tsx"
   },
   "devDependencies": {
     "@commitlint/cli": "^13.2.1",
@@ -24,21 +25,21 @@
     "@commitlint/config-lerna-scopes": "^13.2.0",
     "@commitlint/cz-commitlint": "^13.2.1",
     "@commitlint/format": "^13.2.0",
-    "@typescript-eslint/eslint-plugin": "4.29.3",
-    "@typescript-eslint/parser": "^4.29.3",
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "@typescript-eslint/parser": "^5.3.1",
     "commitizen": "^4.2.4",
     "conventional-changelog": "^3.1.24",
     "conventional-changelog-conventionalcommits": "^4.6.1",
-    "eslint": "^7.5.0",
+    "eslint": "^8.2.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-airbnb-typescript": "^14.0.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.2",
-    "eslint-plugin-jest": "^25.2.2",
-    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-jest": "^25.2.4",
+    "eslint-plugin-jsx-a11y": "6.5.0",
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "eslint-plugin-unicorn": "^20.0.0",
+    "eslint-plugin-unicorn": "^38.0.1",
     "husky": "^7.0.2",
     "inquirer": "^8.2.0",
     "lerna": "^4.0.0",

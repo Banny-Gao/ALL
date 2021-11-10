@@ -26,30 +26,27 @@ let projectName;
 
 const logInfo = () => {
   console.log(chalk.bold('\nEnvironment Info:'));
-  return (
-    envinfo
-      .run(
-        {
-          System: ['OS', 'CPU'],
-          Binaries: ['Node', 'npm', 'Yarn'],
-          Browsers: [
-            'Chrome',
-            'Edge',
-            'Internet Explorer',
-            'Firefox',
-            'Safari',
-          ],
-          npmPackages: ['react', 'react-dom', 'react-scripts'],
-          npmGlobalPackages: ['create-react-app'],
-        },
-        {
-          duplicates: true,
-          showNotFound: true,
-        },
-      )
-      // eslint-disable-next-line no-console
-      .then(console.log)
-  );
+  return envinfo
+    .run(
+      {
+        System: ['OS', 'CPU'],
+        Binaries: ['Node', 'npm', 'Yarn'],
+        Browsers: [
+          'Chrome',
+          'Edge',
+          'Internet Explorer',
+          'Firefox',
+          'Safari',
+        ],
+        npmPackages: ['react', 'react-dom', 'react-scripts'],
+        npmGlobalPackages: ['create-react-app'],
+      },
+      {
+        duplicates: true,
+        showNotFound: true,
+      },
+    )
+    .then(console.log);
 };
 
 const createApp = ({

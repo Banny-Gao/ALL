@@ -3,6 +3,7 @@ import fs from 'fs';
 import { Compiler, webpack } from '@types/webpack';
 import WebpackDevServer from '@types/webpack-dev-server';
 import HtmlWebpackPlugin from '@types/html-webpack-plugin';
+import { Handler } from '@types/express';
 
 export interface INpmVersion {
   hasMinNpm: boolean;
@@ -156,9 +157,28 @@ export declare const getCSSModuleLocalIdent: (
   options: object,
 ) => string;
 
+export declare const evalSourceMapMiddleware: (
+  server: WebpackDevServer,
+) => Handler;
+export declare const noopServiceWorkerMiddleware: (
+  servedPath: string,
+) => Handler;
+export declare const redirectServedPathMiddleware: (
+  servedPath: string,
+) => Handler;
+
+export declare const getHttpsConfig: () =>
+  | boolean
+  | {
+      cert: Buffer;
+      key: Buffer;
+    };
+
 export declare const getCacheIdentifier: (
   environment: string,
   packages: ReadonlyArray<string>,
 ) => string;
 
 export declare const createEnvironmentHash: (env: any) => string;
+
+export declare const ignoredFiles: (appSrc: string) => RegExp;

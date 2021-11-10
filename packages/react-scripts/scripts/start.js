@@ -28,6 +28,13 @@ const paths = require('../config/paths');
 
 const configFactory = require('../config/webpack.config');
 const createDevServerConfig = require('../config/webpackDevServer.config');
+const getClientEnvironment = require('../config/env');
+
+const react = require(require.resolve('react', {
+  paths: [paths.appPath],
+}));
+const env = getClientEnvironment(paths.publicPath.slice(0, -1));
+const isInteractive = process.stdout.isTTY;
 
 if (!checkRequiredFiles([paths.appHtml, paths.appIndexJs]))
   process.exit(1);
@@ -35,7 +42,7 @@ if (!checkRequiredFiles([paths.appHtml, paths.appIndexJs]))
 const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
 
-checkBrowsers(paths.appPath)
+checkBrowsers(paths.appPath, isInteractive)
   .then(() => choosePort(HOST, DEFAULT_PORT))
   .then((port) => {
     if (port === null) return;
@@ -49,7 +56,7 @@ checkBrowsers(paths.appPath)
       protocol,
       HOST,
       port,
-      paths.appPublic.slice(0, -1),
+      paths.publicPath.slice(0, -1),
     );
 
     const compiler = createCompiler({
@@ -64,7 +71,7 @@ checkBrowsers(paths.appPath)
     const proxyConfig = prepareProxy(
       proxySetting,
       paths.appPublic,
-      paths.publicUrlOrPath,
+      paths.publicPath,
     );
 
     const serverConfig = {
@@ -72,6 +79,39 @@ checkBrowsers(paths.appPath)
       host: HOST,
       port,
     };
+
+    const devServer = new WebpackDevServer(serverConfig, compiler);
+
+    devServer.startCallback(() => {
+      if (isInteractive) {
+        clearConsole();
+      }
+
+      if (env.raw.FAST_REFRESH && semver.lt(react.version, '16.10.0')) {
+        console.log(
+          chalk.yellow(
+            `Fast Refresh requires React 16.10 or higher. You are using React ${react.version}.`,
+          ),
+        );
+      }
+
+      console.log(chalk.cyan('Starting the development server...\n'));
+      openBrowser(urls.localUrlForBrowser);
+    });
+
+    ['SIGINT', 'SIGTERM'].forEach(function (sig) {
+      process.on(sig, function () {
+        devServer.stop();
+        process.exit();
+      });
+    });
+
+    if (process.env.CI !== 'true') {
+      process.stdin.on('end', function () {
+        devServer.stop();
+        process.exit();
+      });
+    }
   })
   .catch((err) => {
     if (err && err.message) {

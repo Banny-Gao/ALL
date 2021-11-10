@@ -8,6 +8,7 @@ const detect = require('detect-port');
 const prompts = require('prompts');
 const forkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const loaderUtils = require('loader-utils');
+const crypto = require('crypto');
 
 const {
   clearConsole,
@@ -478,6 +479,138 @@ const getCSSModuleLocalIdent = (
   return className.replace('.module_', '_').replace(/\./g, '_');
 };
 
+const base64SourceMap = (source) => {
+  const base64 = Buffer.from(
+    JSON.stringify(source.map()),
+    'utf8',
+  ).toString('base64');
+  return `data:application/json;charset=utf-8;base64,${base64}`;
+};
+
+const getSourceById = (server, id) => {
+  const module = Array.from(server._stats.compilation.modules).find(
+    (m) => server._stats.compilation.chunkGraph.getModuleId(m) === id,
+  );
+  return module.originalSource();
+};
+
+const evalSourceMapMiddleware = (server) => (req, res, next) => {
+  if (req.url.startsWith('/__get-internal-source')) {
+    const { fileName } = req.query;
+    const id = fileName.match(/webpack-internal:\/\/\/(.+)/)[1];
+    if (!id || !server._stats) {
+      next();
+    }
+
+    const source = getSourceById(server, id);
+    const sourceMapURL = `//# sourceMappingURL=${base64SourceMap(
+      source,
+    )}`;
+    const sourceURL = `//# sourceURL=webpack-internal:///${module.id}`;
+    res.end(`${source.source()}\n${sourceMapURL}\n${sourceURL}`);
+  } else {
+    next();
+  }
+};
+
+const noopServiceWorkerMiddleware =
+  (servedPath) => (req, res, next) => {
+    if (req.url === path.join(servedPath, 'service-worker.js')) {
+      res.setHeader('Content-Type', 'text/javascript');
+      res.send(
+        `
+          self.addEventListener('install', () => self.skipWaiting());
+
+          self.addEventListener('activate', () => {
+            self.clients.matchAll({ type: 'window' }).then(windowClients => {
+              for (let windowClient of windowClients) {
+                // Force open pages to refresh, so that they have a chance to load the
+                // fresh navigation response from the local dev server.
+                windowClient.navigate(windowClient.url);
+              }
+            });
+          });
+        `,
+      );
+    } else {
+      next();
+    }
+  };
+
+const redirectServedPathMiddleware = (servedPath) => {
+  servedPath = servedPath.slice(0, -1);
+
+  return (req, res, next) => {
+    if (
+      servedPath === '' ||
+      req.url === servedPath ||
+      req.url.startsWith(servedPath)
+    ) {
+      next();
+    } else {
+      const newPath = path.join(
+        servedPath,
+        req.path !== '/' ? req.path : '',
+      );
+      res.redirect(newPath);
+    }
+  };
+};
+
+const readEnvFile = (file, type) => {
+  if (!fs.existsSync(file)) {
+    throw new Error(
+      `You specified ${chalk.cyan(
+        type,
+      )} in your env, but the file "${chalk.yellow(
+        file,
+      )}" can't be found.`,
+    );
+  }
+  return fs.readFileSync(file);
+};
+
+const validateKeyAndCerts = ({ cert, key, keyFile, crtFile }) => {
+  let encrypted;
+  try {
+    encrypted = crypto.publicEncrypt(cert, Buffer.from('test'));
+  } catch (err) {
+    throw new Error(
+      `The certificate "${chalk.yellow(crtFile)}" is invalid.\n${
+        err.message
+      }`,
+    );
+  }
+
+  try {
+    crypto.privateDecrypt(key, encrypted);
+  } catch (err) {
+    throw new Error(
+      `The certificate key "${chalk.yellow(keyFile)}" is invalid.\n${
+        err.message
+      }`,
+    );
+  }
+};
+
+const getHttpsConfig = () => {
+  const { SSL_CRT_FILE, SSL_KEY_FILE, HTTPS } = process.env;
+  const isHttps = HTTPS === 'true';
+
+  if (isHttps && SSL_CRT_FILE && SSL_KEY_FILE) {
+    const crtFile = path.resolve(paths.appPath, SSL_CRT_FILE);
+    const keyFile = path.resolve(paths.appPath, SSL_KEY_FILE);
+    const config = {
+      cert: readEnvFile(crtFile, 'SSL_CRT_FILE'),
+      key: readEnvFile(keyFile, 'SSL_KEY_FILE'),
+    };
+
+    validateKeyAndCerts({ ...config, keyFile, crtFile });
+    return config;
+  }
+  return isHttps;
+};
+
 module.exports = {
   formatWebpackMessages,
   prepareUrls,
@@ -485,4 +618,8 @@ module.exports = {
   prepareProxy,
   choosePort,
   getCSSModuleLocalIdent,
+  evalSourceMapMiddleware,
+  noopServiceWorkerMiddleware,
+  redirectServedPathMiddleware,
+  getHttpsConfig,
 };

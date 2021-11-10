@@ -5,6 +5,7 @@ const tmp = require('tmp');
 const fs = require('fs-extra');
 const { unpack } = require('tar-pack');
 const { createHash } = require('crypto');
+const escape = require('escape-string-regexp');
 
 const dns = require('dns');
 const path = require('path');
@@ -266,7 +267,7 @@ const install = ({
       command = 'npm';
       args = [
         'install',
-        '--no-audit', // https://github.com/facebook/create-react-app/issues/11174
+        '--no-audit',
         '--save',
         '--save-exact',
         '--loglevel',
@@ -346,6 +347,14 @@ const createEnvironmentHash = (env) => {
   return hash.digest('hex');
 };
 
+const ignoredFiles = (appSrc) =>
+  new RegExp(
+    `^(?!${escape(
+      path.normalize(`${appSrc}/`).replace(/[\\]+/g, '/'),
+    )}).+/node_modules/`,
+    'g',
+  );
+
 module.exports = {
   checkNpmCanReadCwd,
   checkNpmVersion,
@@ -358,4 +367,5 @@ module.exports = {
   checkNodeVersion,
   getCacheIdentifier,
   createEnvironmentHash,
+  ignoredFiles,
 };

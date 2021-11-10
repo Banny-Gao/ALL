@@ -19,6 +19,12 @@ const defaultBrowsers = {
   ],
 };
 
+const Actions = Object.freeze({
+  NONE: 0,
+  BROWSER: 1,
+  SCRIPT: 2,
+});
+
 const shouldSetBrowsers = async (isInteractive) => {
   if (!isInteractive) return true;
 
