@@ -89,6 +89,7 @@ export const isInMercurialRepository: () => boolean;
 export const isInGitRepository: () => boolean;
 
 export const clearConsole: () => void;
+export const isUsingYarn: () => boolean;
 
 export const getProcessIdOnPort: (port: number) => string;
 export const getDirectoryOfProcessById: (processId: string) => string;

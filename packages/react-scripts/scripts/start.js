@@ -33,6 +33,7 @@ const getClientEnvironment = require('../config/env');
 const react = require(require.resolve('react', {
   paths: [paths.appPath],
 }));
+
 const env = getClientEnvironment(paths.publicPath.slice(0, -1));
 const isInteractive = process.stdout.isTTY;
 
