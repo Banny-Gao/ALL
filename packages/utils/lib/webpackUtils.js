@@ -52,20 +52,20 @@ const formatMessage = (message) => {
   message = lines.join('\n');
   message = message.replace(
     /SyntaxError\s+\((\d+):(\d+)\)\s*(.+?)\n/g,
-    `${friendlySyntaxErrorLabel} $3 ($1:$2)\n`,
+    `${friendlySyntaxErrorLabel} $3 ($1:$2)\n`
   );
 
   message = message.replace(
     /^.*export '(.+?)' was not found in '(.+?)'.*$/gm,
-    `Attempted import error: '$1' is not exported from '$2'.`,
+    `Attempted import error: '$1' is not exported from '$2'.`
   );
   message = message.replace(
     /^.*export 'default' \(imported as '(.+?)'\) was not found in '(.+?)'.*$/gm,
-    `Attempted import error: '$2' does not contain a default export (imported as '$1').`,
+    `Attempted import error: '$2' does not contain a default export (imported as '$1').`
   );
   message = message.replace(
     /^.*export '(.+?)' \(imported as '(.+?)'\) was not found in '(.+?)'.*$/gm,
-    `Attempted import error: '$1' is not exported from '$3' (imported as '$2').`,
+    `Attempted import error: '$1' is not exported from '$3' (imported as '$2').`
   );
   lines = message.split('\n');
 
@@ -80,7 +80,7 @@ const formatMessage = (message) => {
         .replace('Error: ', '')
         .replace(
           'Module not found: Cannot find file:',
-          'Cannot find file:',
+          'Cannot find file:'
         ),
     ];
   }
@@ -96,7 +96,7 @@ const formatMessage = (message) => {
 
   message = message.replace(
     /^\s*at\s((?!webpack:).)*:\d+:\d+[\s)]*(\n|$)/gm,
-    '',
+    ''
   );
   message = message.replace(/^\s*at\s<anonymous>(\n|$)/gm, '');
   lines = message.split('\n');
@@ -105,7 +105,7 @@ const formatMessage = (message) => {
     (line, index, arr) =>
       index === 0 ||
       line.trim() !== '' ||
-      line.trim() !== arr[index - 1].trim(),
+      line.trim() !== arr[index - 1].trim()
   );
 
   message = lines.join('\n');
@@ -154,7 +154,7 @@ const prepareUrls = (protocol, host, port, pathname = '/') => {
       if (lanUrlForConfig) {
         if (
           /^10[.]|^172[.](1[6-9]|2[0-9]|3[0-1])[.]|^192[.]168[.]/.test(
-            lanUrlForConfig,
+            lanUrlForConfig
           )
         ) {
           lanUrlForTerminal = prettyPrintUrl(lanUrlForConfig);
@@ -182,18 +182,16 @@ const prepareUrls = (protocol, host, port, pathname = '/') => {
 const printInstructions = (appName, urls) => {
   console.log();
   console.log(
-    `You can now view ${chalk.bold(appName)} in the browser.`,
+    `You can now view ${chalk.bold(appName)} in the browser.`
   );
   console.log();
 
   if (urls.lanUrlForTerminal) {
     console.log(
-      `  ${chalk.bold('Local:')}            ${
-        urls.localUrlForTerminal
-      }`,
+      `  ${chalk.bold('Local:')}            ${urls.localUrlForTerminal}`
     );
     console.log(
-      `  ${chalk.bold('On Your Network:')}  ${urls.lanUrlForTerminal}`,
+      `  ${chalk.bold('On Your Network:')}  ${urls.lanUrlForTerminal}`
     );
   } else {
     console.log(`  ${urls.localUrlForTerminal}`);
@@ -203,14 +201,14 @@ const printInstructions = (appName, urls) => {
   console.log('Note that the development build is not optimized.');
   console.log(
     `To create a production build, use ` +
-      `${chalk.cyan(`${isUsingYarn() ? 'yarn' : 'npm run'} build`)}.`,
+      `${chalk.cyan(`${isUsingYarn() ? 'yarn' : 'npm run'} build`)}.`
   );
   console.log();
 };
 
 const createCompiler = (
   { appName, config, urls, useTypeScript, webpack },
-  isPrintInstruction = true,
+  isPrintInstruction = true
 ) => {
   let compiler;
   try {
@@ -234,15 +232,15 @@ const createCompiler = (
       .waiting.tap('awaitingTypeScriptCheck', () => {
         console.log(
           chalk.yellow(
-            'Files successfully emitted, waiting for typecheck results...',
-          ),
+            'Files successfully emitted, waiting for typecheck results...'
+          )
         );
       });
   }
 
   let isFirstCompile = true;
 
-  compiler.hooks.done.tap('done', async (stats) => {
+  compiler.hooks.done.tap('done', (stats) => {
     isInteractive && clearConsole();
 
     const statsData = stats.toJson({
@@ -278,13 +276,13 @@ const createCompiler = (
 
       console.log(
         `\nSearch for the ${chalk.underline(
-          chalk.yellow('keywords'),
-        )} to learn more about each warning.`,
+          chalk.yellow('keywords')
+        )} to learn more about each warning.`
       );
       console.log(
         `To ignore, add ${chalk.cyan(
-          '// eslint-disable-next-line',
-        )} to the line before.\n`,
+          '// eslint-disable-next-line'
+        )} to the line before.\n`
       );
     }
   });
@@ -293,7 +291,7 @@ const createCompiler = (
 };
 
 const resolveLoopback = (proxy) => {
-  const o = url.parse(proxy);
+  const o = new URL(proxy);
   o.host = undefined;
 
   if (o.hostname !== 'localhost') return proxy;
@@ -311,13 +309,13 @@ const onProxyError = (proxy) => (err, req, res) => {
   const host = req.headers && req.headers.host;
   console.log(
     `${chalk.red('Proxy error:')} Could not proxy request ${chalk.cyan(
-      req.url,
-    )} from ${chalk.cyan(host)} to ${chalk.cyan(proxy)}.`,
+      req.url
+    )} from ${chalk.cyan(host)} to ${chalk.cyan(proxy)}.`
   );
   console.log(
     `See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (${chalk.cyan(
-      err.code,
-    )}).`,
+      err.code
+    )}).`
   );
   console.log();
 
@@ -327,7 +325,7 @@ const onProxyError = (proxy) => (err, req, res) => {
     res.writeHead(500);
   }
   res.end(
-    `Proxy error: Could not proxy request ${req.url} from ${host} to ${proxy} (${err.code}).`,
+    `Proxy error: Could not proxy request ${req.url} from ${host} to ${proxy} (${err.code}).`
   );
 };
 
@@ -336,16 +334,16 @@ const prepareProxy = (proxy, appPublicFolder, servedPathname) => {
   if (typeof proxy !== 'string') {
     console.log(
       chalk.red(
-        'When specified, "proxy" in package.json must be a string.',
-      ),
+        'When specified, "proxy" in package.json must be a string.'
+      )
     );
     console.log(
-      chalk.red(`Instead, the type of "proxy" was "${typeof proxy}".`),
+      chalk.red(`Instead, the type of "proxy" was "${typeof proxy}".`)
     );
     console.log(
       chalk.red(
-        'Either remove "proxy" from package.json, or make it a string.',
-      ),
+        'Either remove "proxy" from package.json, or make it a string.'
+      )
     );
     process.exit(1);
   }
@@ -353,8 +351,8 @@ const prepareProxy = (proxy, appPublicFolder, servedPathname) => {
   if (!/^http(s)?:\/\//.test(proxy)) {
     console.log(
       chalk.red(
-        'When "proxy" is specified in package.json it must start with either http:// or https://',
-      ),
+        'When "proxy" is specified in package.json it must start with either http:// or https://'
+      )
     );
     process.exit(1);
   }
@@ -365,7 +363,7 @@ const prepareProxy = (proxy, appPublicFolder, servedPathname) => {
   const mayProxy = (pathname) => {
     const maybePublicPath = path.resolve(
       appPublicFolder,
-      pathname.replace(new RegExp(`^${servedPathname}`), ''),
+      pathname.replace(new RegExp(`^${servedPathname}`), '')
     );
     const isPublicFileRequest = fs.existsSync(maybePublicPath);
 
@@ -425,7 +423,7 @@ const choosePort = async (host, defaultPort) => {
           message: `${chalk.yellow(
             `${message}${
               existingProcess ? ` Probably:\n  ${existingProcess}` : ''
-            }`,
+            }`
           )}\n\nWould you like to run the app on another port instead?`,
           initial: true,
         };
@@ -444,8 +442,8 @@ const choosePort = async (host, defaultPort) => {
   } catch (err) {
     throw new Error(
       `${chalk.red(
-        `Could not find an open port at ${chalk.bold(host)}.`,
-      )}\n${`Network error message: ${err.message}` || err}\n`,
+        `Could not find an open port at ${chalk.bold(host)}.`
+      )}\n${`Network error message: ${err.message}` || err}\n`
     );
   }
 };
@@ -454,10 +452,10 @@ const getCSSModuleLocalIdent = (
   context,
   localIdentName,
   localName,
-  options,
+  options
 ) => {
   const fileNameOrFolder = context.resourcePath.match(
-    /index\.module\.(css|scss|sass)$/,
+    /index\.module\.(css|scss|sass)$/
   )
     ? '[folder]'
     : '[name]';
@@ -467,13 +465,13 @@ const getCSSModuleLocalIdent = (
       localName,
     'md5',
     'base64',
-    5,
+    5
   );
 
   const className = loaderUtils.interpolateName(
     context,
     `${fileNameOrFolder}_${localName}__${hash}`,
-    options,
+    options
   );
 
   return className.replace('.module_', '_').replace(/\./g, '_');
@@ -482,14 +480,14 @@ const getCSSModuleLocalIdent = (
 const base64SourceMap = (source) => {
   const base64 = Buffer.from(
     JSON.stringify(source.map()),
-    'utf8',
+    'utf8'
   ).toString('base64');
   return `data:application/json;charset=utf-8;base64,${base64}`;
 };
 
 const getSourceById = (server, id) => {
   const module = Array.from(server._stats.compilation.modules).find(
-    (m) => server._stats.compilation.chunkGraph.getModuleId(m) === id,
+    (m) => server._stats.compilation.chunkGraph.getModuleId(m) === id
   );
   return module.originalSource();
 };
@@ -504,7 +502,7 @@ const evalSourceMapMiddleware = (server) => (req, res, next) => {
 
     const source = getSourceById(server, id);
     const sourceMapURL = `//# sourceMappingURL=${base64SourceMap(
-      source,
+      source
     )}`;
     const sourceURL = `//# sourceURL=webpack-internal:///${module.id}`;
     res.end(`${source.source()}\n${sourceMapURL}\n${sourceURL}`);
@@ -530,7 +528,7 @@ const noopServiceWorkerMiddleware =
               }
             });
           });
-        `,
+        `
       );
     } else {
       next();
@@ -550,7 +548,7 @@ const redirectServedPathMiddleware = (servedPath) => {
     } else {
       const newPath = path.join(
         servedPath,
-        req.path !== '/' ? req.path : '',
+        req.path !== '/' ? req.path : ''
       );
       res.redirect(newPath);
     }
@@ -561,10 +559,10 @@ const readEnvFile = (file, type) => {
   if (!fs.existsSync(file)) {
     throw new Error(
       `You specified ${chalk.cyan(
-        type,
+        type
       )} in your env, but the file "${chalk.yellow(
-        file,
-      )}" can't be found.`,
+        file
+      )}" can't be found.`
     );
   }
   return fs.readFileSync(file);
@@ -578,7 +576,7 @@ const validateKeyAndCerts = ({ cert, key, keyFile, crtFile }) => {
     throw new Error(
       `The certificate "${chalk.yellow(crtFile)}" is invalid.\n${
         err.message
-      }`,
+      }`
     );
   }
 
@@ -588,7 +586,7 @@ const validateKeyAndCerts = ({ cert, key, keyFile, crtFile }) => {
     throw new Error(
       `The certificate key "${chalk.yellow(keyFile)}" is invalid.\n${
         err.message
-      }`,
+      }`
     );
   }
 };

@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import fs from 'fs';
 import { Compiler, webpack } from '@types/webpack';
 import WebpackDevServer from '@types/webpack-dev-server';
@@ -29,7 +28,7 @@ export const checkAppName: (name: string) => boolean;
 
 export const isSafeToCreateProjectIn: (
   root: string,
-  name: string,
+  name: string
 ) => boolean;
 
 export const checkNpmCanReadCwd: () => boolean;
@@ -45,11 +44,11 @@ export const getTemporaryDirectory: () => Promise<{
 
 export const extractStream: (
   stream: fs.ReadStream,
-  dest: string,
+  dest: string
 ) => Promise<string>;
 
 export const getPackageInfo: (
-  package: string,
+  package: string
 ) => Promise<{ name: string; version?: string }>;
 
 export const checkIfOnline: (useYarn: boolean) => Promise<boolean>;
@@ -70,7 +69,7 @@ export const checkNodeVersion: (packageName: string) => void;
 export const executeNodeScript: (
   options: { cwd: string; args: string[] },
   evaluateArgs: any[],
-  evaluate: string,
+  evaluate: string
 ) => Promise<void>;
 
 export const defaultBrowsers: {
@@ -81,7 +80,7 @@ export const defaultBrowsers: {
 export const checkBrowsers: (
   dir: string,
   isInteractive: boolean,
-  retry?: boolean,
+  retry?: boolean
 ) => Promise<string[] | boolean>;
 export const openBrowser: (url: string) => boolean;
 
@@ -101,7 +100,7 @@ export const prepareUrls: (
   protocol: string,
   host: string,
   port: number | string,
-  pathname: string,
+  pathname: string
 ) => IUrls;
 
 export const checkRequiredFiles: (files: string[]) => boolean;
@@ -114,35 +113,35 @@ export const createCompiler: (
     useTypeScript: boolean;
     webpack: typeof webpack;
   },
-  isPrintInstruction?: boolean,
+  isPrintInstruction?: boolean
 ) => Compiler;
 export const prepareProxy: (
   proxy: string | undefined,
   appPublicFolder: string,
-  servedPathname: string,
+  servedPathname: string
 ) => WebpackDevServer.ProxyConfigArray;
 export const choosePort: (
   host: string,
-  defaultPort: number,
+  defaultPort: number
 ) => Promise<number | null>;
 
 export declare class InlineChunkHtmlPlugin extends webpack.Plugin {
   constructor(
     htmlWebpackPlugin: typeof HtmlWebpackPlugin,
-    tests: ReadonlyArray<RegExp>,
+    tests: ReadonlyArray<RegExp>
   );
 }
 export declare class InterpolateHtmlPlugin extends webpack.Plugin {
   constructor(
     htmlWebpackPlugin: typeof HtmlWebpackPlugin,
-    replacements: { [key: string]: string },
+    replacements: { [key: string]: string }
   );
 }
 
 export declare class ModuleScopePlugin extends webpack.Plugin {
   constructor(
     appSrc: string | ReadonlyArray<string>,
-    allowedFiles?: ReadonlyArray<string>,
+    allowedFiles?: ReadonlyArray<string>
   );
 }
 
@@ -154,17 +153,17 @@ export declare const getCSSModuleLocalIdent: (
   context: webpack.loader.LoaderContext,
   localIdentName: string,
   localName: string,
-  options: object,
+  options: object
 ) => string;
 
 export declare const evalSourceMapMiddleware: (
-  server: WebpackDevServer,
+  server: WebpackDevServer
 ) => Handler;
 export declare const noopServiceWorkerMiddleware: (
-  servedPath: string,
+  servedPath: string
 ) => Handler;
 export declare const redirectServedPathMiddleware: (
-  servedPath: string,
+  servedPath: string
 ) => Handler;
 
 export declare const getHttpsConfig: () =>
@@ -176,7 +175,7 @@ export declare const getHttpsConfig: () =>
 
 export declare const getCacheIdentifier: (
   environment: string,
-  packages: ReadonlyArray<string>,
+  packages: ReadonlyArray<string>
 ) => string;
 
 export declare const createEnvironmentHash: (env: any) => string;

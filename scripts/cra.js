@@ -51,7 +51,7 @@ fs.readdirSync(packagesDir).forEach((name) => {
 Object.keys(packagePathsByName).forEach((name) => {
   const packageJson = path.join(
     packagePathsByName[name],
-    'package.json',
+    'package.json'
   );
   const json = JSON.parse(fs.readFileSync(packageJson, 'utf8'));
   Object.keys(packagePathsByName).forEach((otherName) => {
@@ -78,7 +78,7 @@ Object.keys(packagePathsByName).forEach((name) => {
 
   fs.writeFileSync(packageJson, JSON.stringify(json, null, 2));
   console.log(
-    'Replaced local dependencies in packages/' + name + '/package.json',
+    'Replaced local dependencies in packages/' + name + '/package.json'
   );
 });
 console.log('Replaced all local dependencies for testing.');
@@ -90,12 +90,12 @@ const craScriptPath = path.join(packagesDir, 'cra', 'index.js');
 
 execSync(
   `node ${craScriptPath} ${args.join(
-    ' ',
+    ' '
   )} --scripts-version=file:packages/react-scripts`,
   {
     cwd: rootDir,
     stdio: 'inherit',
-  },
+  }
 );
 
 // Cleanup

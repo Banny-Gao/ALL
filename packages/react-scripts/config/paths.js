@@ -23,7 +23,7 @@ const moduleFileExtensions = [
 
 const resolveModule = (resolveFn, filePath) => {
   const extension = moduleFileExtensions.find((fileExtension) =>
-    fs.existsSync(resolveFn(`${filePath}.${fileExtension}`)),
+    fs.existsSync(resolveFn(`${filePath}.${fileExtension}`))
   );
 
   if (extension) {
@@ -50,7 +50,7 @@ module.exports = {
   appNodeModules: resolveApp('node_modules'),
   appWebpackCache: resolveApp('node_modules/.cache'),
   appTsBuildInfoFile: resolveApp(
-    'node_modules/.cache/tsconfig.tsbuildinfo',
+    'node_modules/.cache/tsconfig.tsbuildinfo'
   ),
   swSrc: resolveModule(resolveApp, 'src/service-worker'),
   publicPath: process.env.PUBLIC_URL || '/',

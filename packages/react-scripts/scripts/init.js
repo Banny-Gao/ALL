@@ -15,7 +15,7 @@ module.exports = (
   appName,
   verbose,
   originalDirectory,
-  templateName,
+  templateName
 ) => {
   const appPackage = require(path.join(root, 'package.json'));
   const useYarn = fs.existsSync(path.join(root, 'yarn.lock'));
@@ -24,26 +24,26 @@ module.exports = (
     console.log('');
     console.error(
       `A template was not provided. This is likely because you're using an outdated version of ${chalk.cyan(
-        'create-react-app',
-      )}.`,
+        'create-react-app'
+      )}.`
     );
     console.error(
       `Please note that global installs of ${chalk.cyan(
-        'create-react-app',
-      )} are no longer supported.`,
+        'create-react-app'
+      )} are no longer supported.`
     );
     console.error(
       `You can fix this by running ${chalk.cyan(
-        'npm uninstall -g create-react-app',
+        'npm uninstall -g create-react-app'
       )} or ${chalk.cyan(
-        'yarn global remove create-react-app',
-      )} before using ${chalk.cyan('create-react-app')} again.`,
+        'yarn global remove create-react-app'
+      )} before using ${chalk.cyan('create-react-app')} again.`
     );
     return;
   }
 
   const templatePath = path.dirname(
-    require.resolve(`${templateName}/package.json`, { paths: [root] }),
+    require.resolve(`${templateName}/package.json`, { paths: [root] })
   );
   const templateJsonPath = path.join(templatePath, 'template.json');
 
@@ -84,7 +84,7 @@ module.exports = (
         !templatePackageBlacklist.includes(key) &&
         !templatePackageToMerge.includes(key)
       );
-    },
+    }
   );
 
   const templateScripts = templatePackage.scripts || {};
@@ -95,7 +95,7 @@ module.exports = (
       test: 'react-scripts test',
       eject: 'react-scripts eject',
     },
-    templateScripts,
+    templateScripts
   );
   if (useYarn) {
     appPackage.scripts = Object.entries(appPackage.scripts).reduce(
@@ -103,13 +103,10 @@ module.exports = (
         ...acc,
         [key]: value.replace(/(npm run |npm )/, 'yarn '),
       }),
-      {},
+      {}
     );
   }
 
-  appPackage.eslintConfig = {
-    extends: 'react-app',
-  };
   appPackage.browserslist = defaultBrowsers;
   templatePackageToReplace.forEach((key) => {
     appPackage[key] = templatePackage[key];
@@ -117,26 +114,26 @@ module.exports = (
 
   fs.writeFileSync(
     path.join(root, 'package.json'),
-    JSON.stringify(appPackage, null, 2) + os.EOL,
+    JSON.stringify(appPackage, null, 2) + os.EOL
   );
 
   const readmeExists = fs.existsSync(path.join(root, 'README.md'));
   if (readmeExists) {
     fs.renameSync(
       path.join(root, 'README.md'),
-      path.join(root, 'README.old.md'),
+      path.join(root, 'README.old.md')
     );
   }
   if (useYarn) {
     try {
       const readme = fs.readFileSync(
         path.join(root, 'README.md'),
-        'utf8',
+        'utf8'
       );
       fs.writeFileSync(
         path.join(root, 'README.md'),
         readme.replace(/(npm run |npm )/g, 'yarn '),
-        'utf8',
+        'utf8'
       );
     } catch (err) {
       // Silencing the error. As it fall backs to using default npm commands.
@@ -148,7 +145,7 @@ module.exports = (
     fs.copySync(templateDir, root);
   } else {
     console.error(
-      `Could not locate supplied template: ${chalk.green(templateDir)}`,
+      `Could not locate supplied template: ${chalk.green(templateDir)}`
     );
     return;
   }
@@ -162,7 +159,7 @@ module.exports = (
     fs.moveSync(
       path.join(root, 'gitignore'),
       path.join(root, '.gitignore'),
-      [],
+      []
     );
   }
 
@@ -201,7 +198,7 @@ module.exports = (
     args = args.concat(
       dependenciesToInstall.map(([dependency, version]) => {
         return `${dependency}@${version}`;
-      }),
+      })
     );
   }
 
@@ -246,7 +243,7 @@ module.exports = (
   console.log('    Starts the development server.');
   console.log();
   console.log(
-    chalk.cyan(`  ${displayedCommand} ${useYarn ? '' : 'run '}build`),
+    chalk.cyan(`  ${displayedCommand} ${useYarn ? '' : 'run '}build`)
   );
   console.log('    Bundles the app into static files for production.');
   console.log();
@@ -254,13 +251,13 @@ module.exports = (
   console.log('    Starts the test runner.');
   console.log();
   console.log(
-    chalk.cyan(`  ${displayedCommand} ${useYarn ? '' : 'run '}eject`),
+    chalk.cyan(`  ${displayedCommand} ${useYarn ? '' : 'run '}eject`)
   );
   console.log(
-    '    Removes this tool and copies build dependencies, configuration files',
+    '    Removes this tool and copies build dependencies, configuration files'
   );
   console.log(
-    '    and scripts into the app directory. If you do this, you can’t go back!',
+    '    and scripts into the app directory. If you do this, you can’t go back!'
   );
   console.log();
   console.log('We suggest that you begin by typing:');
@@ -271,8 +268,8 @@ module.exports = (
     console.log();
     console.log(
       chalk.yellow(
-        'You had a `README.md` file, we renamed it to `README.old.md`',
-      ),
+        'You had a `README.md` file, we renamed it to `README.old.md`'
+      )
     );
   }
   console.log();

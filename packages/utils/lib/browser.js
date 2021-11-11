@@ -32,9 +32,9 @@ const shouldSetBrowsers = async (isInteractive) => {
     type: 'confirm',
     name: 'shouldSetBrowsers',
     message: `${chalk.yellow(
-      "We're unable to detect target browsers.",
+      "We're unable to detect target browsers."
     )}\n\nWould you like to add the defaults to your ${chalk.bold(
-      'package.json',
+      'package.json'
     )}?`,
     initial: true,
   };
@@ -51,9 +51,9 @@ const checkBrowsers = async (dir, isInteractive, retry = true) => {
     return Promise.reject(
       new Error(
         `${os.EOL}Please add a ${chalk.underline(
-          'browserslist',
-        )} key to your ${chalk.bold('package.json')}.`,
-      ),
+          'browserslist'
+        )} key to your ${chalk.bold('package.json')}.`
+      )
     );
 
   const shouldSet = await shouldSetBrowsers(isInteractive);
@@ -71,8 +71,8 @@ const checkBrowsers = async (dir, isInteractive, retry = true) => {
   console.log();
   console.log(
     `${chalk.green('Set target browsers:')} ${chalk.cyan(
-      defaultBrowsers.join(', '),
-    )}`,
+      defaultBrowsers.join(', ')
+    )}`
   );
   console.log();
 
@@ -117,12 +117,12 @@ const startBrowserProcess = (browser, url, args) => {
         execSync(`ps cax | grep "${chromiumBrowser}"`);
         execSync(
           `osascript openChrome.applescript "${encodeURI(
-            url,
+            url
           )}" "${chromiumBrowser}"`,
           {
             cwd: __dirname,
             stdio: 'ignore',
-          },
+          }
         );
         return true;
       } catch (err) {

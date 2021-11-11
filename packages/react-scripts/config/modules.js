@@ -22,8 +22,8 @@ const getAdditionalModulePaths = (options = {}) => {
 
   throw new Error(
     chalk.red.bold(
-      "Your project's `baseUrl` can only be set to `src` or `node_modules`.",
-    ),
+      "Your project's `baseUrl` can only be set to `src` or `node_modules`."
+    )
   );
 };
 
@@ -59,7 +59,7 @@ const getModules = () => {
 
   if (hasTsConfig && hasJsConfig) {
     throw new Error(
-      'You have both a tsconfig.json and a jsconfig.json. If you are using TypeScript please remove your jsconfig.json file.',
+      'You have both a tsconfig.json and a jsconfig.json. If you are using TypeScript please remove your jsconfig.json file.'
     );
   }
 
@@ -71,7 +71,7 @@ const getModules = () => {
     }));
     config = ts.readConfigFile(
       paths.appTsConfig,
-      ts.sys.readFile,
+      ts.sys.readFile
     ).config;
   } else if (hasJsConfig) {
     config = require(paths.appJsConfig);

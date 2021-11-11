@@ -27,21 +27,21 @@ const paths = require('./paths');
 const modules = require('./modules');
 
 const reactRefreshRuntimeEntry = require.resolve(
-  'react-refresh/runtime',
+  'react-refresh/runtime'
 );
 const reactRefreshWebpackPluginRuntimeEntry = require.resolve(
-  '@pmmmwh/react-refresh-webpack-plugin',
+  '@pmmmwh/react-refresh-webpack-plugin'
 );
 const babelRuntimeEntry = require.resolve('babel-preset-react-app');
 const babelRuntimeEntryHelpers = require.resolve(
   '@babel/runtime/helpers/esm/assertThisInitialized',
-  { paths: [babelRuntimeEntry] },
+  { paths: [babelRuntimeEntry] }
 );
 const babelRuntimeRegenerator = require.resolve(
   '@babel/runtime/regenerator',
   {
     paths: [babelRuntimeEntry],
-  },
+  }
 );
 
 const shouldInlineRuntimeChunk =
@@ -53,7 +53,7 @@ const disableESLintPlugin =
 
 const imageInlineSizeLimit = parseInt(
   process.env.IMAGE_INLINE_SIZE_LIMIT || '10000',
-  10,
+  10
 );
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false';
 
@@ -142,7 +142,7 @@ module.exports = (webpackEnv) => {
           options: {
             sourceMap: true,
           },
-        },
+        }
       );
     }
     return loaders;
@@ -191,7 +191,7 @@ module.exports = (webpackEnv) => {
         defaultWebpack: ['webpack/lib/'],
         config: [__filename],
         tsconfig: [paths.appTsConfig, paths.appJsConfig].filter((f) =>
-          fs.existsSync(f),
+          fs.existsSync(f)
         ),
       },
       compression: 'gzip',
@@ -320,7 +320,7 @@ module.exports = (webpackEnv) => {
               loader: require.resolve('babel-loader'),
               options: {
                 customize: require.resolve(
-                  'babel-preset-react-app/webpack-overrides',
+                  'babel-preset-react-app/webpack-overrides'
                 ),
                 presets: [
                   [
@@ -345,7 +345,7 @@ module.exports = (webpackEnv) => {
                 presets: [
                   [
                     require.resolve(
-                      'babel-preset-react-app/dependencies',
+                      'babel-preset-react-app/dependencies'
                     ),
                     { helpers: true },
                   ],
@@ -394,7 +394,7 @@ module.exports = (webpackEnv) => {
                     mode: 'icss',
                   },
                 },
-                'sass-loader',
+                'sass-loader'
               ),
               sideEffects: true,
             },
@@ -411,7 +411,7 @@ module.exports = (webpackEnv) => {
                     getLocalIdent: getCSSModuleLocalIdent,
                   },
                 },
-                'sass-loader',
+                'sass-loader'
               ),
             },
             {
@@ -476,7 +476,7 @@ module.exports = (webpackEnv) => {
             return manifest;
           }, seed);
           const entrypointFiles = entrypoints.main.filter(
-            (fileName) => !fileName.endsWith('.map'),
+            (fileName) => !fileName.endsWith('.map')
           );
 
           return {
@@ -548,18 +548,10 @@ module.exports = (webpackEnv) => {
           cache: true,
           cacheLocation: path.resolve(
             paths.appNodeModules,
-            '.cache/.eslintcache',
+            '.cache/.eslintcache'
           ),
           cwd: paths.appPath,
           resolvePluginsRelativeTo: __dirname,
-          baseConfig: {
-            extends: [require.resolve('eslint-config-react-app/base')],
-            rules: {
-              ...(!hasJsxRuntime && {
-                'react/react-in-jsx-scope': 'error',
-              }),
-            },
-          },
         }),
     ].filter(Boolean),
     performance: false,

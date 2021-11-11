@@ -44,7 +44,7 @@ const logInfo = () => {
       {
         duplicates: true,
         showNotFound: true,
-      },
+      }
     )
     .then(console.log);
 };
@@ -59,15 +59,15 @@ const createApp = ({
 }) => {
   const unSupportNode = !semver.satisfies(
     semver.coerce(process.version),
-    '>=14',
+    '>=14'
   );
 
   if (unSupportNode) {
     console.log(
       chalk.yellow(
         `You are using Node ${process.version} so the project will be bootstrapped with an old unsupported version of tools.\n\n` +
-          `Please update to Node 14 or higher for a better, fully supported experience.\n`,
-      ),
+          `Please update to Node 14 or higher for a better, fully supported experience.\n`
+      )
     );
     process.exit(1);
   }
@@ -90,7 +90,7 @@ const createApp = ({
   };
   fs.writeFileSync(
     path.join(root, 'package.json'),
-    JSON.stringify(packageJson, null, 2) + os.EOL,
+    JSON.stringify(packageJson, null, 2) + os.EOL
   );
 
   // 获取当前 node 进程目录
@@ -117,11 +117,9 @@ const createApp = ({
       try {
         fs.copySync(
           require.resolve('../yarn.lock.cached'),
-          path.join(root, 'yarn.lock'),
+          path.join(root, 'yarn.lock')
         );
-      } catch (e) {
-        
-      }
+      } catch (e) {}
     }
   }
 
@@ -137,7 +135,7 @@ const createApp = ({
   });
 };
 
-const init = async () => {
+const init = () => {
   const program = new commander.Command(pkg.name)
     .version(pkg.version)
     .arguments('<project-directory>')
@@ -149,11 +147,11 @@ const init = async () => {
     .option('--info', 'print environment debug info')
     .option(
       '--scripts-version <alternative-package>',
-      'use a non-standard version of react-scripts',
+      'use a non-standard version of react-scripts'
     )
     .option(
       '--template <path-to-template>',
-      'specify a template for the created project',
+      'specify a template for the created project'
     )
     .option('-u, --use-pnp')
     .option('-d, --directory [path]', 'base directory', '.')

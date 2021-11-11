@@ -22,7 +22,7 @@ if (~scriptIndex) {
       require.resolve(`../scripts/${script}`),
       ...args.slice(scriptIndex + 1),
     ],
-    { stdio: 'inherit' },
+    { stdio: 'inherit' }
   );
 
   if (result.signal) process.exit(1);

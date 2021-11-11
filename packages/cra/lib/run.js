@@ -27,7 +27,7 @@ const getInstallPackage = (version, originalDirectory) => {
     } else if (version.match(/^file:/)) {
       scriptsToInstall = `file:${path.resolve(
         originalDirectory,
-        version.match(/^file:(.*)?$/)[1],
+        version.match(/^file:(.*)?$/)[1]
       )}`;
     } else {
       // for tar.gz or alternative paths
@@ -40,8 +40,8 @@ const getInstallPackage = (version, originalDirectory) => {
       name: 'react-scripts-ts',
       message: chalk.yellow(
         `The react-scripts-ts package is deprecated. TypeScript is now supported natively in Create React App. You can use the ${chalk.green(
-          '--template typescript',
-        )} option instead when generating your app to include TypeScript support. Would you like to continue using react-scripts-ts?`,
+          '--template typescript'
+        )} option instead when generating your app to include TypeScript support. Would you like to continue using react-scripts-ts?`
       ),
     },
   ];
@@ -72,7 +72,7 @@ const getTemplateInstallPackage = (template, originalDirectory) => {
     if (template.match(/^file:/)) {
       templateToInstall = `file:${path.resolve(
         originalDirectory,
-        template.match(/^file:(.*)?$/)[1],
+        template.match(/^file:(.*)?$/)[1]
       )}`;
     } else if (
       template.includes('://') ||
@@ -81,7 +81,7 @@ const getTemplateInstallPackage = (template, originalDirectory) => {
       templateToInstall = template;
     } else {
       const packageMatch = template.match(
-        /^(@[^/]+\/)?([^@]+)?(@.+)?$/,
+        /^(@[^/]+\/)?([^@]+)?(@.+)?$/
       );
       const scope = packageMatch[1] || '';
       const templateName = packageMatch[2] || '';
@@ -108,7 +108,7 @@ const makeCaretRange = (dependencies, name) => {
 
   if (typeof version === 'undefined') {
     console.error(
-      chalk.red(`Missing ${name} dependency in package.json`),
+      chalk.red(`Missing ${name} dependency in package.json`)
     );
     process.exit(1);
   }
@@ -118,8 +118,8 @@ const makeCaretRange = (dependencies, name) => {
   if (!semver.validRange(patchedVersion)) {
     console.error(
       `Unable to patch ${name} dependency version because version ${chalk.red(
-        version,
-      )} will become invalid ${chalk.red(patchedVersion)}`,
+        version
+      )} will become invalid ${chalk.red(patchedVersion)}`
     );
     patchedVersion = version;
   }
@@ -141,7 +141,7 @@ const setCaretRangeForRuntimeDeps = (packageName, root) => {
   const packageVersion = dependencies[packageName];
   if (typeof packageVersion === 'undefined') {
     console.error(
-      chalk.red(`Unable to find ${packageName} in package.json`),
+      chalk.red(`Unable to find ${packageName} in package.json`)
     );
     process.exit(1);
   }
@@ -158,8 +158,8 @@ const setCaretRangeForRuntimeDeps = (packageName, root) => {
         },
       },
       null,
-      2,
-    ) + os.EOL,
+      2
+    ) + os.EOL
   );
 };
 
@@ -181,8 +181,8 @@ module.exports = async ({
 
     console.log(
       chalk.cyan(
-        'Installing packages. This might take a couple of minutes.',
-      ),
+        'Installing packages. This might take a couple of minutes.'
+      )
     );
 
     const dependencies = [
@@ -203,10 +203,10 @@ module.exports = async ({
 
     console.log(
       `Installing ${chalk.cyan('react')}, ${chalk.cyan(
-        'react-dom',
+        'react-dom'
       )}, and ${chalk.cyan(scriptsName)} with ${chalk.cyan(
-        templateName,
-      )}...`,
+        templateName
+      )}...`
     );
     console.log();
 
@@ -236,7 +236,7 @@ module.exports = async ({
       `
         const init = require('${scriptsName}/scripts/init.js');
         init.apply(null, JSON.parse(process.argv[1]));
-      `,
+      `
     );
   } catch (reason) {
     console.log();
@@ -245,7 +245,7 @@ module.exports = async ({
       console.log(`  ${chalk.cyan(reason.command)} has failed.`);
     } else {
       console.log(
-        chalk.red('Unexpected error. Please report it as a bug:'),
+        chalk.red('Unexpected error. Please report it as a bug:')
       );
       console.log(reason);
     }
@@ -270,8 +270,8 @@ module.exports = async ({
     if (!remainingFiles.length) {
       console.log(
         `Deleting ${chalk.cyan(`${appName}/`)} from ${chalk.cyan(
-          path.resolve(root, '..'),
-        )}`,
+          path.resolve(root, '..')
+        )}`
       );
       process.chdir(path.resolve(root, '..'));
       fs.removeSync(path.join(root));

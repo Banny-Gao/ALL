@@ -41,26 +41,26 @@ const checkNpmCanReadCwd = () => {
       `Could not start an npm process in the right directory.\n\n` +
         `The current directory is: ${chalk.bold(cwd)}\n` +
         `However, a newly started npm process runs in: ${chalk.bold(
-          npmCWD,
+          npmCWD
         )}\n\n` +
-        `This is probably caused by a misconfigured system terminal shell.`,
-    ),
+        `This is probably caused by a misconfigured system terminal shell.`
+    )
   );
 
   if (process.platform === 'win32') {
     console.error(
       `${chalk.red(
-        `On Windows, this can usually be fixed by running:\n\n`,
+        `On Windows, this can usually be fixed by running:\n\n`
       )}  ${chalk.cyan(
-        'reg',
+        'reg'
       )} delete "HKCU\\Software\\Microsoft\\Command Processor" /v AutoRun /f\n` +
         `  ${chalk.cyan(
-          'reg',
+          'reg'
         )} delete "HKLM\\Software\\Microsoft\\Command Processor" /v AutoRun /f\n\n${chalk.red(
-          `Try to run the above two lines in the terminal.\n`,
+          `Try to run the above two lines in the terminal.\n`
         )}${chalk.red(
-          `To learn more about this problem, read: https://blogs.msdn.microsoft.com/oldnewthing/20071121-00/?p=24433/`,
-        )}`,
+          `To learn more about this problem, read: https://blogs.msdn.microsoft.com/oldnewthing/20071121-00/?p=24433/`
+        )}`
     );
   }
 
@@ -138,7 +138,7 @@ const extractStream = (stream, dest) =>
       unpack(dest, (err) => {
         if (err) reject(err);
         else resolve(dest);
-      }),
+      })
     );
   });
 
@@ -158,22 +158,22 @@ const getPackageInfo = async (installPackage) => {
 
       const { name, version } = require(path.join(
         tmpdir,
-        'package.json',
+        'package.json'
       ));
 
       cleanup();
       return { name, version };
     } catch (err) {
       console.log(
-        `Could not extract the package name from the archive: ${err.toString()}`,
+        `Could not extract the package name from the archive: ${err.toString()}`
       );
       const assumedProjectName = installPackage.match(
-        /^.+\/(.+?)(?:-\d+.+)?\.(tgz|tar\.gz)$/,
+        /^.+\/(.+?)(?:-\d+.+)?\.(tgz|tar\.gz)$/
       )[1];
       console.log(
         `Based on the filename, assuming it is "${chalk.cyan(
-          assumedProjectName,
-        )}"`,
+          assumedProjectName
+        )}"`
       );
       return { name: assumedProjectName };
     }
@@ -196,7 +196,7 @@ const getPackageInfo = async (installPackage) => {
     const installPackagePath = installPackage.match(/^file:(.*)?$/)[1];
     const { name, version } = require(path.join(
       installPackagePath,
-      'package.json',
+      'package.json'
     ));
     return { name, version };
   }
@@ -259,7 +259,7 @@ const install = ({
       if (!isOnline) {
         console.log(chalk.yellow('You appear to be offline.'));
         console.log(
-          chalk.yellow('Falling back to the local Yarn cache.'),
+          chalk.yellow('Falling back to the local Yarn cache.')
         );
         console.log();
       }
@@ -278,7 +278,7 @@ const install = ({
       if (usePnp) {
         console.log(chalk.yellow("NPM doesn't support PnP."));
         console.log(
-          chalk.yellow('Falling back to the regular installs.'),
+          chalk.yellow('Falling back to the regular installs.')
         );
         console.log();
       }
@@ -302,7 +302,7 @@ const checkNodeVersion = (packageName, root) => {
     root || process.cwd(),
     'node_modules',
     packageName,
-    'package.json',
+    'package.json'
   );
 
   if (!fs.existsSync(packageJsonPath)) return;
@@ -316,10 +316,10 @@ const checkNodeVersion = (packageName, root) => {
       chalk.red(
         `You are running Node %s.\n 
         ${packageName} requires Node %s or higher. \n
-        Please update your version of Node.`,
+        Please update your version of Node.`
       ),
       process.version,
-      engines.node,
+      engines.node
     );
 
     process.exit(1);
@@ -350,9 +350,9 @@ const createEnvironmentHash = (env) => {
 const ignoredFiles = (appSrc) =>
   new RegExp(
     `^(?!${escape(
-      path.normalize(`${appSrc}/`).replace(/[\\]+/g, '/'),
+      path.normalize(`${appSrc}/`).replace(/[\\]+/g, '/')
     )}).+/node_modules/`,
-    'g',
+    'g'
   );
 
 module.exports = {

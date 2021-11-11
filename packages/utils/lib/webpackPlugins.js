@@ -50,9 +50,9 @@ class InlineChunkHtmlPlugin {
           (assets) => {
             assets.headTags = assets.headTags.map(tagFunction);
             assets.bodyTags = assets.bodyTags.map(tagFunction);
-          },
+          }
         );
-      },
+      }
     );
   }
 }
@@ -76,12 +76,12 @@ class InterpolateHtmlPlugin {
                 const value = this.replacements[key];
                 data.html = data.html.replace(
                   new RegExp(`%${escapeStringRegexp(key)}%`, 'g'),
-                  value,
+                  value
                 );
               });
-            },
+            }
           );
-      },
+      }
     );
   }
 }
@@ -114,7 +114,7 @@ class ModuleScopePlugin {
           appSrc.every((src) => {
             const relative = path.relative(
               src,
-              compilation.context.issuer,
+              compilation.context.issuer
             );
             return (
               relative.startsWith('../') || relative.startsWith('..\\')
@@ -125,13 +125,13 @@ class ModuleScopePlugin {
 
         const compilationFullPath = path.resolve(
           path.dirname(compilation.context.issuer),
-          compilation.__innerRequest_request,
+          compilation.__innerRequest_request
         );
 
         if (allowedFiles.has(compilationFullPath)) return callback();
         if (
           allowedPaths.some((allowedPath) =>
-            compilationFullPath.startsWith(allowedPath),
+            compilationFullPath.startsWith(allowedPath)
           )
         )
           return callback();
@@ -140,7 +140,7 @@ class ModuleScopePlugin {
           appSrc.every((src) => {
             const requestRelative = path.relative(
               src,
-              compilationFullPath,
+              compilationFullPath
             );
             return (
               requestRelative.startsWith('../') ||
@@ -151,18 +151,18 @@ class ModuleScopePlugin {
           const scopeError = new Error(
             `${
               `You attempted to import ${chalk.cyan(
-                compilation.__innerRequest_request,
+                compilation.__innerRequest_request
               )} which falls outside of the project ${chalk.cyan(
-                'src/',
+                'src/'
               )} directory. ` +
               `Relative imports outside of ${chalk.cyan(
-                'src/',
+                'src/'
               )} are not supported.`
             }${os.EOL}You can either move it inside ${chalk.cyan(
-              'src/',
+              'src/'
             )}, or add a symlink to it from project's ${chalk.cyan(
-              'node_modules/',
-            )}.`,
+              'node_modules/'
+            )}.`
           );
           Object.defineProperty(scopeError, '__module_scope_plugin', {
             value: true,
@@ -171,7 +171,7 @@ class ModuleScopePlugin {
           });
           callback(scopeError, compilation);
         } else callback();
-      },
+      }
     );
   }
 }
@@ -210,12 +210,12 @@ class ModuleNotFoundPlugin {
       const caseSensitivity =
         err.message &&
         /\[CaseSensitivePathsPlugin\] `(.*?)` .* `(.*?)`/.exec(
-          err.message,
+          err.message
         );
       if (caseSensitivity) {
         const [, incorrectPath, actualName] = caseSensitivity;
         const actualFile = this.getRelativePath(
-          path.join(path.dirname(incorrectPath), actualName),
+          path.join(path.dirname(incorrectPath), actualName)
         );
         const incorrectName = path.basename(incorrectPath);
         err.message = `Cannot find file: '${incorrectName}' does not match the corresponding name on disk: '${actualFile}'.`;
@@ -314,7 +314,7 @@ class ModuleNotFoundPlugin {
             };
           },
         });
-      },
+      }
     );
   }
 }

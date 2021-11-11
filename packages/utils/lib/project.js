@@ -10,9 +10,9 @@ const checkAppName = (appName) => {
     console.error(
       chalk.red(
         `Cannot create a project named ${chalk.green(
-          `"${appName}"`,
-        )} because of npm naming restrictions:\n`,
-      ),
+          `"${appName}"`
+        )} because of npm naming restrictions:\n`
+      )
     );
     [
       ...(validationResult.errors || []),
@@ -21,7 +21,7 @@ const checkAppName = (appName) => {
       console.error(chalk.red(`  * ${error}`));
     });
     console.error(
-      chalk.red('\nPlease choose a different project name.'),
+      chalk.red('\nPlease choose a different project name.')
     );
 
     return false;
@@ -67,8 +67,8 @@ const isSafeToCreateProjectIn = (root, name) => {
   if (conflicts.length > 0) {
     console.log(
       `The directory ${chalk.green(
-        name,
-      )} contains files that could conflict:`,
+        name
+      )} contains files that could conflict:`
     );
     console.log();
     for (const file of conflicts) {
@@ -85,7 +85,7 @@ const isSafeToCreateProjectIn = (root, name) => {
     }
     console.log();
     console.log(
-      'Either try using a new directory name, or remove the files listed above.',
+      'Either try using a new directory name, or remove the files listed above.'
     );
 
     return false;

@@ -3,3 +3,7 @@
 **/build
 **/.husky
 **/scripts
+**/*.d.ts
+
+.eslintrc.js
+commitlint.config.js

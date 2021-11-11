@@ -18,7 +18,7 @@ dotenvFiles.forEach((dotenvFile) => {
     require('dotenv-expand')(
       require('dotenv').config({
         path: dotenvFile,
-      }),
+      })
     );
   }
 });
@@ -47,7 +47,7 @@ const getClientEnvironment = (publicUrl) => {
         WDS_SOCKET_PATH: process.env.WDS_SOCKET_PATH,
         WDS_SOCKET_PORT: process.env.WDS_SOCKET_PORT,
         FAST_REFRESH: process.env.FAST_REFRESH !== 'false',
-      },
+      }
     );
   const stringified = {
     'process.env': Object.keys(raw).reduce((env, key) => {
