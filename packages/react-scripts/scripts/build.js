@@ -13,19 +13,14 @@ const chalk = require('chalk');
 const webpack = require('webpack');
 
 const {
-  clearConsole,
   checkRequiredFiles,
   formatWebpackMessages,
   checkBrowsers,
-  isUsingYarn,
 } = require('utils');
 
 const paths = require('../config/paths');
 
 const configFactory = require('../config/webpack.config');
-
-const WARN_AFTER_BUNDLE_GZIP_SIZE = 512 * 1024;
-const WARN_AFTER_CHUNK_GZIP_SIZE = 1024 * 1024;
 
 const isInteractive = process.stdout.isTTY;
 
@@ -38,7 +33,7 @@ const writeStatsJson = argv.indexOf('--stats') !== -1;
 
 const config = configFactory('production');
 
-const build = (previousFileSizes) => {
+const build = () => {
   const compiler = webpack(config);
 
   return new Promise((resolve, reject) => {
@@ -94,22 +89,47 @@ const build = (previousFileSizes) => {
         }
       }
 
-      const resolveArgs = {
-        stats,
-        previousFileSizes,
-        warnings: messages.warnings,
-      };
-
       if (writeStatsJson) {
         return bfj
           .write(paths.appBuild + '/bundle-stats.json', stats.toJson())
-          .then(() => resolve(resolveArgs))
+          .then(resolve)
           .catch((error) => reject(new Error(error)));
       }
 
-      return resolve(resolveArgs);
+      return resolve();
     });
   });
 };
 
-checkBrowsers(paths.appPath, isInteractive).then(() => {});
+checkBrowsers(paths.appPath, isInteractive)
+  .then(() => {
+    fs.emptyDirSync(paths.appBuild);
+
+    fs.copySync(paths.appPublic, paths.appBuild, {
+      dereference: true,
+      filter: (file) => file !== paths.appHtml,
+    });
+
+    return build();
+  })
+  .then(
+    () => {
+      console.log(chalk.green('Compiled successfully.\n'));
+    },
+    (err) => {
+      const tscCompileOnError =
+        process.env.TSC_COMPILE_ON_ERROR === 'true';
+      if (tscCompileOnError) {
+        console.log(
+          chalk.yellow(
+            'Compiled with the following type errors (you may want to check these before deploying your app):\n'
+          )
+        );
+        console.log(err);
+      } else {
+        console.log(chalk.red('Failed to compile.\n'));
+        console.log(err);
+        process.exit(1);
+      }
+    }
+  );
