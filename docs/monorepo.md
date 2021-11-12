@@ -1,8 +1,9 @@
-# cra 实现
-
-## 从 monorepo 开始
+# Monorepo 搭建项目
 
 - [monorepo](https://juejin.cn/post/6950561371394146318)
+
+## lerna 与 yarn workspace
+
 - [yarn workspace](https://classic.yarnpkg.com/lang/en/docs/workspaces/)
 - [lerna](https://github.com/lerna/lerna)
 
@@ -13,11 +14,11 @@
   yarn global add lerna
   # 创使用独立模式建本项目
   mkdir demo && cd demo && lerna init --independent
-  # 创建 cra 子项目
+  # 创建一个子项目
   lerna create cra --yes && touch packages/cra/index.js
 ```
 
-使用 yarn workspace _lerna.json_
+配合 yarn workspace 使用 _lerna.json_
 
 ```json
 {
@@ -27,34 +28,19 @@
 }
 ```
 
+指定 workspaces
+
 _package.json_
 
 ```json
 {
   // ...
+  "private": true,
   "workspaces": ["packages/*"]
 }
 ```
 
-给 cra 配置 bin _packages/cra/package.json_
-
-```json
-{
-  // ...
-  "engines": {
-    "node": ">=14"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Mackkkk/ALL.git",
-    "directory": "packages/cra"
-  },
-  "files": ["index.js", "lib"],
-  "bin": {
-    "cra": "./index.js"
-  }
-}
-```
+## 配置 lint
 
 添加 husky，配置 commitlint, 自动生成 CHANGELOG
 
@@ -83,7 +69,6 @@ _package.json_
     "@commitlint/cz-commitlint": "^13.2.1",
     "@commitlint/format": "^13.2.0",
     "commitizen": "^4.2.4",
-    "inquirer": "^8.2.0",
     "conventional-changelog": "^3.1.24",
     "conventional-changelog-conventionalcommits": "^4.6.1",
     "husky": "^7.0.2"
@@ -111,40 +96,186 @@ module.exports = {
 yarn husky add .husky/pre-commit 'yarn lint-staged'
 ```
 
+使用 [typescript-eslint](https://typescript-eslint.io/docs/) 基于 [standard](https://www.npmjs.com/package/eslint-config-standard-with-typescript) 配置
+
 _package.json_
 
 ```json
 {
+  "scripts": {
+    // ...
+    "eslint": "eslint packages --ext .js,.jsx,.ts,.tsx --fix"
+  },
   "lint-staged": {
-    "**.*": ["prettier --write", "git add"],
     "**/.*{css,scss,less}": "stylelint",
-    "*.{js,jsx,ts,jsx}": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "*.{js,jsx,ts,jsx}": "eslint --ext .js,.jsx,.ts,.tsx"
   },
   "devDependencies": {
     // ...
-    "eslint": "^7.5.0",
-    "eslint-config-airbnb": "^18.2.1",
-    "eslint-config-airbnb-typescript": "^14.0.1",
+    "eslint": "^8.2.0",
     "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-import": "^2.25.2",
-    "eslint-plugin-jest": "^25.2.2",
-    "eslint-plugin-jsx-a11y": "^6.4.1",
-    "eslint-plugin-react": "^7.26.1",
-    "eslint-plugin-react-hooks": "^4.2.0",
-    "eslint-plugin-unicorn": "^20.0.0",
+    "eslint-config-standard-with-typescript": "^21.0.1",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jest": "^25.2.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.1",
+    "eslint-plugin-react": "^7.27.0",
+    "jest": "^27.3.1",
     "lint-staged": "^11.2.3",
     "prettier": "^2.4.1",
+    "typescript": "^4.4.4",
     "stylelint": "^13.13.1",
     "stylelint-config-css-modules": "^2.2.0",
     "stylelint-config-prettier": "^9.0.3",
     "stylelint-config-standard": "^22.0.0",
-    "stylelint-declaration-block-no-ignored-properties": "^2.4.0",
-    "typescript": "^4.4.4",
-    "@typescript-eslint/eslint-plugin": "4.29.3",
-    "@typescript-eslint/parser": "^4.29.3"
+    "stylelint-declaration-block-no-ignored-properties": "^2.4.0"
   }
 }
 ```
+
+_.eslintrc.js_
+
+```js
+module.exports = {
+  root: true,
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint', 'jest', 'import', 'react'],
+  extends: [
+    'standard-with-typescript',
+    'prettier',
+    'plugin:jest/recommended',
+    'plugin:@typescript-eslint/recommended-requiring-type-checking',
+  ],
+  env: {
+    browser: true,
+    node: true,
+    es6: true,
+    mocha: true,
+    jest: true,
+    jasmine: true,
+  },
+  settings: {
+    'import/resolver': {
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.d.ts'],
+      },
+    },
+    'import/parsers': {
+      '@typescript-eslint/parser': ['.ts', '.tsx', '.d.ts'],
+    },
+    'import/extensions': [
+      '.js',
+      '.mjs',
+      '.jsx',
+      '.ts',
+      '.tsx',
+      '.d.ts',
+    ],
+    'import/external-module-folders': [
+      'node_modules',
+      'node_modules/@types',
+    ],
+  },
+  parserOptions: {
+    tsconfigRootDir: __dirname,
+    project: ['./tsconfig.eslint.json', './packages/*/tsconfig.json'],
+    extraFileExtensions: ['.vue'],
+    ecmaFeatures: {
+      jsx: true,
+    },
+  },
+  rules: {
+    '@typescript-eslint/strict-boolean-expressions': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/unbound-method': 'off',
+    '@typescript-eslint/restrict-plus-operands': 'off',
+    '@typescript-eslint/no-floating-promises': 'off',
+    '@typescript-eslint/no-unsafe-return': 'off',
+    '@typescript-eslint/no-unsafe-call': 'off',
+    '@typescript-eslint/restrict-template-expressions': 'off',
+    '@typescript-eslint/no-unsafe-argument': 'off',
+    '@typescript-eslint/no-unsafe-member-access': 'off',
+    '@typescript-eslint/no-unsafe-assignment': 'off',
+    'no-console': 'warn',
+    'no-restricted-syntax': 'off',
+    'no-undef': 'off',
+    'no-cond-assign': 'off',
+    'prefer-promise-reject-errors': 'off',
+    'import/no-dynamic-require': 'off',
+    'global-require': 'off',
+    'no-bitwise': 'off',
+    'no-param-reassign': 'off',
+    'consistent-return': 'off',
+    'class-methods-use-this': 'off',
+    'max-classes-per-file': 'off',
+    'no-underscore-dangle': 'off',
+    'no-nested-ternary': 'off',
+  },
+};
+```
+
+_tsconfig.json_
+
+```json
+{
+  "compilerOptions": {
+    "rootDir": "./",
+    "module": "esnext",
+    "target": "esnext",
+    "lib": ["esnext", "dom"],
+    "sourceMap": true,
+    "baseUrl": ".",
+    "jsx": "react",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "noUnusedLocals": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "isolatedModules": true,
+    "paths": {
+      "@/*": ["./packages/*"]
+    }
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "build", "jest"]
+}
+```
+
+monorepo 的特殊配置
+
+```json
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["packages"]
+}
+```
+
+_.eslintignore_
+
+```
+**/.husky
+**/node_modules
+**/build
+**/.husky
+**/scripts
+**/*.d.ts
+
+.eslintrc.js
+commitlint.config.js
+```
+
+配置 prettier
 
 _.editorconfig_
 
@@ -168,69 +299,6 @@ trim_trailing_whitespace = false
 max_line_length = 0
 ```
 
-_.eslintignore_
-
-```
-**/.husky
-**/node_modules
-**/build
-**/.husky
-**/.eslintrc.js
-**/.stylelintrc.js
-**/.prettierrc.js
-```
-
-_.eslintrc.json_
-
-```json
-{
-  "extends": ["airbnb", "airbnb-typescript", "prettier"],
-  "parser": "@typescript-eslint/parser",
-  "plugins": ["react", "jest", "unicorn", "react-hooks", "import"],
-  "env": {
-    "browser": true,
-    "node": true,
-    "es6": true,
-    "mocha": true,
-    "jest": true,
-    "jasmine": true
-  },
-  "settings": {
-    "import/resolver": {
-      "node": {
-        "extensions": [".js", ".jsx", ".ts", ".tsx", ".d.ts"]
-      }
-    },
-    "import/parsers": {
-      "@typescript-eslint/parser": [".ts", ".tsx", ".d.ts"]
-    },
-    "import/extensions": [
-      ".js",
-      ".mjs",
-      ".jsx",
-      ".ts",
-      ".tsx",
-      ".d.ts"
-    ],
-    "import/external-module-folders": [
-      "node_modules",
-      "node_modules/@types"
-    ],
-    "polyfills": ["fetch", "Promise", "URL", "object-assign"]
-  },
-  "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
-    },
-    "requireConfigFile": false,
-    "project": "./tsconfig.json"
-  },
-  "rules": {
-    "@typescript-eslint/no-unused-vars": "off"
-  }
-}
-```
-
 _.prettierignore_
 
 ```
@@ -242,48 +310,10 @@ _.prettierrc.json_
 ```json
 {
   "singleQuote": true,
-  "trailingComma": "all",
-  "printWidth": 100,
-  "proseWrap": "never"
-}
-```
-
-_tsconfig.json_
-
-```json
-{
-  "compilerOptions": {
-    "outDir": "build/dist",
-    "module": "esnext",
-    "target": "esnext",
-    "lib": ["esnext", "dom"],
-    "sourceMap": true,
-    "baseUrl": ".",
-    "jsx": "react",
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node",
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitReturns": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "noUnusedLocals": true,
-    "allowJs": true,
-    "skipLibCheck": true,
-    "experimentalDecorators": true,
-    "strict": true,
-    "paths": {
-      "@/*": ["./packages/*"]
-    }
-  },
-  "include": ["./packages/**/*"],
-  "exclude": [
-    "node_modules",
-    "build",
-    "dist",
-    "scripts",
-    "webpack",
-    "jest"
-  ]
+  "trailingComma": "es5",
+  "printWidth": 72,
+  "proseWrap": "never",
+  "endOfLine": "lf"
 }
 ```
 
@@ -321,3 +351,11 @@ _.stylelintrc.json_
   "ignoreFiles": ["**/*.js", "**/*.jsx", "**/*.tsx", "**/*.ts"]
 }
 ```
+
+## Tips
+
+- [workspaces](https://classic.yarnpkg.com/en/docs/cli/workspaces) 与 [workspace](https://classic.yarnpkg.com/en/docs/cli/workspace)
+  - root 添加 package, **yarn add package -W**
+  - workspace 添加 package, **yarn workspace cra add package**, 也可以使用 **lerna add package --scope cra**
+- 使用 **lerna bootstrap** 或 **yarn** 给所有 **workspace** 添加依赖
+- 使用 **lerna clean** 清除 **workspace** 的 _node_modules_
