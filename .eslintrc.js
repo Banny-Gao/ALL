@@ -47,6 +47,8 @@ module.exports = {
     },
   },
   rules: {
+    '@typescript-eslint/strict-boolean-expressions': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/unbound-method': 'off',
     '@typescript-eslint/restrict-plus-operands': 'off',
     '@typescript-eslint/no-floating-promises': 'off',

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "rootDir": "./",
     "module": "esnext",
     "target": "esnext",
     "lib": ["esnext", "dom"],
@@ -8,6 +9,7 @@
     "jsx": "react",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
@@ -17,6 +19,8 @@
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "isolatedModules": true,
     "paths": {
       "@/*": ["./packages/*"]
     }
