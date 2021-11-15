@@ -20,6 +20,7 @@ const {
   ModuleNotFoundPlugin,
   getCSSModuleLocalIdent,
   createEnvironmentHash,
+  getCacheIdentifier,
 } = require('utils');
 
 const getClientEnvironment = require('./env');
@@ -330,6 +331,19 @@ module.exports = (webpackEnv) => {
                     },
                   ],
                 ],
+                babelrc: false,
+                configFile: false,
+                cacheIdentifier: getCacheIdentifier(
+                  isEnvProduction
+                    ? 'production'
+                    : isEnvDevelopment && 'development',
+                  [
+                    'babel-plugin-named-asset-import',
+                    'babel-preset-react-app',
+                    'react-dev-utils',
+                    'react-scripts',
+                  ]
+                ),
                 plugins: [
                   isEnvDevelopment &&
                     shouldUseReactRefresh &&
