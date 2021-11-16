@@ -331,8 +331,12 @@ module.exports = (webpackEnv) => {
                     },
                   ],
                 ],
-                babelrc: false,
-                configFile: false,
+                compact: isEnvProduction,
+                plugins: [
+                  isEnvDevelopment &&
+                    shouldUseReactRefresh &&
+                    require.resolve('react-refresh/babel'),
+                ].filter(Boolean),
                 cacheIdentifier: getCacheIdentifier(
                   isEnvProduction
                     ? 'production'
@@ -340,15 +344,9 @@ module.exports = (webpackEnv) => {
                   [
                     'babel-plugin-named-asset-import',
                     'babel-preset-react-app',
-                    'react-dev-utils',
-                    'react-scripts',
                   ]
                 ),
-                plugins: [
-                  isEnvDevelopment &&
-                    shouldUseReactRefresh &&
-                    require.resolve('react-refresh/babel'),
-                ].filter(Boolean),
+                cacheDirectory: true,
               },
             },
             {
@@ -366,6 +364,16 @@ module.exports = (webpackEnv) => {
                 ],
                 sourceMaps: shouldUseSourceMap,
                 inputSourceMap: shouldUseSourceMap,
+                cacheIdentifier: getCacheIdentifier(
+                  isEnvProduction
+                    ? 'production'
+                    : isEnvDevelopment && 'development',
+                  [
+                    'babel-plugin-named-asset-import',
+                    'babel-preset-react-app',
+                  ]
+                ),
+                cacheDirectory: true,
               },
             },
             {
