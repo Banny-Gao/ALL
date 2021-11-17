@@ -3,6 +3,7 @@ import './App.css';
 
 import { JSX } from './JsxAndCreateElement';
 import { LazyComponent } from './LazyComponent';
+import { ContextExample } from './ContextExample';
 
 export default () => {
   const [state, setState] = useState({
@@ -13,6 +14,7 @@ export default () => {
   return (
     <>
       <JSX />
+
       <>
         <p
           onClick={() =>
@@ -40,6 +42,10 @@ export default () => {
           />
         )}
       </>
+
+      <br />
+
+      <ContextExample />
     </>
   );
 };
