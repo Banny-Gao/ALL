@@ -5,6 +5,8 @@ import { JSX } from './JsxAndCreateElement';
 import { LazyComponent } from './LazyComponent';
 import { ContextExample } from './ContextExample';
 
+import { ErrorBoundary, BuggyCounter } from './ErrorBoundary';
+
 export default () => {
   const [state, setState] = useState({
     showLazyComponent: false,
@@ -44,8 +46,12 @@ export default () => {
       </>
 
       <br />
-
       <ContextExample />
+
+      <br />
+      <ErrorBoundary>
+        <BuggyCounter />
+      </ErrorBoundary>
     </>
   );
 };

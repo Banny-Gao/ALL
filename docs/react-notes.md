@@ -46,8 +46,16 @@ const Example = () => {
   - [example](./../packages/react-ts-app/src/LazyComponent.tsx)
 
 - Context
+
   - React.createContext
   - Context.Provider
   - Context.Consumer
   - Context.displayName 给 react-dev-tools 使用
   - - [example](./../packages/react-ts-app/src/ContextExample.tsx)
+
+- Error Boundaries
+  - static getDerivedStateFromError()
+    - render 阶段调用，不允许出现副作用。返回新的 state，以便下次 render 时回退 UI
+  - componentDidCatch()
+    - 接收 error 和 info， 在 commit 阶段执行，允许副作用，用作错误收集报告
+  - 只有 class component 能作 Error Boundary，且只能捕获其子组件错误，无法捕获自身错误
