@@ -62,3 +62,7 @@ const Example = () => {
   - 只有 class component 能作 Error Boundary，且只能捕获其子组件错误，无法捕获自身错误
 
 - Forwarding Refs
+  - forwardRef [example](./../packages/react-ts-app/src/ForwardRefExample.tsx)
+  - createRef 最好用在 class component
+  - useRef 用在 FC, 返回 mutable ref, 接收 initialValue 初始化 current。 不只是 Dom Refs,可作实例变量，current 的变化不会 re-render
+  - callback ref, 配合 useCallback 测量 Dom 属性 [example](./../packages/react-ts-app/src/MeasureExample.tsx)

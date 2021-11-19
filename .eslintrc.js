@@ -60,6 +60,7 @@ module.exports = {
     '@typescript-eslint/no-unsafe-assignment': 'off',
     '@typescript-eslint/promise-function-async': 'off',
     '@typescript-eslint/no-base-to-string': 'off',
+    '@typescript-eslint/no-var-requires': 'off',
     'no-console': 'warn',
     'no-restricted-syntax': 'off',
     'no-undef': 'off',

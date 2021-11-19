@@ -6,6 +6,8 @@ import { LazyComponent } from './LazyComponent';
 import { ContextExample } from './ContextExample';
 
 import { ErrorBoundary, BuggyCounter } from './ErrorBoundary';
+import { ForwardRefExample } from './ForwardRefExample';
+import { MeasureExample } from './MeasureExample';
 
 export default () => {
   const [state, setState] = useState({
@@ -52,6 +54,12 @@ export default () => {
       <ErrorBoundary>
         <BuggyCounter />
       </ErrorBoundary>
+
+      <br />
+      <ForwardRefExample />
+
+      <br />
+      <MeasureExample />
     </>
   );
 };
