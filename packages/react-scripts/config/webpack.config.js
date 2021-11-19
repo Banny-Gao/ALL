@@ -11,6 +11,7 @@ const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const DashboardPlugin = require('webpack-dashboard/plugin');
 const webpack = require('webpack');
 
 const {
@@ -575,6 +576,7 @@ module.exports = (webpackEnv) => {
           cwd: paths.appPath,
           resolvePluginsRelativeTo: __dirname,
         }),
+      new DashboardPlugin(),
     ].filter(Boolean),
     performance: false,
   };
