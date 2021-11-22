@@ -1,5 +1,5 @@
 export class Timer {
-  static base(handler, timeout, args, refresh) {
+  static base(handler, timeout, args, loop) {
     let timeStamp = Date.now();
 
     const timer = {
@@ -13,7 +13,7 @@ export class Timer {
       if (Date.now() - timeStamp >= timeout) {
         handler.apply(callback, args);
 
-        if (refresh) {
+        if (loop) {
           timeStamp = Date.now();
           timer.value = requestAnimationFrame(callback);
         }
