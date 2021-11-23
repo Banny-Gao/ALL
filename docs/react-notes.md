@@ -39,6 +39,7 @@
   - 只有 class component 能作 Error Boundary，且只能捕获其子组件错误，无法捕获自身错误
 
 - Forwarding Refs
+
   - forwardRef [example](./../packages/react-ts-app/src/ForwardRefExample.tsx)
   - createRef 最好用在 class component
   - useRef 用在 FC, 返回 mutable ref, 接收 initialValue 初始化 current。 不只是 Dom Refs,可作实例变量，current 的变化不会 re-render
@@ -46,3 +47,8 @@
 
 - HOC
   - 高阶组件既是接收一个组件并返回一个新的组件
+  - 不要在 render 里使用 HOC
+    - 每次都是返回的新的组件，造成性能消耗
+    - 自身状态和子节点丢失
+  - 静态方法丢失，可以使用 [hoist-non-react-statics](https://github.com/mridgway/hoist-non-react-statics), 或者引入组件自身的静态方法
+  - 组件接收的 ref 不能直传递，需要 forwardRef 处理
