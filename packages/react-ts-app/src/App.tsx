@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Profiler } from 'react';
 import './App.css';
 
 import { JSX } from './JsxAndCreateElement';
@@ -40,10 +40,18 @@ export default () => {
           Toggle LazyComponent
         </p>
         {state.showLazyComponent && (
-          <LazyComponent
-            showLoading
-            title={`Lazy Component Loaded Count ${state.lazyComponentLoadedCount}`}
-          />
+          <Profiler
+            id="Navigation"
+            onRender={(...args) => {
+              // eslint-disable-next-line no-console
+              console.table(args);
+            }}
+          >
+            <LazyComponent
+              showLoading
+              title={`Lazy Component Loaded Count ${state.lazyComponentLoadedCount}`}
+            />
+          </Profiler>
         )}
       </>
 
