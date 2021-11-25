@@ -8,6 +8,7 @@ import { ContextExample } from './ContextExample';
 import { ErrorBoundary, BuggyCounter } from './ErrorBoundary';
 import { ForwardRefExample } from './ForwardRefExample';
 import { MeasureExample } from './MeasureExample';
+import { CreateReactClassExample } from './CreateReactClassExample';
 
 export default () => {
   const [state, setState] = useState({
@@ -68,6 +69,9 @@ export default () => {
 
       <br />
       <MeasureExample />
+
+      <br />
+      <CreateReactClassExample title="Create React Class Example" />
     </>
   );
 };

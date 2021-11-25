@@ -2801,6 +2801,13 @@
   resolved "https://registry.yarnpkg.com/@types/cors/-/cors-2.8.12.tgz#6b2c510a7ad7039e98e7b8d3d6598f4359e5c080"
   integrity sha512-vt+kDhq/M2ayberEtJcIN/hxXy1Pk+59g2FV/ZQceeaTyCtCucjL2Q7FXlFjtWn4n15KCr1NE2lNNFhp0lEThw==
 
+"@types/create-react-class@^15.6.3":
+  version "15.6.3"
+  resolved "https://registry.yarnpkg.com/@types/create-react-class/-/create-react-class-15.6.3.tgz#d9a533441acd1532f2b97d55c24dfb87898d5cc2"
+  integrity sha512-SXf68tnBChYL/XOKrXsq85X8JZ3KUYtICwlnd3Y28BS41bcIlKSxxnoXSapl0/CSofVxjqqyFmu5e7GMU7lYHg==
+  dependencies:
+    "@types/react" "*"
+
 "@types/cross-spawn@^6.0.2":
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/@types/cross-spawn/-/cross-spawn-6.0.2.tgz#168309de311cd30a2b8ae720de6475c2fbf33ac7"
@@ -4866,6 +4873,14 @@ cosmiconfig@^7.0.0, cosmiconfig@^7.0.1:
     parse-json "^5.0.0"
     path-type "^4.0.0"
     yaml "^1.10.0"
+
+create-react-class@^15.7.0:
+  version "15.7.0"
+  resolved "https://registry.yarnpkg.com/create-react-class/-/create-react-class-15.7.0.tgz#7499d7ca2e69bb51d13faf59bd04f0c65a1d6c1e"
+  integrity sha512-QZv4sFWG9S5RUvkTYWbflxeZX+JG7Cz0Tn33rQBJ+WFQTqTfUTjMjiv9tnfXazjsO5r0KhPs+AqCjyrQX6h2ng==
+  dependencies:
+    loose-envify "^1.3.1"
+    object-assign "^4.1.1"
 
 create-require@^1.1.0:
   version "1.1.1"
@@ -8488,7 +8503,7 @@ longest@^2.0.1:
   resolved "https://registry.yarnpkg.com/longest/-/longest-2.0.1.tgz#781e183296aa94f6d4d916dc335d0d17aefa23f8"
   integrity sha1-eB4YMpaqlPbU2RbcM10NF676I/g=
 
-loose-envify@^1.1.0, loose-envify@^1.4.0:
+loose-envify@^1.1.0, loose-envify@^1.3.1, loose-envify@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/loose-envify/-/loose-envify-1.4.0.tgz#71ee51fa7be4caec1a63839f7e682d8132d30caf"
   integrity sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==
@@ -10652,7 +10667,7 @@ react-refresh@^0.10.0:
     source-map-loader "^3.0.0"
     style-loader "^3.3.1"
     terser-webpack-plugin "^5.2.4"
-    utils "file:../../../AppData/Local/Yarn/Cache/v6/npm-react-scripts-1.0.0-cb2318a1-c8d0-4ee0-9df2-1b0f66e73953-1637303591552/node_modules/utils"
+    utils "file:../../../AppData/Local/Yarn/Cache/v6/npm-react-scripts-1.0.0-bf015101-f95e-429e-a2e5-90eaeb501463-1637821127593/node_modules/utils"
     webpack "^5.60.0"
     webpack-dashboard "^3.3.6"
     webpack-dev-server "^4.4.0"
