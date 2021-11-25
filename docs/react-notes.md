@@ -62,6 +62,60 @@
   - 不可变数据 immer 和 immutable.js
 
 - crateReactClass
+
   - 接收 ComponentSpec<IProps, IState> 类型参数，返回 ClassicComponentClass<IProps> 构造函数
   - 无 this 指向问题
   - [example](../packages/react-ts-app/src/CreateReactClassExample.tsx)
+
+- API
+
+  - Component
+  - PureComponent: shouldComponentUpdate 浅比较
+  - memo: FC 的 PureComponent，第二个参数 areEqual 支持控制比较，
+  - createElement
+  - cloneElement
+  - createFactory
+  - isValidElement
+  - Fragment
+  - createRef
+  - forwardRef
+  - lazy
+  - Suspense
+
+- lifecycle
+
+  - Mounting
+    - constructor
+    - static getDerivedStateFromProps
+    - render
+    - componentDidMount
+  - Updating
+    - static getDerivedStateFromProps
+    - shouldComponentDidUpdate
+    - render
+    - getSnapshotBeforeUpdate
+    - componentDidUpdate
+  - Unmounting
+    - componentWillUnmount
+  - Error Handling
+    - static getDerivedStateFromError
+    - componentDidCatch
+
+- react-dom
+
+  - render
+  - hydrate: 服务端渲染
+  - unmountComponentAtNode
+  - findDOMNode: StrictMode 已弃用
+  - createPortal
+
+- DOM Elements
+  - checked & defaultChecked(非受控默认值)
+  - value & defaultValue
+  - className
+  - dangerouslySetInnerHTML
+  - htmlFor
+  - onChange
+  - selected
+  - style
+  - contentEditable & suppressContentEditableWarning
