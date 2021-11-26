@@ -10,6 +10,8 @@ import { ForwardRefExample } from './ForwardRefExample';
 import { MeasureExample } from './MeasureExample';
 import { CreateReactClassExample } from './CreateReactClassExample';
 
+import { HooksExample } from './HooksExample';
+
 export default () => {
   const [state, setState] = useState({
     showLazyComponent: false,
@@ -72,6 +74,9 @@ export default () => {
 
       <br />
       <CreateReactClassExample title="Create React Class Example" />
+
+      <br />
+      <HooksExample />
     </>
   );
 };

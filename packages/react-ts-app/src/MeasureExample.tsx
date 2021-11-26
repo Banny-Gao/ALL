@@ -17,7 +17,7 @@ export const MeasureExample = () => {
   useEffect(() => {
     const id = setInterval(() => {
       setGrowingText(`${growingText} ${Date.now().toString()}`);
-    }, 3000);
+    }, 5000);
 
     intervalRef.current = id;
 
