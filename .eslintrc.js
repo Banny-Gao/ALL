@@ -61,6 +61,7 @@ module.exports = {
     '@typescript-eslint/promise-function-async': 'off',
     '@typescript-eslint/no-base-to-string': 'off',
     '@typescript-eslint/no-var-requires': 'off',
+    '@typescript-eslint/consistent-type-assertions': 'off',
     'no-console': 'warn',
     'no-restricted-syntax': 'off',
     'no-undef': 'off',

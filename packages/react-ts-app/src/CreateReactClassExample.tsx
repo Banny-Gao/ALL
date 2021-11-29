@@ -61,7 +61,9 @@ const spec: C = {
     const { clickCount } = this.state;
 
     return (
-      <span onClick={this.handleClick}>click count {clickCount}</span>
+      <span onClick={this.handleClick}>
+        createReactClass click count {clickCount}
+      </span>
     );
   },
 };
