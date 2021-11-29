@@ -61,6 +61,7 @@
   - shouldComponentUpdate 和 PureComponent
   - 不可变数据 immer 和 immutable.js
   - useCallback 、 useMemo 和 React.memo
+  - Profiler 组件渲染分析
 
 - crateReactClass
 
