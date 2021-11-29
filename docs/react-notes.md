@@ -60,6 +60,7 @@
   - 虚拟化列表 react-window 和 react-virtualized
   - shouldComponentUpdate 和 PureComponent
   - 不可变数据 immer 和 immutable.js
+  - useCallback 、 useMemo 和 React.memo
 
 - crateReactClass
 
@@ -130,4 +131,6 @@
   - useMemo
   - useRef
   - useImperativeHandle 自定义暴露到父组件的实例 [example](../packages/react-ts-app/src/ForwardRefExample.tsx)
+  - useLayoutEffect
+  - useDebugValue 定义 dev-tools 的 label
   - [example](../packages/react-ts-app/src/HooksExample.tsx)

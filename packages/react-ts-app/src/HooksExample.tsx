@@ -10,6 +10,8 @@ import React, {
   Reducer,
   useCallback,
   useMemo,
+  useEffect,
+  useLayoutEffect,
 } from 'react';
 
 import { useCallbackState } from './hooks';
@@ -37,6 +39,14 @@ const ThemeText = () => {
     ),
     [theme.color]
   );
+
+  useEffect(() => {
+    console.log('effect');
+  });
+
+  useLayoutEffect(() => {
+    console.log('layout effect');
+  });
 
   return (
     <>
