@@ -1,0 +1,47 @@
+{
+  "name": "react",
+  "version": "0.0.1",
+  "directories": {
+    "lib": "lib"
+  },
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "node ./scripts/build.js"
+  },
+  "dependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.10.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.11.0",
+    "@babel/plugin-transform-arrow-functions": "^7.10.4",
+    "@babel/plugin-transform-block-scoped-functions": "^7.10.4",
+    "@babel/plugin-transform-block-scoping": "^7.11.1",
+    "@babel/plugin-transform-classes": "^7.10.4",
+    "@babel/plugin-transform-computed-properties": "^7.10.4",
+    "@babel/plugin-transform-destructuring": "^7.10.4",
+    "@babel/plugin-transform-flow-strip-types": "^7.16.0",
+    "@babel/plugin-transform-for-of": "^7.10.4",
+    "@babel/plugin-transform-parameters": "^7.10.5",
+    "@babel/plugin-transform-shorthand-properties": "^7.10.4",
+    "@babel/plugin-transform-spread": "^7.11.0",
+    "@babel/preset-flow": "^7.10.4",
+    "@babel/preset-react": "^7.10.4",
+    "babel-code-frame": "^6.26.0",
+    "babel-plugin-syntax-trailing-function-commas": "^6.5.0",
+    "chalk": "^4.1.2",
+    "cli-table": "^0.3.1",
+    "filesize": "^6.0.1",
+    "gzip-size": "^5.1.1",
+    "minimist": "^1.2.3",
+    "mkdirp": "^0.5.1",
+    "ncp": "^2.0.0",
+    "rimraf": "^3.0.0",
+    "rollup": "^1.19.4",
+    "rollup-plugin-babel": "^4.0.1",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-replace": "^2.2.0",
+    "rollup-plugin-strip-banner": "^0.2.0",
+    "semver": "^7.1.1",
+    "targz": "^1.0.1"
+  }
+}
