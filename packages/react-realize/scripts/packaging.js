@@ -130,14 +130,14 @@ async function prepareNpmPackage(name) {
   await Promise.all([
     asyncCopyTo('LICENSE', `build/node_modules/${name}/LICENSE`),
     asyncCopyTo(
-      `packages/${name}/package.json`,
+      `lib/${name}/package.json`,
       `build/node_modules/${name}/package.json`
     ),
     asyncCopyTo(
-      `packages/${name}/README.md`,
+      `lib/${name}/README.md`,
       `build/node_modules/${name}/README.md`
     ),
-    asyncCopyTo(`packages/${name}/npm`, `build/node_modules/${name}`),
+    asyncCopyTo(`lib/${name}/npm`, `build/node_modules/${name}`),
   ]);
   filterOutEntrypoints(name);
   const tgzName = (
@@ -150,7 +150,7 @@ async function prepareNpmPackage(name) {
 
 async function prepareNpmPackages() {
   if (!existsSync('build/node_modules')) {
-    // We didn't build any npm packages.
+    // We didn't build any npm lib.
     return;
   }
   const builtPackageFolders = readdirSync('build/node_modules').filter(

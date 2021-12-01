@@ -479,7 +479,7 @@ async function buildEverything() {
     await createBundle(bundle, bundleType);
   }
 
-  await Packaging.prepareNpmPackages();
+  // await Packaging.prepareNpmPackages();
 
   console.log(Stats.printResults());
 }
