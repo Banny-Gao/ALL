@@ -1,5 +1,9 @@
-import { isValidElement } from './ReactElement';
-import { getIteratorFn } from '../../ReactSymbols';
+import { isValidElement, cloneAndReplaceKey } from './ReactElement';
+import {
+  getIteratorFn,
+  REACT_ELEMENT_TYPE,
+  REACT_PORTAL_TYPE,
+} from '../../ReactSymbols';
 
 const SEPARATOR = '.';
 const SUBSEPARATOR = ':';
@@ -18,6 +22,8 @@ const escape = (key) => {
 
   return '$' + escapedString;
 };
+
+const escapeUserProvidedKey = (text) => text.replace(/\/+/g, '$&/');
 
 const getElementKey = (element, index) => {
   if (

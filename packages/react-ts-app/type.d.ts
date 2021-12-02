@@ -3,3 +3,5 @@ declare module '*.svg' {
   export default content;
   export const ReactComponent = content;
 }
+
+declare module 'react-realize/lib/react';

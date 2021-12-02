@@ -1,14 +1,18 @@
 import { REACT_ELEMENT_TYPE } from '../../ReactSymbols';
 
-const ReactElement = function (
-  type,
-  key,
-  ref,
-  self,
-  source,
-  owner,
-  props
-) {};
+const ReactElement = (type, key, ref, owner, props) => ({
+  // This tag allows us to uniquely identify this as a React Element
+  $$typeof: REACT_ELEMENT_TYPE,
+
+  // Built-in properties that belong on the element
+  type: type,
+  key: key,
+  ref: ref,
+  props: props,
+
+  // Record the component responsible for creating this element.
+  _owner: owner,
+});
 
 export const isValidElement = (object) =>
   typeof object === 'object' &&
@@ -20,8 +24,6 @@ export const cloneAndReplaceKey = (oldElement, newKey) => {
     oldElement.type,
     newKey,
     oldElement.ref,
-    oldElement._self,
-    oldElement._source,
     oldElement._owner,
     oldElement.props
   );

@@ -5,6 +5,8 @@
     "eslintcache",
     "icss",
     "precache",
-    "svgr"
+    "SUBSEPARATOR",
+    "svgr",
+    "typeof"
   ]
 }
