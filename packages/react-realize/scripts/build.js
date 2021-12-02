@@ -479,8 +479,6 @@ async function buildEverything() {
     await createBundle(bundle, bundleType);
   }
 
-  // await Packaging.prepareNpmPackages();
-
   console.log(Stats.printResults());
 }
 

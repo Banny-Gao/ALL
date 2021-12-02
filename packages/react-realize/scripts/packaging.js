@@ -1,17 +1,4 @@
-const {
-  existsSync,
-  readdirSync,
-  unlinkSync,
-  readFileSync,
-  writeFileSync,
-} = require('fs');
 const Bundles = require('./bundles');
-const {
-  asyncCopyTo,
-  asyncExecuteCommand,
-  asyncExtractTar,
-  asyncRimRaf,
-} = require('./utils');
 
 const {
   NODE_ES2015,
@@ -34,41 +21,20 @@ function getPackageName(name) {
 function getBundleOutputPath(bundleType, filename, packageName) {
   switch (bundleType) {
     case NODE_ES2015:
-      return `build/node_modules/${packageName}/cjs/${filename}`;
+      return `build/${packageName}/cjs/${filename}`;
     case NODE_ESM:
-      return `build/node_modules/${packageName}/esm/${filename}`;
+      return `build/${packageName}/esm/${filename}`;
     case NODE_DEV:
     case NODE_PROD:
     case NODE_PROFILING:
-      return `build/node_modules/${packageName}/cjs/${filename}`;
+      return `build/${packageName}/cjs/${filename}`;
     case UMD_DEV:
     case UMD_PROD:
     case UMD_PROFILING:
-      return `build/node_modules/${packageName}/umd/${filename}`;
+      return `build/${packageName}/umd/${filename}`;
     default:
       throw new Error('Unknown bundle type.');
   }
-}
-
-function getTarOptions(tgzName, packageName) {
-  // Files inside the `npm pack`ed archive start
-  // with "package/" in their paths. We'll undo
-  // this during extraction.
-  const CONTENTS_FOLDER = 'package';
-  return {
-    src: tgzName,
-    dest: `build/node_modules/${packageName}`,
-    tar: {
-      entries: [CONTENTS_FOLDER],
-      map(header) {
-        if (header.name.indexOf(CONTENTS_FOLDER + '/') === 0) {
-          header.name = header.name.substring(
-            CONTENTS_FOLDER.length + 1
-          );
-        }
-      },
-    },
-  };
 }
 
 let entryPointsToHasBundle = new Map();
@@ -83,84 +49,7 @@ for (const bundle of Bundles.bundles) {
   }
 }
 
-function filterOutEntrypoints(name) {
-  // Remove entry point files that are not built in this configuration.
-  let jsonPath = `build/node_modules/${name}/package.json`;
-  let packageJSON = JSON.parse(readFileSync(jsonPath));
-  let files = packageJSON.files;
-  if (!Array.isArray(files)) {
-    throw new Error(
-      'expected all package.json files to contain a files field'
-    );
-  }
-  let changed = false;
-  for (let i = 0; i < files.length; i++) {
-    let filename = files[i];
-    let entry =
-      filename === 'index.js'
-        ? name
-        : name + '/' + filename.replace(/\.js$/, '');
-    let hasBundle = entryPointsToHasBundle.get(entry);
-    if (hasBundle === undefined) {
-      // This entry doesn't exist in the bundles. Check if something similar exists.
-      hasBundle =
-        entryPointsToHasBundle.get(entry + '.node') ||
-        entryPointsToHasBundle.get(entry + '.browser');
-    }
-    if (hasBundle === undefined) {
-      // This doesn't exist in the bundles. It's an extra file.
-    } else if (hasBundle === true) {
-      // This is built in this release channel.
-    } else {
-      // This doesn't have any bundleTypes in this release channel.
-      // Let's remove it.
-      files.splice(i, 1);
-      i--;
-      unlinkSync(`build/node_modules/${name}/${filename}`);
-      changed = true;
-    }
-  }
-  if (changed) {
-    let newJSON = JSON.stringify(packageJSON, null, '  ');
-    writeFileSync(jsonPath, newJSON);
-  }
-}
-
-async function prepareNpmPackage(name) {
-  await Promise.all([
-    asyncCopyTo('LICENSE', `build/node_modules/${name}/LICENSE`),
-    asyncCopyTo(
-      `lib/${name}/package.json`,
-      `build/node_modules/${name}/package.json`
-    ),
-    asyncCopyTo(
-      `lib/${name}/README.md`,
-      `build/node_modules/${name}/README.md`
-    ),
-    asyncCopyTo(`lib/${name}/npm`, `build/node_modules/${name}`),
-  ]);
-  filterOutEntrypoints(name);
-  const tgzName = (
-    await asyncExecuteCommand(`npm pack build/node_modules/${name}`)
-  ).trim();
-  await asyncRimRaf(`build/node_modules/${name}`);
-  await asyncExtractTar(getTarOptions(tgzName, name));
-  unlinkSync(tgzName);
-}
-
-async function prepareNpmPackages() {
-  if (!existsSync('build/node_modules')) {
-    // We didn't build any npm lib.
-    return;
-  }
-  const builtPackageFolders = readdirSync('build/node_modules').filter(
-    (dir) => dir.charAt(0) !== '.'
-  );
-  await Promise.all(builtPackageFolders.map(prepareNpmPackage));
-}
-
 module.exports = {
   getPackageName,
   getBundleOutputPath,
-  prepareNpmPackages,
 };
