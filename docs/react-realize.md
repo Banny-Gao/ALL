@@ -69,3 +69,10 @@ console.log(mappedChildren);
 - createElement: 初始化 ref, key, props, children， ReactElement 创建元素
 - createFactory: _createElement.bind(null, type);_
 - cloneElement: 与 createElement 不同的是, createElement 默认 owner 是 ReactCurrentOwner.current, 而 cloneElement 保留原，在传了 config.ref 的情况下才更新为 ReactCurrentOwner.current
+
+### Component
+
+- 绑定 props, context, refs 和 updater
+- setState 执行 updater.enqueueSetState, 传入 this, partialState, callback
+- 标记 isReactComponent
+- PureComponent 标记 isPureComponent

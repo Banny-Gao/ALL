@@ -12,6 +12,7 @@ import {
   cloneElement,
   isValidElement,
 } from './ReactElement';
+import { Component, PureComponent } from './ReactBaseClasses';
 
 const Children = {
   map,
@@ -32,4 +33,6 @@ export {
   REACT_STRICT_MODE_TYPE as StrictMode,
   REACT_SUSPENSE_TYPE as Suspense,
   REACT_SUSPENSE_LIST_TYPE as SuspenseList,
+  Component,
+  PureComponent,
 };
