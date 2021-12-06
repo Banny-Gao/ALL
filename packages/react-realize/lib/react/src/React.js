@@ -13,6 +13,9 @@ import {
   isValidElement,
 } from './ReactElement';
 import { Component, PureComponent } from './ReactBaseClasses';
+import { createRef } from './ReactCreateRef';
+import { createContext } from './ReactContext';
+import { forwardRef } from './ReactForwardRef';
 
 const Children = {
   map,
@@ -35,4 +38,7 @@ export {
   REACT_SUSPENSE_LIST_TYPE as SuspenseList,
   Component,
   PureComponent,
+  createRef,
+  forwardRef,
+  createContext,
 };

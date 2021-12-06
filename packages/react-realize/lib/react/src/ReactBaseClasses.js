@@ -7,23 +7,23 @@ export class Component {
     this.refs = {};
     this.updater = updater || ReactNoopUpdateQueue;
   }
-
-  isReactComponent = {};
-
-  setState(partialState, callback) {
-    this.updater.enqueueSetState(
-      this,
-      partialState,
-      callback,
-      'setState'
-    );
-  }
-
-  forceUpdate(callback) {
-    this.updater.enqueueForceUpdate(this, callback, 'forceUpdate');
-  }
 }
 
-export class PureComponent extends Component {
-  isPureReactComponent = true;
-}
+Component.prototype.isReactComponent = {};
+
+Component.prototype.setState = function (partialState, callback) {
+  this.updater.enqueueSetState(
+    this,
+    partialState,
+    callback,
+    'setState'
+  );
+};
+
+Component.prototype.forceUpdate = function (callback) {
+  this.updater.enqueueForceUpdate(this, callback, 'forceUpdate');
+};
+
+export class PureComponent extends Component {}
+
+PureComponent.prototype.isPureReactComponent = true;
