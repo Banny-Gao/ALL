@@ -14,8 +14,8 @@
 - 包含 forEach, map(children, **callback**, **context**), count, toArray, only 的对象
 - 核心是 mapIntoArray (递归)，
   - mappedChild = **callback**.call(**context**, child)
-  - 非 REACT_ELEMENT_TYPE 类型不作处理
-  - REACT_ELEMENT_TYPE 类型， 进行 cloneAndReplaceKey 转换生成新的 key，新的 key 标识出元素在树节点中的位置信息以及原来的 key 值
+  - 非 REACT_ELEMENT_TYPE 类型不作处理, isValidElement 判断
+  - REACT_ELEMENT_TYPE 类型， 由 cloneAndReplaceKey 接收 newKey 调用 ReactElement 返回新元素，，新的 key 标识出元素在树节点中的位置信息以及原来的 key 值
   - 将 children 树转成一维数组
 
 ```js
@@ -62,3 +62,7 @@ console.log(mappedChildren);
   10,
 ];
 ```
+
+- createElement: 初始化 ref, key, props, children， ReactElement 创建元素
+- createFactory: _createElement.bind(null, type);_
+- cloneElement: 与 createElement 不同的是, createElement 默认 owner 是 ReactCurrentOwner.current, 而 cloneElement 保留原，在传了 config.ref 的情况下才更新为 ReactCurrentOwner.current

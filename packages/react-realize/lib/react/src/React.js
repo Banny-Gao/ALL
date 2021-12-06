@@ -1,4 +1,10 @@
 import { forEach, map, count, toArray, only } from './ReactChildren';
+import {
+  createElement,
+  createFactory,
+  cloneElement,
+  isValidElement,
+} from './ReactElement';
 
 const Children = {
   map,
@@ -8,4 +14,10 @@ const Children = {
   only,
 };
 
-export { Children };
+export {
+  Children,
+  createElement,
+  createFactory,
+  cloneElement,
+  isValidElement,
+};
