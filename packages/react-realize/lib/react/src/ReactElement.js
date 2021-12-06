@@ -79,6 +79,8 @@ export const createFactory = (type) => {
 };
 
 export const cloneElement = (element, config, children) => {
+  let key = element.key;
+  let ref = element.ref;
   let propName;
   let owner = element._owner;
 

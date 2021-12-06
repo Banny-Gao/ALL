@@ -8,6 +8,7 @@
 
 - 使用 [Symbol.for](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Symbol/for) 定义了一些 react 类型
 - 暴露了 getIteratorFn, 获取 iterator 的方法
+- Fragment, Profiler, StrictMode, Suspense 以及 SuspenseList 只是 Symbol 类型标记, 非 REACT_ELEMENT_TYPE 类型，不会映射到 DOM
 
 ### Children
 
@@ -62,6 +63,8 @@ console.log(mappedChildren);
   10,
 ];
 ```
+
+### ReactElement
 
 - createElement: 初始化 ref, key, props, children， ReactElement 创建元素
 - createFactory: _createElement.bind(null, type);_

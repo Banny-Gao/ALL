@@ -14,13 +14,7 @@ export const REACT_SUSPENSE_LIST_TYPE = symbolFor(
 export const REACT_MEMO_TYPE = symbolFor('react.memo');
 export const REACT_LAZY_TYPE = symbolFor('react.lazy');
 export const REACT_SCOPE_TYPE = symbolFor('react.scope');
-export const REACT_DEBUG_TRACING_MODE_TYPE = symbolFor(
-  'react.debug_trace_mode'
-);
-export const REACT_OFFSCREEN_TYPE = symbolFor('react.offscreen');
-export const REACT_LEGACY_HIDDEN_TYPE = symbolFor(
-  'react.legacy_hidden'
-);
+
 export const REACT_CACHE_TYPE = symbolFor('react.cache');
 
 export const getIteratorFn = (iterable) => iterable[Symbol.iterator];

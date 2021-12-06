@@ -1,1 +1,1 @@
-export { Children } from './src/React';
+export * from './src/React';
