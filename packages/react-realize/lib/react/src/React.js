@@ -21,6 +21,18 @@ import { memo } from './ReactMemo';
 
 import { ReactSharedInternals } from './ReactSharedInternals';
 
+import {
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useContext,
+  useCallback,
+  useMemo,
+  useRef,
+  useImperativeHandle,
+  useReducer,
+} from './ReactHooks';
+
 const Children = {
   map,
   forEach,
@@ -48,4 +60,13 @@ export {
   lazy,
   memo,
   ReactSharedInternals as _BOOM_BOOM_BOOM,
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useContext,
+  useCallback,
+  useMemo,
+  useRef,
+  useImperativeHandle,
+  useReducer,
 };

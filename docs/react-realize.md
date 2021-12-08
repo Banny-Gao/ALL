@@ -91,3 +91,7 @@ console.log(mappedChildren);
 ### memo
 
 - memo: (type: Component, compare: (prevProps, nextProps) => boolean) => elementType: { $$typeof: REACT_MEMO_TYPE, type, compare: compare === undefined ? null : compare };
+
+### React Hooks
+
+- 调用 ReactCurrentDispatcher.current[hook]
