@@ -76,3 +76,14 @@ console.log(mappedChildren);
 - setState 执行 updater.enqueueSetState, 传入 this, partialState, callback
 - 标记 isReactComponent
 - PureComponent 标记 isPureComponent
+
+### createRef & forwardRef & createContext
+
+- createRef 即返回 Object.seal 处理过的 { current: null, };
+- forwardRef: (render: (props, ref) => ReactElement) => { $$typeof: REACT_FORWARD_REF_TYPE, render}
+- createContext: (defaultValue) => context: { $$typeof: REACT_CONTEXT_TYPE, Provider: { $$typeof: REACT_PROVIDER_TYPE, \_context: context }, Consumer: context }
+
+### lazy
+
+- 接收 factory: () => Promise<{ default: T }>
+- 返回 lazyType: { $$typeof: REACT_LAZY_TYPE, \_payload: payload: { \_status: Uninitialized, \_result: factory}, \_init: lazyInitializer }

@@ -16,6 +16,7 @@ import { Component, PureComponent } from './ReactBaseClasses';
 import { createRef } from './ReactCreateRef';
 import { createContext } from './ReactContext';
 import { forwardRef } from './ReactForwardRef';
+import { lazy } from './ReactLazy';
 
 const Children = {
   map,
@@ -41,4 +42,5 @@ export {
   createRef,
   forwardRef,
   createContext,
+  lazy,
 };
