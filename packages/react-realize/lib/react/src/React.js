@@ -17,6 +17,9 @@ import { createRef } from './ReactCreateRef';
 import { createContext } from './ReactContext';
 import { forwardRef } from './ReactForwardRef';
 import { lazy } from './ReactLazy';
+import { memo } from './ReactMemo';
+
+import { ReactSharedInternals } from './ReactSharedInternals';
 
 const Children = {
   map,
@@ -43,4 +46,6 @@ export {
   forwardRef,
   createContext,
   lazy,
+  memo,
+  ReactSharedInternals as _BOOM_BOOM_BOOM,
 };

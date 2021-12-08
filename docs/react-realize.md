@@ -87,3 +87,7 @@ console.log(mappedChildren);
 
 - 接收 factory: () => Promise<{ default: T }>
 - 返回 lazyType: { $$typeof: REACT_LAZY_TYPE, \_payload: payload: { \_status: Uninitialized, \_result: factory}, \_init: lazyInitializer }
+
+### memo
+
+- memo: (type: Component, compare: (prevProps, nextProps) => boolean) => elementType: { $$typeof: REACT_MEMO_TYPE, type, compare: compare === undefined ? null : compare };
