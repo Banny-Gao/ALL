@@ -46,3 +46,18 @@ export const useImperativeHandle = (ref, create, deps) => {
   const dispatcher = resolveDispatcher();
   return dispatcher.useImperativeHandle(ref, create, deps);
 };
+
+export const useTransition = () => {
+  const dispatcher = resolveDispatcher();
+  return dispatcher.useTransition();
+};
+
+export const useDeferredValue = (value) => {
+  const dispatcher = resolveDispatcher();
+  return dispatcher.useDeferredValue(value);
+};
+
+export const useId = () => {
+  const dispatcher = resolveDispatcher();
+  return dispatcher.useId();
+};

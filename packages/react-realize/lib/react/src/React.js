@@ -31,7 +31,12 @@ import {
   useRef,
   useImperativeHandle,
   useReducer,
+  useTransition,
+  useDeferredValue,
+  useId,
 } from './ReactHooks';
+
+import { startTransition } from './ReactStartTransition';
 
 const Children = {
   map,
@@ -69,4 +74,8 @@ export {
   useRef,
   useImperativeHandle,
   useReducer,
+  useTransition,
+  useDeferredValue,
+  useId,
+  startTransition,
 };
