@@ -12,10 +12,7 @@ class InlineChunkHtmlPlugin {
   }
 
   getInlinedTag(publicPath, assets, tag) {
-    if (
-      tag.tagName !== 'script' ||
-      !(tag.attributes && tag.attributes.src)
-    )
+    if (tag.tagName !== 'script' || !(tag.attributes && tag.attributes.src))
       return tag;
 
     const scriptName = publicPath
@@ -38,22 +35,16 @@ class InlineChunkHtmlPlugin {
     let publicPath = compiler.options.output.publicPath || '';
     if (publicPath && !publicPath.endsWith('/')) publicPath += '/';
 
-    compiler.hooks.compilation.tap(
-      'InlineChunkHtmlPlugin',
-      (compilation) => {
-        const tagFunction = (tag) =>
-          this.getInlinedTag(publicPath, compilation.assets, tag);
+    compiler.hooks.compilation.tap('InlineChunkHtmlPlugin', (compilation) => {
+      const tagFunction = (tag) =>
+        this.getInlinedTag(publicPath, compilation.assets, tag);
 
-        const hooks = this.htmlWebpackPlugin.getHooks(compilation);
-        hooks.alterAssetTagGroups.tap(
-          'InlineChunkHtmlPlugin',
-          (assets) => {
-            assets.headTags = assets.headTags.map(tagFunction);
-            assets.bodyTags = assets.bodyTags.map(tagFunction);
-          }
-        );
-      }
-    );
+      const hooks = this.htmlWebpackPlugin.getHooks(compilation);
+      hooks.alterAssetTagGroups.tap('InlineChunkHtmlPlugin', (assets) => {
+        assets.headTags = assets.headTags.map(tagFunction);
+        assets.bodyTags = assets.bodyTags.map(tagFunction);
+      });
+    });
   }
 }
 
@@ -64,25 +55,19 @@ class InterpolateHtmlPlugin {
   }
 
   apply(compiler) {
-    compiler.hooks.compilation.tap(
-      'InterpolateHtmlPlugin',
-      (compilation) => {
-        this.htmlWebpackPlugin
-          .getHooks(compilation)
-          .afterTemplateExecution.tap(
-            'InterpolateHtmlPlugin',
-            (data) => {
-              Object.keys(this.replacements).forEach((key) => {
-                const value = this.replacements[key];
-                data.html = data.html.replace(
-                  new RegExp(`%${escapeStringRegexp(key)}%`, 'g'),
-                  value
-                );
-              });
-            }
-          );
-      }
-    );
+    compiler.hooks.compilation.tap('InterpolateHtmlPlugin', (compilation) => {
+      this.htmlWebpackPlugin
+        .getHooks(compilation)
+        .afterTemplateExecution.tap('InterpolateHtmlPlugin', (data) => {
+          Object.keys(this.replacements).forEach((key) => {
+            const value = this.replacements[key];
+            data.html = data.html.replace(
+              new RegExp(`%${escapeStringRegexp(key)}%`, 'g'),
+              value
+            );
+          });
+        });
+    });
   }
 }
 
@@ -112,13 +97,8 @@ class ModuleScopePlugin {
 
         if (
           appSrc.every((src) => {
-            const relative = path.relative(
-              src,
-              compilation.context.issuer
-            );
-            return (
-              relative.startsWith('../') || relative.startsWith('..\\')
-            );
+            const relative = path.relative(src, compilation.context.issuer);
+            return relative.startsWith('../') || relative.startsWith('..\\');
           })
         )
           return callback();
@@ -138,10 +118,7 @@ class ModuleScopePlugin {
 
         if (
           appSrc.every((src) => {
-            const requestRelative = path.relative(
-              src,
-              compilationFullPath
-            );
+            const requestRelative = path.relative(src, compilationFullPath);
             return (
               requestRelative.startsWith('../') ||
               requestRelative.startsWith('..\\')
@@ -209,9 +186,7 @@ class ModuleNotFoundPlugin {
     if (origin === null) {
       const caseSensitivity =
         err.message &&
-        /\[CaseSensitivePathsPlugin\] `(.*?)` .* `(.*?)`/.exec(
-          err.message
-        );
+        /\[CaseSensitivePathsPlugin\] `(.*?)` .* `(.*?)`/.exec(err.message);
       if (caseSensitivity) {
         const [, incorrectPath, actualName] = caseSensitivity;
         const actualFile = this.getRelativePath(
@@ -245,9 +220,7 @@ class ModuleNotFoundPlugin {
           }.`,
         ];
       } else if (isFile) {
-        details = [
-          `Cannot find file '${target}' in '${relativeContext}'.`,
-        ];
+        details = [`Cannot find file '${target}' in '${relativeContext}'.`];
       } else {
         details = [err.message];
       }
@@ -268,12 +241,7 @@ class ModuleNotFoundPlugin {
     const { prettierError } = this;
     compiler.hooks.make.intercept({
       register(tap) {
-        if (
-          !(
-            tap.name === 'MultiEntryPlugin' ||
-            tap.name === 'EntryPlugin'
-          )
-        ) {
+        if (!(tap.name === 'MultiEntryPlugin' || tap.name === 'EntryPlugin')) {
           return tap;
         }
         return {
@@ -289,33 +257,30 @@ class ModuleNotFoundPlugin {
         };
       },
     });
-    compiler.hooks.normalModuleFactory.tap(
-      'ModuleNotFoundPlugin',
-      (nmf) => {
-        nmf.hooks.afterResolve.intercept({
-          register(tap) {
-            if (tap.name !== 'CaseSensitivePathsPlugin') {
-              return tap;
-            }
-            return {
-              ...tap,
-              fn: (compilation, callback) => {
-                tap.fn(compilation, (err, ...args) => {
-                  if (
-                    err &&
-                    err.message &&
-                    err.message.includes('CaseSensitivePathsPlugin')
-                  ) {
-                    err = prettierError(err);
-                  }
-                  callback(err, ...args);
-                });
-              },
-            };
-          },
-        });
-      }
-    );
+    compiler.hooks.normalModuleFactory.tap('ModuleNotFoundPlugin', (nmf) => {
+      nmf.hooks.afterResolve.intercept({
+        register(tap) {
+          if (tap.name !== 'CaseSensitivePathsPlugin') {
+            return tap;
+          }
+          return {
+            ...tap,
+            fn: (compilation, callback) => {
+              tap.fn(compilation, (err, ...args) => {
+                if (
+                  err &&
+                  err.message &&
+                  err.message.includes('CaseSensitivePathsPlugin')
+                ) {
+                  err = prettierError(err);
+                }
+                callback(err, ...args);
+              });
+            },
+          };
+        },
+      });
+    });
   }
 }
 

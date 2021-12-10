@@ -117,8 +117,7 @@ checkBrowsers(paths.appPath, isInteractive)
       console.log(chalk.green('Compiled successfully.\n'));
     },
     (err) => {
-      const tscCompileOnError =
-        process.env.TSC_COMPILE_ON_ERROR === 'true';
+      const tscCompileOnError = process.env.TSC_COMPILE_ON_ERROR === 'true';
       if (tscCompileOnError) {
         console.log(
           chalk.yellow(

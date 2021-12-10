@@ -156,10 +156,7 @@ const getPackageInfo = async (installPackage) => {
 
       await extractStream(stream, tmpdir);
 
-      const { name, version } = require(path.join(
-        tmpdir,
-        'package.json'
-      ));
+      const { name, version } = require(path.join(tmpdir, 'package.json'));
 
       cleanup();
       return { name, version };
@@ -186,9 +183,7 @@ const getPackageInfo = async (installPackage) => {
 
   if (installPackage.match(/.+@/))
     return {
-      name:
-        installPackage.charAt(0) +
-        installPackage.substr(1).split('@')[0],
+      name: installPackage.charAt(0) + installPackage.substr(1).split('@')[0],
       version: installPackage.split('@')[1],
     };
 
@@ -234,14 +229,7 @@ const checkIfOnline = (useYarn) =>
     });
   });
 
-const install = ({
-  root,
-  useYarn,
-  usePnp,
-  dependencies,
-  verbose,
-  isOnline,
-}) =>
+const install = ({ root, useYarn, usePnp, dependencies, verbose, isOnline }) =>
   new Promise((resolve, reject) => {
     let command;
     let args;
@@ -258,9 +246,7 @@ const install = ({
 
       if (!isOnline) {
         console.log(chalk.yellow('You appear to be offline.'));
-        console.log(
-          chalk.yellow('Falling back to the local Yarn cache.')
-        );
+        console.log(chalk.yellow('Falling back to the local Yarn cache.'));
         console.log();
       }
     } else {
@@ -277,9 +263,7 @@ const install = ({
 
       if (usePnp) {
         console.log(chalk.yellow("NPM doesn't support PnP."));
-        console.log(
-          chalk.yellow('Falling back to the regular installs.')
-        );
+        console.log(chalk.yellow('Falling back to the regular installs.'));
         console.log();
       }
     }
@@ -327,8 +311,7 @@ const checkNodeVersion = (packageName, root) => {
 };
 
 const getCacheIdentifier = (environment, packages) => {
-  let cacheIdentifier =
-    environment == null ? '' : environment.toString();
+  let cacheIdentifier = environment == null ? '' : environment.toString();
   for (const packageName of packages) {
     cacheIdentifier += `:${packageName}@`;
     try {

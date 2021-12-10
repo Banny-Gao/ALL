@@ -34,18 +34,12 @@ const executeNodeScript = ({ cwd, args }, data, source) =>
 
 const clearConsole = () => {
   process.stdout.write(
-    process.platform === 'win32'
-      ? '\x1B[2J\x1B[0f'
-      : '\x1B[2J\x1B[3J\x1B[H'
+    process.platform === 'win32' ? '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H'
   );
 };
 
 const getProcessIdOnPort = (port) =>
-  execFileSync(
-    'lsof',
-    [`-i:${port}`, '-P', '-t', '-sTCP:LISTEN'],
-    execOptions
-  )
+  execFileSync('lsof', [`-i:${port}`, '-P', '-t', '-sTCP:LISTEN'], execOptions)
     .split('\n')[0]
     .trim();
 
@@ -56,10 +50,10 @@ const getDirectoryOfProcessById = (processId) =>
   ).trim();
 
 const getProcessCommand = (processId) =>
-  execSync(
-    `ps -o command -p ${processId} | sed -n 2p`,
-    execOptions
-  ).replace(/\n$/, '');
+  execSync(`ps -o command -p ${processId} | sed -n 2p`, execOptions).replace(
+    /\n$/,
+    ''
+  );
 
 const getProcessForPort = (port) => {
   try {

@@ -12,20 +12,14 @@ const lazyInitializer = (payload) => {
 
     thenable.then(
       (moduleObject) => {
-        if (
-          payload._status === Pending ||
-          payload._status === Uninitialized
-        ) {
+        if (payload._status === Pending || payload._status === Uninitialized) {
           const resolved = payload;
           resolved._status = Resolved;
           resolved._result = moduleObject;
         }
       },
       (error) => {
-        if (
-          payload._status === Pending ||
-          payload._status === Uninitialized
-        ) {
+        if (payload._status === Pending || payload._status === Uninitialized) {
           const resolved = payload;
           resolved._status = Rejected;
           resolved._result = error;

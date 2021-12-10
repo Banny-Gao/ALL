@@ -12,8 +12,7 @@ const getAdditionalModulePaths = (options = {}) => {
 
   const baseUrlResolved = path.resolve(paths.appPath, baseUrl);
 
-  if (path.relative(paths.appNodeModules, baseUrlResolved) === '')
-    return null;
+  if (path.relative(paths.appNodeModules, baseUrlResolved) === '') return null;
 
   if (path.relative(paths.appSrc, baseUrlResolved) === '')
     return [paths.appSrc];
@@ -69,10 +68,7 @@ const getModules = () => {
     const ts = require(resolve.sync('typescript', {
       basedir: paths.appNodeModules,
     }));
-    config = ts.readConfigFile(
-      paths.appTsConfig,
-      ts.sys.readFile
-    ).config;
+    config = ts.readConfigFile(paths.appTsConfig, ts.sys.readFile).config;
   } else if (hasJsConfig) {
     config = require(paths.appJsConfig);
   }

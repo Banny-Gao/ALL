@@ -1,7 +1,4 @@
-import {
-  REACT_PROVIDER_TYPE,
-  REACT_CONTEXT_TYPE,
-} from '../../ReactSymbols';
+import { REACT_PROVIDER_TYPE, REACT_CONTEXT_TYPE } from '../../ReactSymbols';
 
 export const createContext = (defaultValue) => {
   const context = {

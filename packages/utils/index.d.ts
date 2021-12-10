@@ -26,10 +26,7 @@ export const getNodeSemver: () => string[];
 
 export const checkAppName: (name: string) => boolean;
 
-export const isSafeToCreateProjectIn: (
-  root: string,
-  name: string
-) => boolean;
+export const isSafeToCreateProjectIn: (root: string, name: string) => boolean;
 
 export const checkNpmCanReadCwd: () => boolean;
 

@@ -7,10 +7,7 @@ const join = require('path').join;
 const fs = require('fs');
 const mkdirp = require('mkdirp');
 
-const BUNDLE_SIZES_FILE_NAME = join(
-  __dirname,
-  '../build/bundle-sizes.json'
-);
+const BUNDLE_SIZES_FILE_NAME = join(__dirname, '../build/bundle-sizes.json');
 const prevBuildResults = fs.existsSync(BUNDLE_SIZES_FILE_NAME)
   ? require(BUNDLE_SIZES_FILE_NAME)
   : { bundleSizes: [] };
@@ -108,10 +105,7 @@ function printResults() {
     head: resultsHeaders.map((label) => chalk.gray.yellow(label)),
   });
 
-  const results = generateResultsArray(
-    currentBuildResults,
-    prevBuildResults
-  );
+  const results = generateResultsArray(currentBuildResults, prevBuildResults);
   results.forEach((result) => {
     table.push([
       chalk.white.bold(`${result.filename}  (${result.bundleType})`),

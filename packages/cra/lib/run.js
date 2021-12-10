@@ -80,9 +80,7 @@ const getTemplateInstallPackage = (template, originalDirectory) => {
     ) {
       templateToInstall = template;
     } else {
-      const packageMatch = template.match(
-        /^(@[^/]+\/)?([^@]+)?(@.+)?$/
-      );
+      const packageMatch = template.match(/^(@[^/]+\/)?([^@]+)?(@.+)?$/);
       const scope = packageMatch[1] || '';
       const templateName = packageMatch[2] || '';
       const version = packageMatch[3] || '';
@@ -107,9 +105,7 @@ const makeCaretRange = (dependencies, name) => {
   const version = dependencies[name];
 
   if (typeof version === 'undefined') {
-    console.error(
-      chalk.red(`Missing ${name} dependency in package.json`)
-    );
+    console.error(chalk.red(`Missing ${name} dependency in package.json`));
     process.exit(1);
   }
 
@@ -140,9 +136,7 @@ const setCaretRangeForRuntimeDeps = (packageName, root) => {
 
   const packageVersion = dependencies[packageName];
   if (typeof packageVersion === 'undefined') {
-    console.error(
-      chalk.red(`Unable to find ${packageName} in package.json`)
-    );
+    console.error(chalk.red(`Unable to find ${packageName} in package.json`));
     process.exit(1);
   }
 
@@ -180,9 +174,7 @@ module.exports = async ({
     ]);
 
     console.log(
-      chalk.cyan(
-        'Installing packages. This might take a couple of minutes.'
-      )
+      chalk.cyan('Installing packages. This might take a couple of minutes.')
     );
 
     const dependencies = [
@@ -204,9 +196,7 @@ module.exports = async ({
     console.log(
       `Installing ${chalk.cyan('react')}, ${chalk.cyan(
         'react-dom'
-      )}, and ${chalk.cyan(scriptsName)} with ${chalk.cyan(
-        templateName
-      )}...`
+      )}, and ${chalk.cyan(scriptsName)} with ${chalk.cyan(templateName)}...`
     );
     console.log();
 
@@ -223,9 +213,7 @@ module.exports = async ({
     setCaretRangeForRuntimeDeps(scriptsName, root);
 
     const pnpPath = path.resolve(process.cwd(), '.pnp.js');
-    const nodeArgs = fs.existsSync(pnpPath)
-      ? ['--require', pnpPath]
-      : [];
+    const nodeArgs = fs.existsSync(pnpPath) ? ['--require', pnpPath] : [];
 
     await executeNodeScript(
       {
@@ -244,18 +232,12 @@ module.exports = async ({
     if (reason.command) {
       console.log(`  ${chalk.cyan(reason.command)} has failed.`);
     } else {
-      console.log(
-        chalk.red('Unexpected error. Please report it as a bug:')
-      );
+      console.log(chalk.red('Unexpected error. Please report it as a bug:'));
       console.log(reason);
     }
     console.log();
 
-    const knownGeneratedFiles = [
-      'package.json',
-      'yarn.lock',
-      'node_modules',
-    ];
+    const knownGeneratedFiles = ['package.json', 'yarn.lock', 'node_modules'];
     const currentFiles = fs.readdirSync(path.join(root));
     currentFiles.forEach((file) => {
       knownGeneratedFiles.forEach((fileToMatch) => {

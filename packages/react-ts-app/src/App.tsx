@@ -26,8 +26,7 @@ export default () => {
         <p
           onClick={() =>
             setState((prevState) => {
-              const { showLazyComponent, lazyComponentLoadedCount } =
-                state;
+              const { showLazyComponent, lazyComponentLoadedCount } = state;
               const newCount = showLazyComponent
                 ? lazyComponentLoadedCount
                 : lazyComponentLoadedCount + 1;

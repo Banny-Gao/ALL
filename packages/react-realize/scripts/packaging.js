@@ -42,10 +42,7 @@ let entryPointsToHasBundle = new Map();
 for (const bundle of Bundles.bundles) {
   let hasBundle = entryPointsToHasBundle.get(bundle.entry);
   if (!hasBundle) {
-    entryPointsToHasBundle.set(
-      bundle.entry,
-      bundle.bundleTypes.length > 0
-    );
+    entryPointsToHasBundle.set(bundle.entry, bundle.bundleTypes.length > 0);
   }
 }
 

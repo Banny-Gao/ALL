@@ -28,9 +28,7 @@ const getClientEnvironment = require('./env');
 const paths = require('./paths');
 const modules = require('./modules');
 
-const reactRefreshRuntimeEntry = require.resolve(
-  'react-refresh/runtime'
-);
+const reactRefreshRuntimeEntry = require.resolve('react-refresh/runtime');
 const reactRefreshWebpackPluginRuntimeEntry = require.resolve(
   '@pmmmwh/react-refresh-webpack-plugin'
 );
@@ -39,19 +37,13 @@ const babelRuntimeEntryHelpers = require.resolve(
   '@babel/runtime/helpers/esm/assertThisInitialized',
   { paths: [babelRuntimeEntry] }
 );
-const babelRuntimeRegenerator = require.resolve(
-  '@babel/runtime/regenerator',
-  {
-    paths: [babelRuntimeEntry],
-  }
-);
+const babelRuntimeRegenerator = require.resolve('@babel/runtime/regenerator', {
+  paths: [babelRuntimeEntry],
+});
 
-const shouldInlineRuntimeChunk =
-  process.env.INLINE_RUNTIME_CHUNK !== 'false';
-const emitErrorsAsWarnings =
-  process.env.ESLINT_NO_DEV_ERRORS === 'true';
-const disableESLintPlugin =
-  process.env.DISABLE_ESLINT_PLUGIN === 'true';
+const shouldInlineRuntimeChunk = process.env.INLINE_RUNTIME_CHUNK !== 'false';
+const emitErrorsAsWarnings = process.env.ESLINT_NO_DEV_ERRORS === 'true';
+const disableESLintPlugin = process.env.DISABLE_ESLINT_PLUGIN === 'true';
 
 const imageInlineSizeLimit = parseInt(
   process.env.IMAGE_INLINE_SIZE_LIMIT || '10000',
@@ -122,9 +114,7 @@ module.exports = (webpackEnv) => {
               'postcss-normalize',
             ],
           },
-          sourceMap: isEnvProduction
-            ? shouldUseSourceMap
-            : isEnvDevelopment,
+          sourceMap: isEnvProduction ? shouldUseSourceMap : isEnvDevelopment,
         },
       },
     ].filter(Boolean);
@@ -133,9 +123,7 @@ module.exports = (webpackEnv) => {
         {
           loader: require.resolve('resolve-url-loader'),
           options: {
-            sourceMap: isEnvProduction
-              ? shouldUseSourceMap
-              : isEnvDevelopment,
+            sourceMap: isEnvProduction ? shouldUseSourceMap : isEnvDevelopment,
             root: paths.appSrc,
           },
         },
@@ -152,9 +140,7 @@ module.exports = (webpackEnv) => {
 
   return {
     target: ['browserslist'],
-    mode: isEnvProduction
-      ? 'production'
-      : isEnvDevelopment && 'development',
+    mode: isEnvProduction ? 'production' : isEnvDevelopment && 'development',
     bail: isEnvProduction,
     devtool: isEnvProduction
       ? shouldUseSourceMap
@@ -180,9 +166,7 @@ module.exports = (webpackEnv) => {
               .replace(/\\/g, '/')
         : isEnvDevelopment &&
           ((info) =>
-            path
-              .resolve(info.absoluteResourcePath)
-              .replace(/\\/g, '/')),
+            path.resolve(info.absoluteResourcePath).replace(/\\/g, '/')),
     },
     cache: {
       type: 'filesystem',
@@ -342,10 +326,7 @@ module.exports = (webpackEnv) => {
                   isEnvProduction
                     ? 'production'
                     : isEnvDevelopment && 'development',
-                  [
-                    'babel-plugin-named-asset-import',
-                    'babel-preset-react-app',
-                  ]
+                  ['babel-plugin-named-asset-import', 'babel-preset-react-app']
                 ),
                 cacheDirectory: true,
               },
@@ -357,9 +338,7 @@ module.exports = (webpackEnv) => {
               options: {
                 presets: [
                   [
-                    require.resolve(
-                      'babel-preset-react-app/dependencies'
-                    ),
+                    require.resolve('babel-preset-react-app/dependencies'),
                     { helpers: true },
                   ],
                 ],
@@ -369,10 +348,7 @@ module.exports = (webpackEnv) => {
                   isEnvProduction
                     ? 'production'
                     : isEnvDevelopment && 'development',
-                  [
-                    'babel-plugin-named-asset-import',
-                    'babel-preset-react-app',
-                  ]
+                  ['babel-plugin-named-asset-import', 'babel-preset-react-app']
                 ),
                 cacheDirectory: true,
               },
@@ -438,12 +414,7 @@ module.exports = (webpackEnv) => {
               ),
             },
             {
-              exclude: [
-                /^$/,
-                /\.(js|mjs|jsx|ts|tsx)$/,
-                /\.html$/,
-                /\.json$/,
-              ],
+              exclude: [/^$/, /\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
               type: 'asset/resource',
             },
           ],
@@ -473,9 +444,7 @@ module.exports = (webpackEnv) => {
       }),
       isEnvProduction &&
         shouldInlineRuntimeChunk &&
-        new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [
-          /runtime-.+[.]js/,
-        ]),
+        new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/runtime-.+[.]js/]),
       new InterpolateHtmlPlugin(HtmlWebpackPlugin, env.raw),
       new ModuleNotFoundPlugin(paths.appPath),
       new webpack.DefinePlugin(env.stringified),

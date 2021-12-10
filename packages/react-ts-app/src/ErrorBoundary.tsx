@@ -73,8 +73,6 @@ export class BuggyCounter extends Component<any, IBuggyCounterState> {
       // Simulate a JS error
       throw new Error('I crashed!');
     }
-    return (
-      <h1 onClick={() => this.handleClick()}>{this.state.counter}</h1>
-    );
+    return <h1 onClick={() => this.handleClick()}>{this.state.counter}</h1>;
   }
 }

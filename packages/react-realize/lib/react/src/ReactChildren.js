@@ -26,23 +26,13 @@ const escape = (key) => {
 const escapeUserProvidedKey = (text) => text.replace(/\/+/g, '$&/');
 
 const getElementKey = (element, index) => {
-  if (
-    typeof element === 'object' &&
-    element !== null &&
-    element.key != null
-  )
+  if (typeof element === 'object' && element !== null && element.key != null)
     return escape('' + element.key);
 
   return index.toString(36);
 };
 
-const mapIntoArray = (
-  children,
-  array,
-  escapedPrefix,
-  nameSoFar,
-  callback
-) => {
+const mapIntoArray = (children, array, escapedPrefix, nameSoFar, callback) => {
   const type = typeof children;
 
   if (type === 'undefined' || type === 'boolean') children = null;
@@ -70,9 +60,7 @@ const mapIntoArray = (
     let mappedChild = callback(child);
 
     const childKey =
-      nameSoFar === ''
-        ? SEPARATOR + getElementKey(child, 0)
-        : nameSoFar;
+      nameSoFar === '' ? SEPARATOR + getElementKey(child, 0) : nameSoFar;
 
     if (Array.isArray(mappedChild)) {
       let escapedChildKey = '';
@@ -86,8 +74,7 @@ const mapIntoArray = (
         mappedChild = cloneAndReplaceKey(
           mappedChild,
           escapedPrefix +
-            (mappedChild.key &&
-            (!child || child.key !== mappedChild.key)
+            (mappedChild.key && (!child || child.key !== mappedChild.key)
               ? escapeUserProvidedKey('' + mappedChild.key) + '/'
               : '') +
             childKey
@@ -173,8 +160,7 @@ const countChildren = (children) => {
   return n;
 };
 
-const toArray = (children) =>
-  mapChildren(children, (child) => child) || [];
+const toArray = (children) => mapChildren(children, (child) => child) || [];
 
 const onlyChild = (children) => {
   if (!isValidElement(children)) {

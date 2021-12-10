@@ -33,8 +33,7 @@ export const MeasureExample = () => {
       </h1>
       {rect && (
         <h2 onClick={() => clearInterval(intervalRef.current)}>
-          The above growing text is {~~rect.height}px tall,{' '}
-          {~~rect.width}
+          The above growing text is {~~rect.height}px tall, {~~rect.width}
           px long.
         </h2>
       )}

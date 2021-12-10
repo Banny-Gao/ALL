@@ -36,9 +36,7 @@ export const ContextExample = () => {
 
   return (
     <Provider value={theme}>
-      <Toolbar
-        onClick={() => setTheme(theme === light ? dark : light)}
-      />
+      <Toolbar onClick={() => setTheme(theme === light ? dark : light)} />
     </Provider>
   );
 };

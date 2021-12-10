@@ -12,12 +12,7 @@ export class Component {
 Component.prototype.isReactComponent = {};
 
 Component.prototype.setState = function (partialState, callback) {
-  this.updater.enqueueSetState(
-    this,
-    partialState,
-    callback,
-    'setState'
-  );
+  this.updater.enqueueSetState(this, partialState, callback, 'setState');
 };
 
 Component.prototype.forceUpdate = function (callback) {

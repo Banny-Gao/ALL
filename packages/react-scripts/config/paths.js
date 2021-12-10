@@ -2,8 +2,7 @@ const fs = require('fs-extra');
 const path = require('path');
 
 const appDirectory = fs.realpathSync(process.cwd());
-const resolveApp = (relativePath) =>
-  path.resolve(appDirectory, relativePath);
+const resolveApp = (relativePath) => path.resolve(appDirectory, relativePath);
 
 const buildPath = process.env.BUILD_PATH || 'build';
 
@@ -49,9 +48,7 @@ module.exports = {
   proxySetup: resolveApp('src/setupProxy.js'),
   appNodeModules: resolveApp('node_modules'),
   appWebpackCache: resolveApp('node_modules/.cache'),
-  appTsBuildInfoFile: resolveApp(
-    'node_modules/.cache/tsconfig.tsbuildinfo'
-  ),
+  appTsBuildInfoFile: resolveApp('node_modules/.cache/tsconfig.tsbuildinfo'),
   swSrc: resolveModule(resolveApp, 'src/service-worker'),
   publicPath: process.env.PUBLIC_URL || '/',
 };

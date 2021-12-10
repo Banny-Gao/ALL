@@ -20,9 +20,7 @@ const checkAppName = (appName) => {
     ].forEach((error) => {
       console.error(chalk.red(`  * ${error}`));
     });
-    console.error(
-      chalk.red('\nPlease choose a different project name.')
-    );
+    console.error(chalk.red('\nPlease choose a different project name.'));
 
     return false;
   }
@@ -66,9 +64,7 @@ const isSafeToCreateProjectIn = (root, name) => {
 
   if (conflicts.length > 0) {
     console.log(
-      `The directory ${chalk.green(
-        name
-      )} contains files that could conflict:`
+      `The directory ${chalk.green(name)} contains files that could conflict:`
     );
     console.log();
     for (const file of conflicts) {

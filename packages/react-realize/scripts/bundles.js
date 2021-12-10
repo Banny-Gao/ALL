@@ -31,19 +31,12 @@ const moduleTypes = {
   RECONCILER: 'RECONCILER',
 };
 
-const { ISOMORPHIC, RENDERER, RENDERER_UTILS, RECONCILER } =
-  moduleTypes;
+const { ISOMORPHIC, RENDERER, RENDERER_UTILS, RECONCILER } = moduleTypes;
 
 const bundles = [
   /******* Isomorphic *******/
   {
-    bundleTypes: [
-      UMD_DEV,
-      UMD_PROD,
-      UMD_PROFILING,
-      NODE_DEV,
-      NODE_PROD,
-    ],
+    bundleTypes: [UMD_DEV, UMD_PROD, UMD_PROFILING, NODE_DEV, NODE_PROD],
     moduleType: ISOMORPHIC,
     entry: 'react',
     minifyWithProdErrorCodes: false,
@@ -99,10 +92,7 @@ const bundles = [
           require.resolve('@babel/preset-flow'),
         ]),
         plugins: opts.plugins.concat([
-          [
-            require.resolve('@babel/plugin-transform-classes'),
-            { loose: true },
-          ],
+          [require.resolve('@babel/plugin-transform-classes'), { loose: true }],
         ]),
       }),
   },

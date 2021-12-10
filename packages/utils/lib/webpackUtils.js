@@ -40,8 +40,9 @@ const formatMessage = (message) => {
   lines = lines.filter((line) => !/Module [A-z ]+\(from/.test(line));
 
   lines = lines.map((line) => {
-    const parsingError =
-      /Line (\d+):(?:(\d+):)?\s*Parsing error: (.+)$/.exec(line);
+    const parsingError = /Line (\d+):(?:(\d+):)?\s*Parsing error: (.+)$/.exec(
+      line
+    );
     if (!parsingError) {
       return line;
     }
@@ -78,16 +79,12 @@ const formatMessage = (message) => {
       lines[0],
       lines[1]
         .replace('Error: ', '')
-        .replace(
-          'Module not found: Cannot find file:',
-          'Cannot find file:'
-        ),
+        .replace('Module not found: Cannot find file:', 'Cannot find file:'),
     ];
   }
 
   if (lines[1] && lines[1].match(/Cannot find module.+sass/)) {
-    lines[1] =
-      'To import Sass files, you first need to install sass.\n';
+    lines[1] = 'To import Sass files, you first need to install sass.\n';
     lines[1] +=
       'Run `npm install sass` or `yarn add sass` inside your workspace.';
   }
@@ -103,9 +100,7 @@ const formatMessage = (message) => {
 
   lines = lines.filter(
     (line, index, arr) =>
-      index === 0 ||
-      line.trim() !== '' ||
-      line.trim() !== arr[index - 1].trim()
+      index === 0 || line.trim() !== '' || line.trim() !== arr[index - 1].trim()
   );
 
   message = lines.join('\n');
@@ -181,9 +176,7 @@ const prepareUrls = (protocol, host, port, pathname = '/') => {
 
 const printInstructions = (appName, urls) => {
   console.log();
-  console.log(
-    `You can now view ${chalk.bold(appName)} in the browser.`
-  );
+  console.log(`You can now view ${chalk.bold(appName)} in the browser.`);
   console.log();
 
   if (urls.lanUrlForTerminal) {
@@ -250,8 +243,7 @@ const createCompiler = (
     });
 
     const messages = formatWebpackMessages(statsData);
-    const isSuccessful =
-      !messages.errors.length && !messages.warnings.length;
+    const isSuccessful = !messages.errors.length && !messages.warnings.length;
 
     isSuccessful && console.log(chalk.green('Compiled successfully!'));
     isSuccessful &&
@@ -333,17 +325,13 @@ const prepareProxy = (proxy, appPublicFolder, servedPathname) => {
   if (!proxy) return;
   if (typeof proxy !== 'string') {
     console.log(
-      chalk.red(
-        'When specified, "proxy" in package.json must be a string.'
-      )
+      chalk.red('When specified, "proxy" in package.json must be a string.')
     );
     console.log(
       chalk.red(`Instead, the type of "proxy" was "${typeof proxy}".`)
     );
     console.log(
-      chalk.red(
-        'Either remove "proxy" from package.json, or make it a string.'
-      )
+      chalk.red('Either remove "proxy" from package.json, or make it a string.')
     );
     process.exit(1);
   }
@@ -441,9 +429,9 @@ const choosePort = async (host, defaultPort) => {
     });
   } catch (err) {
     throw new Error(
-      `${chalk.red(
-        `Could not find an open port at ${chalk.bold(host)}.`
-      )}\n${`Network error message: ${err.message}` || err}\n`
+      `${chalk.red(`Could not find an open port at ${chalk.bold(host)}.`)}\n${
+        `Network error message: ${err.message}` || err
+      }\n`
     );
   }
 };
@@ -461,8 +449,7 @@ const getCSSModuleLocalIdent = (
     : '[name]';
 
   const hash = loaderUtils.getHashDigest(
-    path.posix.relative(context.rootContext, context.resourcePath) +
-      localName,
+    path.posix.relative(context.rootContext, context.resourcePath) + localName,
     'md5',
     'base64',
     5
@@ -478,10 +465,9 @@ const getCSSModuleLocalIdent = (
 };
 
 const base64SourceMap = (source) => {
-  const base64 = Buffer.from(
-    JSON.stringify(source.map()),
-    'utf8'
-  ).toString('base64');
+  const base64 = Buffer.from(JSON.stringify(source.map()), 'utf8').toString(
+    'base64'
+  );
   return `data:application/json;charset=utf-8;base64,${base64}`;
 };
 
@@ -501,9 +487,7 @@ const evalSourceMapMiddleware = (server) => (req, res, next) => {
     }
 
     const source = getSourceById(server, id);
-    const sourceMapURL = `//# sourceMappingURL=${base64SourceMap(
-      source
-    )}`;
+    const sourceMapURL = `//# sourceMappingURL=${base64SourceMap(source)}`;
     const sourceURL = `//# sourceURL=webpack-internal:///${module.id}`;
     res.end(`${source.source()}\n${sourceMapURL}\n${sourceURL}`);
   } else {
@@ -511,12 +495,11 @@ const evalSourceMapMiddleware = (server) => (req, res, next) => {
   }
 };
 
-const noopServiceWorkerMiddleware =
-  (servedPath) => (req, res, next) => {
-    if (req.url === path.join(servedPath, 'service-worker.js')) {
-      res.setHeader('Content-Type', 'text/javascript');
-      res.send(
-        `
+const noopServiceWorkerMiddleware = (servedPath) => (req, res, next) => {
+  if (req.url === path.join(servedPath, 'service-worker.js')) {
+    res.setHeader('Content-Type', 'text/javascript');
+    res.send(
+      `
           self.addEventListener('install', () => self.skipWaiting());
 
           self.addEventListener('activate', () => {
@@ -529,11 +512,11 @@ const noopServiceWorkerMiddleware =
             });
           });
         `
-      );
-    } else {
-      next();
-    }
-  };
+    );
+  } else {
+    next();
+  }
+};
 
 const redirectServedPathMiddleware = (servedPath) => {
   servedPath = servedPath.slice(0, -1);
@@ -546,10 +529,7 @@ const redirectServedPathMiddleware = (servedPath) => {
     ) {
       next();
     } else {
-      const newPath = path.join(
-        servedPath,
-        req.path !== '/' ? req.path : ''
-      );
+      const newPath = path.join(servedPath, req.path !== '/' ? req.path : '');
       res.redirect(newPath);
     }
   };
@@ -560,9 +540,7 @@ const readEnvFile = (file, type) => {
     throw new Error(
       `You specified ${chalk.cyan(
         type
-      )} in your env, but the file "${chalk.yellow(
-        file
-      )}" can't be found.`
+      )} in your env, but the file "${chalk.yellow(file)}" can't be found.`
     );
   }
   return fs.readFileSync(file);
@@ -574,9 +552,7 @@ const validateKeyAndCerts = ({ cert, key, keyFile, crtFile }) => {
     encrypted = crypto.publicEncrypt(cert, Buffer.from('test'));
   } catch (err) {
     throw new Error(
-      `The certificate "${chalk.yellow(crtFile)}" is invalid.\n${
-        err.message
-      }`
+      `The certificate "${chalk.yellow(crtFile)}" is invalid.\n${err.message}`
     );
   }
 

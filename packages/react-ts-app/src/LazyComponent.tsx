@@ -14,9 +14,7 @@ interface IShowTitleProps {
 
 type ShowTitleComponentType = ComponentType<IShowTitleProps>;
 
-const ShowTitle: FC<IShowTitleProps> = ({ title }) => (
-  <span>{title}</span>
-);
+const ShowTitle: FC<IShowTitleProps> = ({ title }) => <span>{title}</span>;
 
 const factory = () =>
   new Promise<{ default: ShowTitleComponentType }>((resolve) => {

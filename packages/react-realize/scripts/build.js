@@ -88,16 +88,10 @@ const babelPlugins = [
   ],
   '@babel/plugin-transform-for-of',
   // TODO: Remove array spread from the source. Prefer .apply instead.
-  [
-    '@babel/plugin-transform-spread',
-    { loose: true, useBuiltIns: true },
-  ],
+  ['@babel/plugin-transform-spread', { loose: true, useBuiltIns: true }],
   '@babel/plugin-transform-parameters',
   // TODO: Remove array destructuring from the source. Requires runtime.
-  [
-    '@babel/plugin-transform-destructuring',
-    { loose: true, useBuiltIns: true },
-  ],
+  ['@babel/plugin-transform-destructuring', { loose: true, useBuiltIns: true }],
 ];
 
 const babelToES5Plugins = [
@@ -106,10 +100,7 @@ const babelToES5Plugins = [
   '@babel/plugin-transform-block-scoped-functions',
   '@babel/plugin-transform-shorthand-properties',
   '@babel/plugin-transform-computed-properties',
-  [
-    '@babel/plugin-transform-block-scoping',
-    { throwIfClosureRequired: true },
-  ],
+  ['@babel/plugin-transform-block-scoping', { throwIfClosureRequired: true }],
 ];
 
 function getBabelConfig(updateBabelOptions, isDevelopment) {
@@ -247,9 +238,7 @@ function getPlugins(
       __DEV__: isProduction ? 'false' : 'true',
       __PROFILE__: isProfiling || !isProduction ? 'true' : 'false',
       __UMD__: isUMDBundle ? 'true' : 'false',
-      'process.env.NODE_ENV': isProduction
-        ? "'production'"
-        : "'development'",
+      'process.env.NODE_ENV': isProduction ? "'production'" : "'development'",
       __EXPERIMENTAL__,
       // Enable forked reconciler.
       // NOTE: I did not put much thought into how to configure this.
@@ -265,11 +254,9 @@ function getPlugins(
         const currentSizes = Stats.currentBuildResults.bundleSizes;
         const recordIndex = currentSizes.findIndex(
           (record) =>
-            record.filename === filename &&
-            record.bundleType === bundleType
+            record.filename === filename && record.bundleType === bundleType
         );
-        const index =
-          recordIndex !== -1 ? recordIndex : currentSizes.length;
+        const index = recordIndex !== -1 ? recordIndex : currentSizes.length;
         currentSizes[index] = {
           filename,
           bundleType,
@@ -283,8 +270,7 @@ function getPlugins(
 }
 
 function shouldSkipBundle(bundle, bundleType) {
-  const shouldSkipBundleType =
-    bundle.bundleTypes.indexOf(bundleType) === -1;
+  const shouldSkipBundleType = bundle.bundleTypes.indexOf(bundleType) === -1;
   if (shouldSkipBundleType) {
     return true;
   }
@@ -339,8 +325,7 @@ async function createBundle(bundle, bundleType) {
 
   const filename = getFilename(bundle, bundleType);
   const logKey =
-    chalk.white.bold(filename) +
-    chalk.dim(` (${bundleType.toLowerCase()})`);
+    chalk.white.bold(filename) + chalk.dim(` (${bundleType.toLowerCase()})`);
   const format = getFormat(bundleType);
   const packageName = Packaging.getPackageName(bundle.entry);
 
@@ -382,14 +367,10 @@ async function createBundle(bundle, bundleType) {
     watcher.on('event', async (event) => {
       switch (event.code) {
         case 'BUNDLE_START':
-          console.log(
-            `${chalk.bgYellow.black(' BUILDING ')} ${logKey}`
-          );
+          console.log(`${chalk.bgYellow.black(' BUILDING ')} ${logKey}`);
           break;
         case 'BUNDLE_END':
-          console.log(
-            `${chalk.bgGreen.black(' COMPLETE ')} ${logKey}\n`
-          );
+          console.log(`${chalk.bgGreen.black(' COMPLETE ')} ${logKey}\n`);
           break;
         case 'ERROR':
         case 'FATAL':
@@ -419,9 +400,7 @@ function handleRollupError(error) {
     return;
   }
   console.error(
-    `\x1b[31m-- ${error.code}${
-      error.plugin ? ` (${error.plugin})` : ''
-    } --`
+    `\x1b[31m-- ${error.code}${error.plugin ? ` (${error.plugin})` : ''} --`
   );
   console.error(error.stack);
   if (error.loc && error.loc.file) {

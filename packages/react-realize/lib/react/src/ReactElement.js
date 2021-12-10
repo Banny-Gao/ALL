@@ -102,10 +102,7 @@ export const cloneElement = (element, config, children) => {
         hasOwnProperty.call(config, propName) &&
         !Object.hasOwnProperty.call(RESERVED_PROPS, propName)
       ) {
-        if (
-          config[propName] === undefined &&
-          defaultProps !== undefined
-        ) {
+        if (config[propName] === undefined && defaultProps !== undefined) {
           props[propName] = defaultProps[propName];
         } else {
           props[propName] = config[propName];

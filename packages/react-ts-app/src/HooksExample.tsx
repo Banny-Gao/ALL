@@ -34,9 +34,7 @@ const ThemeText = () => {
     [theme.color]
   );
   const memoriedButton = useMemo(
-    () => (
-      <button onClick={() => theme.setColor('red')}>toggle red</button>
-    ),
+    () => <button onClick={() => theme.setColor('red')}>toggle red</button>,
     [theme.color]
   );
 
@@ -102,9 +100,7 @@ export const HooksExample: FC = () => {
 
   return (
     <>
-      <button
-        onClick={() => setState((prevState) => (prevState >>> 0) + 1)}
-      >
+      <button onClick={() => setState((prevState) => (prevState >>> 0) + 1)}>
         {clickCount1}
       </button>
       <button
@@ -118,13 +114,9 @@ export const HooksExample: FC = () => {
         {clickCount2}
       </button>
       <button>
-        <span onClick={() => dispatch({ type: ACTIONS.decrement })}>
-          -
-        </span>
+        <span onClick={() => dispatch({ type: ACTIONS.decrement })}>-</span>
         {store.count}
-        <span onClick={() => dispatch({ type: ACTIONS.increment })}>
-          +
-        </span>
+        <span onClick={() => dispatch({ type: ACTIONS.increment })}>+</span>
       </button>
 
       <br />

@@ -131,8 +131,7 @@ const startBrowserProcess = (browser, url, args) => {
     }
   }
 
-  if (process.platform === 'darwin' && browser === 'open')
-    browser = undefined;
+  if (process.platform === 'darwin' && browser === 'open') browser = undefined;
 
   if (typeof browser === 'string' && args.length > 0)
     browser = [browser].concat(args);

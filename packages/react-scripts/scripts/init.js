@@ -10,13 +10,7 @@ const os = require('os');
 
 const { defaultBrowsers, tryGitInit } = require('utils');
 
-module.exports = (
-  root,
-  appName,
-  verbose,
-  originalDirectory,
-  templateName
-) => {
+module.exports = (root, appName, verbose, originalDirectory, templateName) => {
   const appPackage = require(path.join(root, 'package.json'));
   const useYarn = fs.existsSync(path.join(root, 'yarn.lock'));
 
@@ -48,8 +42,7 @@ module.exports = (
   const templateJsonPath = path.join(templatePath, 'template.json');
 
   let templateJson = {};
-  if (fs.existsSync(templateJsonPath))
-    templateJson = require(templateJsonPath);
+  if (fs.existsSync(templateJsonPath)) templateJson = require(templateJsonPath);
 
   const templatePackage = templateJson.package || {};
   const templatePackageBlacklist = [
@@ -126,10 +119,7 @@ module.exports = (
   }
   if (useYarn) {
     try {
-      const readme = fs.readFileSync(
-        path.join(root, 'README.md'),
-        'utf8'
-      );
+      const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
       fs.writeFileSync(
         path.join(root, 'README.md'),
         readme.replace(/(npm run |npm )/g, 'yarn '),
@@ -225,10 +215,7 @@ module.exports = (
   }
 
   let cdpath;
-  if (
-    originalDirectory &&
-    path.join(originalDirectory, appName) === root
-  ) {
+  if (originalDirectory && path.join(originalDirectory, appName) === root) {
     cdpath = appName;
   } else {
     cdpath = root;

@@ -7,13 +7,11 @@ import React, {
   RefObject,
 } from 'react';
 
-const FancyButton = forwardRef<HTMLInputElement>(
-  ({ children }, ref) => (
-    <input ref={ref} placeholder="click the lateral button">
-      {children}
-    </input>
-  )
-);
+const FancyButton = forwardRef<HTMLInputElement>(({ children }, ref) => (
+  <input ref={ref} placeholder="click the lateral button">
+    {children}
+  </input>
+));
 
 interface ICustomRef extends HTMLInputElement {
   focus: () => void;
@@ -35,10 +33,7 @@ const FancyInput = forwardRef<ICustomRef>(({ children }, ref) => {
   );
 
   return (
-    <input
-      ref={inputRef}
-      placeholder="custom ref by useImperativeHandle"
-    >
+    <input ref={inputRef} placeholder="custom ref by useImperativeHandle">
       {children}
     </input>
   );
