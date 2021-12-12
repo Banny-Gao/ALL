@@ -5,3 +5,4 @@ declare module '*.svg' {
 }
 
 declare module 'react-realize/lib/react';
+declare module 'react-realize/lib/react-dom';

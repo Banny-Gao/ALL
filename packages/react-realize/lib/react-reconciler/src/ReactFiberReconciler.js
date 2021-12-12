@@ -1,4 +1,5 @@
 import { unbatchedUpdates } from './ReactFiberWorkLoop';
+import { createFiberRoot } from './ReactFiberRoot';
 
 export { unbatchedUpdates };
 
@@ -10,3 +11,6 @@ export const updateContainer = (
   parentComponent,
   callback
 ) => {};
+
+export const createContainer = (containerInfo, tag, hydrate) =>
+  createFiberRoot(containerInfo, tag, hydrate);
