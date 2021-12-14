@@ -1,1 +1,5 @@
-console.log(1);
+import * as Scheduler from './src/Scheduler';
+
+export * from './src/Scheduler';
+
+export default Scheduler;

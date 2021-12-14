@@ -1,7 +1,15 @@
 import { DOCUMENT_NODE } from '../../../HTMLNodeType';
-import { IS_NON_DELEGATED } from './EventSystemFlags';
+import { IS_NON_DELEGATED, IS_CAPTURE_PHASE } from './EventSystemFlags';
 
 import { getEventListenerSet } from '../client/ReactDOMComponentTree';
+import { allNativeEvents } from './EventRegistry';
+import { createEventListenerWrapperWithPriority } from './ReactDOMEventListener';
+import {
+  addEventCaptureListener,
+  addEventBubbleListener,
+  addEventBubbleListenerWithPassiveFlag,
+  addEventCaptureListenerWithPassiveFlag,
+} from './EventListener';
 
 const listeningMarker = '_reactListening' + Math.random().toString(36).slice(2);
 
@@ -48,9 +56,51 @@ const addTrappedEventListener = (
   targetContainer,
   domEventName,
   eventSystemFlags,
-  isCapturePhaseListener,
-  isDeferredListenerForLegacyFBSupport
-) => {};
+  isCapturePhaseListener
+) => {
+  const listener = createEventListenerWrapperWithPriority(
+    targetContainer,
+    domEventName,
+    eventSystemFlags
+  );
+  let isPassiveListener;
+
+  if (
+    domEventName === 'touchstart' ||
+    domEventName === 'touchmove' ||
+    domEventName === 'wheel'
+  ) {
+    isPassiveListener = true;
+  }
+
+  if (isCapturePhaseListener) {
+    if (isPassiveListener !== undefined) {
+      addEventCaptureListenerWithPassiveFlag(
+        targetContainer,
+        domEventName,
+        listener,
+        isPassiveListener
+      );
+    } else {
+      addEventCaptureListener(targetContainer, domEventName, listener);
+    }
+  } else {
+    if (isPassiveListener !== undefined) {
+      addEventBubbleListenerWithPassiveFlag(
+        targetContainer,
+        domEventName,
+        listener,
+        isPassiveListener
+      );
+    } else {
+      unsubscribeListener = addEventBubbleListener(
+        targetContainer,
+        domEventName,
+        listener
+      );
+    }
+  }
+};
 
 export const listenToNativeEvent = (
   domEventName,
@@ -109,5 +159,7 @@ export const listenToAllSupportedEvents = (rootContainerElement) => {
     if (!nonDelegatedEvents.has(domEventName)) {
       listenToNativeEvent(domEventName, false, rootContainerElement, null);
     }
+
+    listenToNativeEvent(domEventName, true, rootContainerElement, null);
   });
 };
