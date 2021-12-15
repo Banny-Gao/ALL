@@ -66,5 +66,7 @@ module.exports = {
     'max-classes-per-file': 'off',
     'no-underscore-dangle': 'off',
     'no-nested-ternary': 'off',
+    'no-unmodified-loop-condition': 'off',
+    camelcase: 'off',
   },
 };

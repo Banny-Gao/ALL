@@ -1,16 +1,72 @@
-import { unbatchedUpdates } from './ReactFiberWorkLoop';
+import {
+  unbatchedUpdates,
+  requestEventTime,
+  requestUpdateLane,
+} from './ReactFiberWorkLoop';
 import { createFiberRoot } from './ReactFiberRoot';
+import {
+  emptyContextObject,
+  findCurrentUnmaskedContext,
+  isContextProvider,
+  processChildContext,
+} from './ReactFiberContext';
+import { ClassComponent } from './ReactWorkTags';
+import { createUpdate, enqueueUpdate } from './ReactUpdateQueue';
 
-export { unbatchedUpdates };
+import { get as getInstance } from '../../ReactInstanceMap';
 
 export const getPublicRootInstance = (container) => {};
+
+const getContextForSubtree = (parentComponent) => {
+  if (!parentComponent) {
+    return emptyContextObject;
+  }
+
+  const fiber = getInstance(parentComponent);
+  const parentContext = findCurrentUnmaskedContext(fiber);
+
+  if (fiber.tag === ClassComponent) {
+    const Component = fiber.type;
+    if (isContextProvider(Component)) {
+      return processChildContext(fiber, Component, parentContext);
+    }
+  }
+
+  return parentContext;
+};
 
 export const updateContainer = (
   element,
   container,
   parentComponent,
   callback
-) => {};
+) => {
+  const current = container.current;
+  const eventTime = requestEventTime();
+
+  const lane = requestUpdateLane(current);
+
+  const context = getContextForSubtree(parentComponent);
+
+  if (container.context === null) {
+    container.context = context;
+  } else {
+    container.pendingContext = context;
+  }
+
+  const update = createUpdate(eventTime, lane);
+
+  update.payload = { element };
+
+  callback = callback === undefined ? null : callback;
+
+  enqueueUpdate(current, update);
+  scheduleUpdateOnFiber(current, lane, eventTime);
+
+  return lane;
+};
 
 export const createContainer = (containerInfo, tag, hydrate) =>
   createFiberRoot(containerInfo, tag, hydrate);
+
+export { unbatchedUpdates };

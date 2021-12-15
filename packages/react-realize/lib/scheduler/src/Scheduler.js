@@ -186,6 +186,8 @@ const scheduleCallback = (priorityLevel, callback, options) => {
   return newTask;
 };
 
+const getCurrentPriorityLevel = () => currentPriorityLevel;
+
 export {
   cancelCallback,
   ImmediatePriority,
@@ -195,4 +197,5 @@ export {
   LowPriority,
   runWithPriority,
   scheduleCallback,
+  getCurrentPriorityLevel,
 };

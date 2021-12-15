@@ -5,10 +5,9 @@ import {
   StrictMode,
   NoMode,
 } from './ReactTypeOfMode';
-
 import { HostRoot } from './ReactWorkTags';
-
 import { NoLanes } from './ReactFiberLane';
+import { NoFlags } from './ReactFiberFlags';
 
 class FiberNode {
   constructor(tag, pendingProps, key, mode) {
@@ -65,4 +64,56 @@ export const createHostRootFiber = (tag) => {
   }
 
   return createFiber(HostRoot, null, null, mode);
+};
+
+export const createWorkInProgress = (current, pendingProps) => {
+  let workInProgress = current.alternate;
+
+  if (workInProgress === null) {
+    workInProgress = createFiber(
+      current.tag,
+      pendingProps,
+      current.key,
+      current.mode
+    );
+    workInProgress.elementType = current.elementType;
+    workInProgress.type = current.type;
+    workInProgress.stateNode = current.stateNode;
+
+    workInProgress.alternate = current;
+    current.alternate = workInProgress;
+  } else {
+    workInProgress.pendingProps = pendingProps;
+
+    workInProgress.type = current.type;
+
+    workInProgress.flags = NoFlags;
+
+    workInProgress.nextEffect = null;
+    workInProgress.firstEffect = null;
+    workInProgress.lastEffect = null;
+  }
+
+  workInProgress.childLanes = current.childLanes;
+  workInProgress.lanes = current.lanes;
+
+  workInProgress.child = current.child;
+  workInProgress.memoizedProps = current.memoizedProps;
+  workInProgress.memoizedState = current.memoizedState;
+  workInProgress.updateQueue = current.updateQueue;
+
+  const currentDependencies = current.dependencies;
+  workInProgress.dependencies =
+    currentDependencies === null
+      ? null
+      : {
+          lanes: currentDependencies.lanes,
+          firstContext: currentDependencies.firstContext,
+        };
+
+  workInProgress.sibling = current.sibling;
+  workInProgress.index = current.index;
+  workInProgress.ref = current.ref;
+
+  return workInProgress;
 };
