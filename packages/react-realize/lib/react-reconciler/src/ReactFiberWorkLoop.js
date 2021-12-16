@@ -173,7 +173,8 @@ const checkForNestedUpdates = () => {
   if (nestedUpdateCount > NESTED_UPDATE_LIMIT) {
     nestedUpdateCount = 0;
     rootWithNestedUpdates = null;
-    throw new Error(
+    invariant(
+      false,
       'Maximum update depth exceeded. This can happen when a component ' +
         'repeatedly calls setState inside componentWillUpdate or ' +
         'componentDidUpdate. React limits the number of nested updates to ' +
@@ -184,6 +185,7 @@ const checkForNestedUpdates = () => {
 
 const markUpdateLaneFromFiberToRoot = (sourceFiber, lane) => {
   sourceFiber.lanes = mergeLanes(sourceFiber.lanes, lane);
+  let { alternate } = sourceFiber;
   if (alternate !== null) {
     alternate.lanes = mergeLanes(alternate.lanes, lane);
   }

@@ -2,6 +2,7 @@ import {
   unbatchedUpdates,
   requestEventTime,
   requestUpdateLane,
+  scheduleUpdateOnFiber,
 } from './ReactFiberWorkLoop';
 import { createFiberRoot } from './ReactFiberRoot';
 import {
@@ -15,7 +16,14 @@ import { createUpdate, enqueueUpdate } from './ReactUpdateQueue';
 
 import { get as getInstance } from '../../ReactInstanceMap';
 
-export const getPublicRootInstance = (container) => {};
+export const getPublicRootInstance = (container) => {
+  const containerFiber = container.current;
+  if (!containerFiber.child) {
+    return null;
+  }
+
+  return containerFiber.child.stateNode;
+};
 
 const getContextForSubtree = (parentComponent) => {
   if (!parentComponent) {
