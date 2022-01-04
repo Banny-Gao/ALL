@@ -7,3 +7,5 @@ export const resetContextDependencies = () => {
   lastContextDependency = null;
   lastContextWithAllBitsObserved = null;
 };
+
+export const readContext = (context, observedBits) => {};

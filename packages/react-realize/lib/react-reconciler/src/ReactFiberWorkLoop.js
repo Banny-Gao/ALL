@@ -98,8 +98,11 @@ let workInProgressRootUpdatedLanes = NoLanes;
 let workInProgressRootExitStatus = RootIncomplete;
 let workInProgressRootRenderLanes = NoLanes;
 let workInProgressRootPingedLanes = NoLanes;
+let workInProgressRootSkippedLanes = NoLanes;
 
 let subtreeRenderLanes = NoLanes;
+
+let workInProgressRootFatalError = null;
 
 let pendingPassiveEffectsRenderPriority = NoSchedulerPriority;
 
@@ -257,8 +260,10 @@ const prepareFreshStack = (root, lanes) => {
       interruptedWork = interruptedWork.return;
     }
   }
+
   workInProgressRoot = root;
   workInProgress = createWorkInProgress(root.current, null);
+
   workInProgressRootRenderLanes =
     subtreeRenderLanes =
     workInProgressRootIncludedLanes =
@@ -500,11 +505,7 @@ export const scheduleUpdateOnFiber = (fiber, lane, eventTime) => {
     ) {
       performSyncWorkOnRoot(root);
     } else {
-      ensureRootIsScheduled(root, eventTime);
-      if (executionContext === NoContext) {
-        resetRenderTimer();
-        flushSyncCallbackQueue();
-      }
+      //
     }
   }
 };
