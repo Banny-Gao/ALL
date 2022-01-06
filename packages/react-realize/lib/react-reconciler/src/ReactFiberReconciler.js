@@ -52,7 +52,7 @@ export const updateContainer = (
   const current = container.current;
   const eventTime = requestEventTime();
 
-  const lane = requestUpdateLane(current);
+  const lane = requestUpdateLane(current); // SyncLane: 1
 
   const context = getContextForSubtree(parentComponent);
 
@@ -69,6 +69,8 @@ export const updateContainer = (
   callback = callback === undefined ? null : callback;
 
   enqueueUpdate(current, update);
+  console.log('updateContainer>enqueueUpdate: current', current);
+
   scheduleUpdateOnFiber(current, lane, eventTime);
 
   return lane;

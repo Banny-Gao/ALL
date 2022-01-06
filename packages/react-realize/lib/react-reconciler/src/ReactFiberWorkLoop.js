@@ -114,6 +114,8 @@ export const unbatchedUpdates = (fn, a) => {
   executionContext &= BatchedContext;
   executionContext |= LegacyUnbatchedContext;
 
+  // executionContext: 8, prevExecutionContext: 0
+
   try {
     return fn(a);
   } finally {
@@ -465,14 +467,14 @@ const performSyncWorkOnRoot = (root) => {
     exitStatus = renderRootSync(root, lanes);
   }
 
-  if (root.tag !== LegacyRoot && exitStatus === RootErrored) {
-    executionContext |= RetryAfterError;
+  // if (root.tag !== LegacyRoot && exitStatus === RootErrored) {
+  //   executionContext |= RetryAfterError;
 
-    if (root.hydrate) {
-      root.hydrate = false;
-      clearContainer(root.containerInfo);
-    }
-  }
+  //   if (root.hydrate) {
+  //     root.hydrate = false;
+  //     clearContainer(root.containerInfo);
+  //   }
+  // }
 };
 
 export const scheduleUpdateOnFiber = (fiber, lane, eventTime) => {
