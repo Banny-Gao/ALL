@@ -1,11 +1,143 @@
 import { NoLanes, includesSomeLane } from './ReactFiberLane';
-import { hasContextChanged } from './ReactFiberContext';
-import { NoFlags, ForceUpdateForLegacySuspense } from './ReactFiberFlags';
+import {
+  hasContextChanged,
+  pushTopLevelContextObject,
+} from './ReactFiberContext';
+import {
+  NoFlags,
+  ForceUpdateForLegacySuspense,
+  Placement,
+  Hydrating,
+} from './ReactFiberFlags';
 import { HostRoot } from './ReactWorkTags';
+import { pushHostContainer } from './ReactFiberHostContext';
+import { cloneUpdateQueue, processUpdateQueue } from './ReactUpdateQueue';
+import {
+  resetHydrationState,
+  enterHydrationState,
+} from './ReactFiberHydrationContext';
+import { markSkippedUpdateLanes } from './ReactFiberWorkLoop';
+import {
+  cloneChildFibers,
+  mountChildFibers,
+  reconcileChildFibers,
+} from './ReactChildFiber';
+import { setWorkInProgressVersion } from './ReactMutableSource';
+
+const invariant = require('invariant');
 
 let didReceiveUpdate = false;
 
-const updateHostRoot = (current, workInProgress, renderLanes) => {};
+const pushHostRootContext = (workInProgress) => {
+  const root = workInProgress.stateNode;
+  if (root.pendingContext) {
+    pushTopLevelContextObject(
+      workInProgress,
+      root.pendingContext,
+      root.pendingContext !== root.context
+    );
+  } else if (root.context) {
+    pushTopLevelContextObject(workInProgress, root.context, false);
+  }
+
+  pushHostContainer(workInProgress, root.containerInfo);
+};
+
+const bailoutOnAlreadyFinishedWork = (current, workInProgress, renderLanes) => {
+  if (current !== null) workInProgress.dependencies = current.dependencies;
+
+  markSkippedUpdateLanes(workInProgress.lanes);
+
+  if (!includesSomeLane(renderLanes, workInProgress.childLanes)) return null;
+  cloneChildFibers(current, workInProgress);
+
+  return workInProgress.child;
+};
+
+const reconcileChildren = (
+  current,
+  workInProgress,
+  nextChildren,
+  renderLanes
+) => {
+  if (current === null) {
+    workInProgress.child = mountChildFibers(
+      workInProgress,
+      null,
+      nextChildren,
+      renderLanes
+    );
+  } else {
+    workInProgress.child = reconcileChildFibers(
+      workInProgress,
+      current.child,
+      nextChildren,
+      renderLanes
+    );
+  }
+};
+
+const updateHostRoot = (current, workInProgress, renderLanes) => {
+  pushHostRootContext(workInProgress);
+  const updateQueue = workInProgress.updateQueue;
+  invariant(
+    current !== null && updateQueue !== null,
+    'If the root does not have an updateQueue, we should have already ' +
+      'bailed out. This error is likely caused by a bug in React. Please ' +
+      'file an issue.'
+  );
+
+  const nextProps = workInProgress.pendingProps;
+  const prevState = workInProgress.memoizedState;
+  const prevChildren = prevState !== null ? prevState.element : null;
+  cloneUpdateQueue(current, workInProgress);
+  processUpdateQueue(workInProgress, nextProps, null, renderLanes);
+
+  const nextState = workInProgress.memoizedState;
+  const nextChildren = nextState.element;
+
+  if (nextChildren === prevChildren) {
+    resetHydrationState();
+    return bailoutOnAlreadyFinishedWork(current, workInProgress, renderLanes);
+  }
+
+  const root = workInProgress.stateNode;
+
+  if (root.hydrate && enterHydrationState(workInProgress)) {
+    const mutableSourceEagerHydrationData =
+      root.mutableSourceEagerHydrationData;
+    if (mutableSourceEagerHydrationData != null) {
+      for (let i = 0; i < mutableSourceEagerHydrationData.length; i += 2) {
+        const mutableSource = mutableSourceEagerHydrationData[i];
+        const version = mutableSourceEagerHydrationData[i + 1];
+        setWorkInProgressVersion(mutableSource, version);
+      }
+    }
+
+    const child = mountChildFibers(
+      workInProgress,
+      null,
+      nextChildren,
+      renderLanes
+    );
+    workInProgress.child = child;
+
+    let node = child;
+    while (node) {
+      node.flags = (node.flags & ~Placement) | Hydrating;
+      node = node.sibling;
+    }
+  } else {
+    reconcileChildren(current, workInProgress, nextChildren, renderLanes);
+    resetHydrationState();
+  }
+
+  console.log(workInProgress);
+
+  return null;
+
+  // return workInProgress.child;
+};
 
 const beginWork = (current, workInProgress, renderLanes) => {
   const updateLanes = workInProgress.lanes;

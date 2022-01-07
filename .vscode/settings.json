@@ -9,6 +9,7 @@
     "SUBSEPARATOR",
     "svgr",
     "typeof",
-    "unbatched"
+    "unbatched",
+    "Unkeyed"
   ]
 }

@@ -1,8 +1,9 @@
 import { ClassComponent, HostRoot } from './ReactWorkTags';
-import { createCursor } from './ReactFiberStack';
+import { createCursor, push } from './ReactFiberStack';
 
 export const emptyContextObject = {};
 
+const contextStackCursor = createCursor(emptyContextObject);
 const didPerformWorkStackCursor = createCursor(false);
 
 const isContextProvider = (type) => {
@@ -41,4 +42,14 @@ const processChildContext = (fiber, type, parentContext) => {
 
 const hasContextChanged = () => didPerformWorkStackCursor.current;
 
-export { isContextProvider, processChildContext, hasContextChanged };
+const pushTopLevelContextObject = (fiber, context, didChange) => {
+  push(contextStackCursor, context, fiber);
+  push(didPerformWorkStackCursor, didChange, fiber);
+};
+
+export {
+  isContextProvider,
+  processChildContext,
+  hasContextChanged,
+  pushTopLevelContextObject,
+};

@@ -377,6 +377,8 @@ const performUnitOfWork = (unitOfWork) => {
   const current = unitOfWork.alternate;
   const next = beginWork(current, unitOfWork, subtreeRenderLanes);
 
+  console.log(next);
+
   unitOfWork.memoizedProps = unitOfWork.pendingProps;
 
   if (next === null) {
@@ -510,4 +512,11 @@ export const scheduleUpdateOnFiber = (fiber, lane, eventTime) => {
       //
     }
   }
+};
+
+export const markSkippedUpdateLanes = (lane) => {
+  workInProgressRootSkippedLanes = mergeLanes(
+    lane,
+    workInProgressRootSkippedLanes
+  );
 };

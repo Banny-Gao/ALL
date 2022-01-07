@@ -133,6 +133,8 @@ export const schedulerPriorityToLanePriority = (schedulerPriorityLevel) => {
   }
 };
 
+export const isSubsetOfLanes = (set, subset) => (set & subset) === subset;
+
 export const mergeLanes = (a, b) => a | b;
 
 const pickArbitraryLaneIndex = (lane) => 31 - Math.clz32(lane);

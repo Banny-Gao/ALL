@@ -67,6 +67,7 @@ module.exports = {
     'no-underscore-dangle': 'off',
     'no-nested-ternary': 'off',
     'no-unmodified-loop-condition': 'off',
+    'no-fallthrough': 'off',
     camelcase: 'off',
   },
 };
