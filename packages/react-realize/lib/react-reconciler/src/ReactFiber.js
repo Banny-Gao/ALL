@@ -48,9 +48,9 @@ class FiberNode {
       ref: null,
 
       pendingProps,
-      memorizedProps: null,
+      memoizedProps: null,
       updateQueue: null,
-      memorizedState: null,
+      memoizedState: null,
       dependencies: null,
 
       mode,
@@ -122,6 +122,8 @@ export const createWorkInProgress = (current, pendingProps) => {
   workInProgress.memoizedProps = current.memoizedProps;
   workInProgress.memoizedState = current.memoizedState;
   workInProgress.updateQueue = current.updateQueue;
+
+  console.log(workInProgress, current, '-------');
 
   const currentDependencies = current.dependencies;
   workInProgress.dependencies =

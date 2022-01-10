@@ -377,12 +377,12 @@ const performUnitOfWork = (unitOfWork) => {
   const current = unitOfWork.alternate;
   const next = beginWork(current, unitOfWork, subtreeRenderLanes);
 
-  console.log(next);
+  console.log(next, 'performUnitOfWork:next');
 
   unitOfWork.memoizedProps = unitOfWork.pendingProps;
 
   if (next === null) {
-    completeUnitOfWork(unitOfWork);
+    // completeUnitOfWork(unitOfWork);
   } else {
     workInProgress = next;
   }
@@ -391,9 +391,9 @@ const performUnitOfWork = (unitOfWork) => {
 };
 
 const workLoopSync = () => {
-  while (workInProgress !== null) {
-    performUnitOfWork(workInProgress);
-  }
+  // while (workInProgress !== null) {
+  performUnitOfWork(workInProgress);
+  // }
 };
 
 const handleError = (root, thrownValue) => {};
@@ -411,14 +411,16 @@ const renderRootSync = (root, lanes) => {
     prepareFreshStack(root, lanes);
   }
 
-  do {
-    try {
-      workLoopSync();
-      break;
-    } catch (thrownValue) {
-      handleError(root, thrownValue);
-    }
-  } while (true);
+  return;
+
+  // do {
+  //   try {
+  workLoopSync();
+  //     break;
+  //   } catch (thrownValue) {
+  //     handleError(root, thrownValue);
+  //   }
+  // } while (true);
 
   resetContextDependencies();
   executionContext = prevExecutionContext;

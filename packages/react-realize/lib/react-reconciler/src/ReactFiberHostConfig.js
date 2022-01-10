@@ -22,6 +22,17 @@ export const clearContainer = (container) => {
   container.children.splice(0);
 };
 
+export const getIntrinsicNamespace = (type) => {
+  switch (type) {
+    case 'svg':
+      return SVG_NAMESPACE;
+    case 'math':
+      return MATH_NAMESPACE;
+    default:
+      return HTML_NAMESPACE;
+  }
+};
+
 export const getChildNamespace = (parentNamespace, type) => {
   if (parentNamespace == null || parentNamespace === HTML_NAMESPACE) {
     return getIntrinsicNamespace(type);

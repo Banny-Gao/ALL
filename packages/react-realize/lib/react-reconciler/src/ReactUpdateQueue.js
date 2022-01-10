@@ -25,7 +25,7 @@ export const createUpdate = (eventTime, lane) => {
 
 export const initializeUpdateQueue = (fiber) => {
   const queue = {
-    baseState: fiber.memorizedState,
+    baseState: fiber.memoizedState,
     firstBaseUpdate: null,
     lastBaseUpdate: null,
     shared: {
