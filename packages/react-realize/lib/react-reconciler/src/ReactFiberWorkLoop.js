@@ -53,6 +53,7 @@ import {
   LegacyHiddenComponent,
   ScopeComponent,
 } from './ReactWorkTags';
+import { resetContextDependencies } from './ReactFiberNewContext';
 
 import { noTimeout, clearContainer } from './ReactFiberHostConfig';
 
@@ -375,9 +376,10 @@ const completeUnitOfWork = (unitOfWork) => {
 
 const performUnitOfWork = (unitOfWork) => {
   const current = unitOfWork.alternate;
-  const next = beginWork(current, unitOfWork, subtreeRenderLanes);
 
-  console.log(next, 'performUnitOfWork:next');
+  console.log(unitOfWork, '----------performUnitOfWork(workInProgress)');
+  const next = beginWork(current, unitOfWork, subtreeRenderLanes);
+  console.log(next, '--------performUnitOfWork:next');
 
   unitOfWork.memoizedProps = unitOfWork.pendingProps;
 
@@ -410,8 +412,6 @@ const renderRootSync = (root, lanes) => {
   if (workInProgressRoot !== root || workInProgressRootRenderLanes !== lanes) {
     prepareFreshStack(root, lanes);
   }
-
-  return;
 
   // do {
   //   try {

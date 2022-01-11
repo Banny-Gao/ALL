@@ -123,8 +123,6 @@ export const createWorkInProgress = (current, pendingProps) => {
   workInProgress.memoizedState = current.memoizedState;
   workInProgress.updateQueue = current.updateQueue;
 
-  console.log(workInProgress, current, '-------');
-
   const currentDependencies = current.dependencies;
   workInProgress.dependencies =
     currentDependencies === null
@@ -210,10 +208,6 @@ export const createFiberFromTypeAndProps = (
   fiber.elementType = type;
   fiber.type = resolvedType;
   fiber.lanes = lanes;
-
-  if (__DEV__) {
-    fiber._debugOwner = owner;
-  }
 
   return fiber;
 };

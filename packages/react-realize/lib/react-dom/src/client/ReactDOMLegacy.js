@@ -66,7 +66,7 @@ const legacyRenderSubtreeIntoContainer = (
       forceHydrate
     );
 
-    console.log('root:', root);
+    console.log(root, '-------root');
 
     runner = (callback) =>
       unbatchedUpdates(() => {
