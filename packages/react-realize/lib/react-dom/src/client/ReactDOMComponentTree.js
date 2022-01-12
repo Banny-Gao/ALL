@@ -14,3 +14,11 @@ export const getEventListenerSet = (node) => {
   }
   return elementListenerSet;
 };
+
+export const precacheFiberNode = (hostInst, node) => {
+  node[internalInstanceKey] = hostInst;
+};
+
+export const updateFiberProps = (node, props) => {
+  node[internalPropsKey] = props;
+};

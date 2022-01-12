@@ -174,7 +174,6 @@ export const processUpdateQueue = (
         const updateLane = update.lane;
         const updateEventTime = update.eventTime;
 
-        console.log(renderLanes, updateLane, '-------renderLanes,updateLane')
         if (!isSubsetOfLanes(renderLanes, updateLane)) {
           const clone = {
             eventTime: updateEventTime,

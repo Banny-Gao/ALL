@@ -246,6 +246,10 @@ const pushDispatcher = () => {
   }
 };
 
+const popDispatcher = (prevDispatcher) => {
+  ReactCurrentDispatcher.current = prevDispatcher;
+};
+
 const prepareFreshStack = (root, lanes) => {
   root.finishedWork = null;
   root.finishedLanes = NoLanes;
@@ -384,7 +388,7 @@ const performUnitOfWork = (unitOfWork) => {
   unitOfWork.memoizedProps = unitOfWork.pendingProps;
 
   if (next === null) {
-    // completeUnitOfWork(unitOfWork);
+    completeUnitOfWork(unitOfWork);
   } else {
     workInProgress = next;
   }
@@ -393,16 +397,12 @@ const performUnitOfWork = (unitOfWork) => {
 };
 
 const workLoopSync = () => {
-  // while (workInProgress !== null) {
-  performUnitOfWork(workInProgress);
-  // }
+  while (workInProgress !== null) {
+    performUnitOfWork(workInProgress);
+  }
 };
 
 const handleError = (root, thrownValue) => {};
-
-const popDispatcher = (prevDispatcher) => {
-  ReactCurrentDispatcher.current = prevDispatcher;
-};
 
 const renderRootSync = (root, lanes) => {
   const prevExecutionContext = executionContext;

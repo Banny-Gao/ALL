@@ -8,13 +8,19 @@ import {
   ForceUpdateForLegacySuspense,
   Placement,
   Hydrating,
+  Ref,
+  ContentReset
 } from './ReactFiberFlags';
-import { HostRoot } from './ReactWorkTags';
-import { pushHostContainer } from './ReactFiberHostContext';
+import { HostRoot, HostComponent } from './ReactWorkTags';
+import {
+  pushHostContainer,
+  pushHostContext,
+} from './ReactFiberHostContext';
 import { cloneUpdateQueue, processUpdateQueue } from './ReactUpdateQueue';
 import {
   resetHydrationState,
   enterHydrationState,
+  tryToClaimNextHydratableInstance,
 } from './ReactFiberHydrationContext';
 import { markSkippedUpdateLanes } from './ReactFiberWorkLoop';
 import {
@@ -23,6 +29,7 @@ import {
   reconcileChildFibers,
 } from './ReactChildFiber';
 import { setWorkInProgressVersion } from './ReactMutableSource';
+import { shouldSetTextContent } from './ReactFiberHostConfig';
 
 const invariant = require('invariant');
 
@@ -137,9 +144,40 @@ const updateHostRoot = (current, workInProgress, renderLanes) => {
     resetHydrationState();
   }
 
-  return null;
+  return workInProgress.child;
+};
 
-  // return workInProgress.child;
+const markRef = (current, workInProgress) => {
+  const ref = workInProgress.ref;
+  if (
+    (current === null && ref !== null) ||
+    (current !== null && current.ref !== ref)
+  ) {
+    workInProgress.flags |= Ref;
+  }
+};
+
+const updateHostComponent = (current, workInProgress, renderLanes) => {
+  pushHostContext(workInProgress);
+
+  if (current === null) tryToClaimNextHydratableInstance(workInProgress);
+
+  const type = workInProgress.type;
+  const nextProps = workInProgress.pendingProps;
+  const prevProps = current !== null ? current.memoizedProps : null;
+
+  let nextChildren = nextProps.children;
+  const isDirectTextChild = shouldSetTextContent(type, nextProps);
+
+  if (isDirectTextChild) {
+    nextChildren = null;
+  } else if (prevProps !== null && shouldSetTextContent(type, prevProps)) {
+    workInProgress.flags |= ContentReset;
+  }
+
+  markRef(current, workInProgress);
+  reconcileChildren(current, workInProgress, nextChildren, renderLanes);
+  return workInProgress.child;
 };
 
 const beginWork = (current, workInProgress, renderLanes) => {
@@ -215,8 +253,8 @@ const beginWork = (current, workInProgress, renderLanes) => {
     // }
     case HostRoot:
       return updateHostRoot(current, workInProgress, renderLanes);
-    // case HostComponent:
-    //   return updateHostComponent(current, workInProgress, renderLanes);
+    case HostComponent:
+      return updateHostComponent(current, workInProgress, renderLanes);
     // case HostText:
     //   return updateHostText(current, workInProgress);
     // case SuspenseComponent:

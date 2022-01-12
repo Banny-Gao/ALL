@@ -47,9 +47,15 @@ const pushTopLevelContextObject = (fiber, context, didChange) => {
   push(didPerformWorkStackCursor, didChange, fiber);
 };
 
+const popTopLevelContextObject = (fiber) => {
+  pop(didPerformWorkStackCursor, fiber);
+  pop(contextStackCursor, fiber);
+};
+
 export {
   isContextProvider,
   processChildContext,
   hasContextChanged,
   pushTopLevelContextObject,
+  popTopLevelContextObject,
 };

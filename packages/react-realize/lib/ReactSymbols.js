@@ -15,4 +15,20 @@ export const REACT_SCOPE_TYPE = symbolFor('react.scope');
 
 export const REACT_CACHE_TYPE = symbolFor('react.cache');
 
-export const getIteratorFn = (iterable) => iterable[Symbol.iterator];
+const MAYBE_ITERATOR_SYMBOL = typeof Symbol === 'function' && Symbol.iterator;
+const FAUX_ITERATOR_SYMBOL = '@@iterator';
+
+export const getIteratorFn = (maybeIterable) => {
+  if (maybeIterable === null || typeof maybeIterable !== 'object') {
+    return null;
+  }
+
+  const maybeIterator =
+    (MAYBE_ITERATOR_SYMBOL && maybeIterable[MAYBE_ITERATOR_SYMBOL]) ||
+    maybeIterable[FAUX_ITERATOR_SYMBOL];
+  if (typeof maybeIterator === 'function') {
+    return maybeIterator;
+  }
+
+  return null;
+};

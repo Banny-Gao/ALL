@@ -6,6 +6,12 @@ const setWorkInProgressVersion = (mutableSource, version) => {
   workInProgressSources.push(mutableSource);
 };
 
-export {
-  setWorkInProgressVersion
-}
+const resetWorkInProgressVersions = () => {
+  for (let i = 0; i < workInProgressSources.length; i++) {
+    const mutableSource = workInProgressSources[i];
+    mutableSource._workInProgressVersionPrimary = null;
+  }
+  workInProgressSources.length = 0;
+};
+
+export { setWorkInProgressVersion, resetWorkInProgressVersions };

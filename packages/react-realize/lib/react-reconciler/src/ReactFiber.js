@@ -235,3 +235,12 @@ export const createFiberFromText = (content, mode, lanes) => {
   fiber.lanes = lanes;
   return fiber;
 };
+
+export const createFiberFromHostInstanceForDeletion = () => {
+  const fiber = createFiber(HostComponent, null, null, NoMode);
+
+  fiber.elementType = 'DELETED';
+  fiber.type = 'DELETED';
+
+  return fiber;
+};
