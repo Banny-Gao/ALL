@@ -13,7 +13,7 @@ import {
 
 const listeningMarker = '_reactListening' + Math.random().toString(36).slice(2);
 
-export const mediaEventTypes = [
+const mediaEventTypes = [
   'abort',
   'canplay',
   'canplaythrough',
@@ -39,7 +39,7 @@ export const mediaEventTypes = [
   'waiting',
 ];
 
-export const nonDelegatedEvents = new Set([
+const nonDelegatedEvents = new Set([
   'cancel',
   'close',
   'invalid',
@@ -49,7 +49,7 @@ export const nonDelegatedEvents = new Set([
   ...mediaEventTypes,
 ]);
 
-export const getListenerSetKey = (domEventName, capture) =>
+const getListenerSetKey = (domEventName, capture) =>
   `${domEventName}__${capture ? 'capture' : 'bubble'}`;
 
 const addTrappedEventListener = (
@@ -102,7 +102,7 @@ const addTrappedEventListener = (
   }
 };
 
-export const listenToNativeEvent = (
+const listenToNativeEvent = (
   domEventName,
   isCapturePhaseListener,
   rootContainerElement,
@@ -150,7 +150,7 @@ export const listenToNativeEvent = (
   }
 };
 
-export const listenToAllSupportedEvents = (rootContainerElement) => {
+const listenToAllSupportedEvents = (rootContainerElement) => {
   if (rootContainerElement[listeningMarker]) return;
 
   rootContainerElement[listeningMarker] = true;
@@ -162,4 +162,31 @@ export const listenToAllSupportedEvents = (rootContainerElement) => {
 
     listenToNativeEvent(domEventName, true, rootContainerElement, null);
   });
+};
+
+const listenToNonDelegatedEvent = (domEventName, targetElement) => {
+  const isCapturePhaseListener = false;
+  const listenerSet = getEventListenerSet(targetElement);
+  const listenerSetKey = getListenerSetKey(
+    domEventName,
+    isCapturePhaseListener
+  );
+  if (!listenerSet.has(listenerSetKey)) {
+    addTrappedEventListener(
+      targetElement,
+      domEventName,
+      IS_NON_DELEGATED,
+      isCapturePhaseListener
+    );
+    listenerSet.add(listenerSetKey);
+  }
+};
+
+export {
+  mediaEventTypes,
+  nonDelegatedEvents,
+  getListenerSetKey,
+  listenToNativeEvent,
+  listenToAllSupportedEvents,
+  listenToNonDelegatedEvent,
 };

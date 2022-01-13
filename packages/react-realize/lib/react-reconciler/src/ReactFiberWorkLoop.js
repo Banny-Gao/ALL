@@ -22,6 +22,8 @@ import {
   includesSomeLane,
   OffscreenLane,
   getNextLanes,
+  markRootFinished,
+  hasDiscreteLanes,
 } from './ReactFiberLane';
 import { ConcurrentMode, BlockingMode, NoMode } from './ReactTypeOfMode';
 import { requestCurrentTransition, NoTransition } from './ReactFiberTransition';
@@ -106,6 +108,9 @@ let subtreeRenderLanes = NoLanes;
 let workInProgressRootFatalError = null;
 
 let pendingPassiveEffectsRenderPriority = NoSchedulerPriority;
+let rootWithPendingPassiveEffects = null;
+
+let rootsWithPendingDiscreteUpdates = null;
 
 const resetRenderTimer = () =>
   (workInProgressRootRenderTargetTime = now() + RENDER_TIMEOUT_MS);
@@ -231,7 +236,7 @@ export const flushPassiveEffects = () => {
         : pendingPassiveEffectsRenderPriority;
     pendingPassiveEffectsRenderPriority = NoSchedulerPriority;
 
-    return runWithPriority(priorityLevel, flushPassiveEffectsImpl);
+    return runWithPriority(priorityLevel, () => {});
   }
   return false;
 };
@@ -289,9 +294,8 @@ const resetChildLanes = (completedWork) => {
     completedWork.memoizedState !== null &&
     !includesSomeLane(subtreeRenderLanes, OffscreenLane) &&
     (completedWork.mode & ConcurrentMode) !== NoLanes
-  ) {
+  )
     return;
-  }
 
   let newChildLanes = NoLanes;
 
@@ -313,8 +317,11 @@ const completeUnitOfWork = (unitOfWork) => {
     const current = completedWork.alternate;
     const returnFiber = completedWork.return;
 
+    console.log(completedWork, '------completeUnitOfWork:completedWork');
+
     if ((completedWork.flags & Incomplete) === NoFlags) {
       const next = completeWork(current, completedWork, subtreeRenderLanes);
+      console.log(next, '------completeUnitOfWork:next');
 
       if (next !== null) {
         workInProgress = next;
@@ -381,7 +388,7 @@ const completeUnitOfWork = (unitOfWork) => {
 const performUnitOfWork = (unitOfWork) => {
   const current = unitOfWork.alternate;
 
-  console.log(unitOfWork, '----------performUnitOfWork(workInProgress)');
+  console.log(unitOfWork, '--------performUnitOfWork(workInProgress)');
   const next = beginWork(current, unitOfWork, subtreeRenderLanes);
   console.log(next, '--------performUnitOfWork:next');
 
@@ -404,6 +411,89 @@ const workLoopSync = () => {
 
 const handleError = (root, thrownValue) => {};
 
+const commitRootImpl = (root, renderPriorityLevel) => {
+  do {
+    flushPassiveEffects();
+  } while (rootWithPendingPassiveEffects !== null);
+
+  invariant(
+    (executionContext & (RenderContext | CommitContext)) === NoContext,
+    'Should not already be working.'
+  );
+
+  const finishedWork = root.finishedWork;
+  const lanes = root.finishedLanes;
+
+  if (finishedWork === null) return null;
+
+  root.finishedWork = null;
+  root.finishedLanes = NoLanes;
+
+  invariant(
+    finishedWork !== root.current,
+    'Cannot commit the same tree as before. This error is likely caused by ' +
+      'a bug in React. Please file an issue.'
+  );
+
+  root.callbackNode = null;
+
+  let remainingLanes = mergeLanes(finishedWork.lanes, finishedWork.childLanes);
+  markRootFinished(root, remainingLanes);
+
+  if (rootsWithPendingDiscreteUpdates !== null) {
+    if (
+      !hasDiscreteLanes(remainingLanes) &&
+      rootsWithPendingDiscreteUpdates.has(root)
+    ) {
+      rootsWithPendingDiscreteUpdates.delete(root);
+    }
+  }
+
+  if (root === workInProgressRoot) {
+    workInProgressRoot = null;
+    workInProgress = null;
+    workInProgressRootRenderLanes = NoLanes;
+  } else {
+    // This indicates that the last root we worked on is not the same one that
+    // we're committing now. This most commonly happens when a suspended root
+    // times out.
+  }
+
+  let firstEffect;
+  if (finishedWork.flags > PerformedWork) {
+    if (finishedWork.lastEffect !== null) {
+      finishedWork.lastEffect.nextEffect = finishedWork;
+      firstEffect = finishedWork.firstEffect;
+    } else {
+      firstEffect = finishedWork;
+    }
+  } else {
+    // There is no effect on the root.
+    firstEffect = finishedWork.firstEffect;
+  }
+
+  if (firstEffect !== null) {
+    let previousLanePriority;
+
+    const prevExecutionContext = executionContext;
+    executionContext |= CommitContext;
+
+    ReactCurrentOwner.current = null;
+
+    focusedInstanceHandle = prepareForCommit(root.containerInfo);
+    shouldFireAfterActiveInstanceBlur = false;
+  }
+};
+
+const commitRoot = (root) => {
+  const renderPriorityLevel = getCurrentPriorityLevel();
+  runWithPriority(
+    ImmediateSchedulerPriority,
+    commitRootImpl.bind(null, root, renderPriorityLevel)
+  );
+  return null;
+};
+
 const renderRootSync = (root, lanes) => {
   const prevExecutionContext = executionContext;
   executionContext |= RenderContext;
@@ -413,14 +503,14 @@ const renderRootSync = (root, lanes) => {
     prepareFreshStack(root, lanes);
   }
 
-  // do {
-  //   try {
-  workLoopSync();
-  //     break;
-  //   } catch (thrownValue) {
-  //     handleError(root, thrownValue);
-  //   }
-  // } while (true);
+  do {
+    try {
+      workLoopSync();
+      break;
+    } catch (thrownValue) {
+      handleError(root, thrownValue);
+    }
+  } while (true);
 
   resetContextDependencies();
   executionContext = prevExecutionContext;
@@ -471,14 +561,27 @@ const performSyncWorkOnRoot = (root) => {
     exitStatus = renderRootSync(root, lanes);
   }
 
-  // if (root.tag !== LegacyRoot && exitStatus === RootErrored) {
-  //   executionContext |= RetryAfterError;
+  console.log(exitStatus, root, '------renderRootSync->exitStatus,root');
 
-  //   if (root.hydrate) {
-  //     root.hydrate = false;
-  //     clearContainer(root.containerInfo);
-  //   }
-  // }
+  if (root.tag !== LegacyRoot && exitStatus === RootErrored) {
+    executionContext |= RetryAfterError;
+
+    if (root.hydrate) {
+      root.hydrate = false;
+      clearContainer(root.containerInfo);
+    }
+  }
+
+  const finishedWork = root.current.alternate;
+  root.finishedWork = finishedWork;
+  root.finishedLanes = lanes;
+  commitRoot(root);
+
+  // // Before exiting, make sure there's a callback scheduled for the next
+  // // pending level.
+  // ensureRootIsScheduled(root, now());
+
+  return null;
 };
 
 export const scheduleUpdateOnFiber = (fiber, lane, eventTime) => {

@@ -1,13 +1,25 @@
-import { HostRoot, HostComponent } from './ReactWorkTags';
-
+import { HostRoot, HostComponent, HostText, HostPortal } from './ReactWorkTags';
+import { Ref, Update, NoFlags, DidCapture, Snapshot } from './ReactFiberFlags';
 import { popTopLevelContextObject } from './ReactFiberContext';
 import {
   popHostContainer,
   getRootHostContainer,
   getHostContext,
+  popHostContext,
 } from './ReactFiberHostContext';
 import { resetWorkInProgressVersions } from './ReactMutableSource';
-import { popHydrationState } from './ReactFiberHydrationContext';
+import {
+  popHydrationState,
+  prepareToHydrateHostInstance,
+} from './ReactFiberHydrationContext';
+import {
+  prepareUpdate,
+  createInstance,
+  appendInitialChild,
+  finalizeInitialChildren,
+} from './ReactFiberHostConfig';
+
+const invariant = require('invariant');
 
 const markUpdate = (workInProgress) => {
   workInProgress.flags |= Update;
@@ -42,6 +54,39 @@ const updateHostComponent = (
   }
 };
 
+const appendAllChildren = (
+  parent,
+  workInProgress,
+  needsVisibilityToggle,
+  isHidden
+) => {
+  let node = workInProgress.child;
+  while (node !== null) {
+    if (node.tag === HostComponent || node.tag === HostText) {
+      appendInitialChild(parent, node.stateNode);
+    } else if (node.tag === HostPortal) {
+      // If we have a portal child, then we don't want to traverse
+      // down its children. Instead, we'll get insertions from each child in
+      // the portal directly.
+    } else if (node.child !== null) {
+      node.child.return = node;
+      node = node.child;
+      continue;
+    }
+    if (node === workInProgress) {
+      return;
+    }
+    while (node.sibling === null) {
+      if (node.return === null || node.return === workInProgress) {
+        return;
+      }
+      node = node.return;
+    }
+    node.sibling.return = node.return;
+    node = node.sibling;
+  }
+};
+
 const completeWork = (current, workInProgress, renderLanes) => {
   const newProps = workInProgress.pendingProps;
 
@@ -69,6 +114,7 @@ const completeWork = (current, workInProgress, renderLanes) => {
     case HostComponent: {
       popHostContext(workInProgress);
       const rootContainerInstance = getRootHostContainer();
+
       const type = workInProgress.type;
       if (current !== null && workInProgress.stateNode != null) {
         updateHostComponent(

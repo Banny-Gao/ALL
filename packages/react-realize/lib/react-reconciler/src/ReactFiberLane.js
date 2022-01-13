@@ -4,23 +4,22 @@ import {
   NormalPriority as NormalSchedulerPriority,
   LowPriority as LowSchedulerPriority,
   IdlePriority as IdleSchedulerPriority,
-  NoPriority as NoSchedulerPriority,
 } from './SchedulerWithReactIntegration';
 
-export const SyncLanePriority = 15;
-export const SyncBatchedLanePriority = 14;
+const SyncLanePriority = 15;
+const SyncBatchedLanePriority = 14;
 
 const InputDiscreteHydrationLanePriority = 13;
-export const InputDiscreteLanePriority = 12;
+const InputDiscreteLanePriority = 12;
 
 const InputContinuousHydrationLanePriority = 11;
-export const InputContinuousLanePriority = 10;
+const InputContinuousLanePriority = 10;
 
 const DefaultHydrationLanePriority = 9;
-export const DefaultLanePriority = 8;
+const DefaultLanePriority = 8;
 
 const TransitionHydrationPriority = 7;
-export const TransitionPriority = 6;
+const TransitionPriority = 6;
 
 const RetryLanePriority = 5;
 
@@ -31,44 +30,44 @@ const IdleLanePriority = 2;
 
 const OffscreenLanePriority = 1;
 
-export const NoLanePriority = 0;
+const NoLanePriority = 0;
 
-export const createLaneMap = (initial) =>
+const createLaneMap = (initial) =>
   Array(31)
     .fill(0)
     .map(() => initial);
 
-export const NoLanes = 0b0000000000000000000000000000000;
-export const NoLane = 0b0000000000000000000000000000000;
+const NoLanes = 0b0000000000000000000000000000000;
+const NoLane = 0b0000000000000000000000000000000;
 
-export const SyncLane = 0b0000000000000000000000000000001;
-export const SyncBatchedLane = 0b0000000000000000000000000000010;
+const SyncLane = 0b0000000000000000000000000000001;
+const SyncBatchedLane = 0b0000000000000000000000000000010;
 
-export const InputDiscreteHydrationLane = 0b0000000000000000000000000000100;
+const InputDiscreteHydrationLane = 0b0000000000000000000000000000100;
 const InputDiscreteLanes = 0b0000000000000000000000000011000;
 
 const InputContinuousHydrationLane = 0b0000000000000000000000000100000;
 const InputContinuousLanes = 0b0000000000000000000000011000000;
 
-export const DefaultHydrationLane = 0b0000000000000000000000100000000;
-export const DefaultLanes = 0b0000000000000000000111000000000;
+const DefaultHydrationLane = 0b0000000000000000000000100000000;
+const DefaultLanes = 0b0000000000000000000111000000000;
 
 const TransitionHydrationLane = 0b0000000000000000001000000000000;
 const TransitionLanes = 0b0000000001111111110000000000000;
 
-export const IdleHydrationLane = 0b0001000000000000000000000000000;
+const IdleHydrationLane = 0b0001000000000000000000000000000;
 const IdleLanes = 0b0110000000000000000000000000000;
 const NonIdleLanes = 0b0000111111111111111111111111111;
 
-export const OffscreenLane = 0b1000000000000000000000000000000;
+const OffscreenLane = 0b1000000000000000000000000000000;
 
-export const NoTimestamp = -1;
+const NoTimestamp = -1;
 
 const getHighestPriorityLane = (lanes) => lanes & -lanes;
 
-export const pickArbitraryLane = (lanes) => getHighestPriorityLane(lanes);
+const pickArbitraryLane = (lanes) => getHighestPriorityLane(lanes);
 
-export const findUpdateLane = (lanePriority, wipLanes) => {
+const findUpdateLane = (lanePriority, wipLanes) => {
   let lane;
   switch (lanePriority) {
     case NoLanePriority:
@@ -117,7 +116,7 @@ export const findUpdateLane = (lanePriority, wipLanes) => {
   throw new Error('Invalid update priority: %s. This is a bug in React.');
 };
 
-export const schedulerPriorityToLanePriority = (schedulerPriorityLevel) => {
+const schedulerPriorityToLanePriority = (schedulerPriorityLevel) => {
   switch (schedulerPriorityLevel) {
     case ImmediateSchedulerPriority:
       return SyncLanePriority;
@@ -133,13 +132,13 @@ export const schedulerPriorityToLanePriority = (schedulerPriorityLevel) => {
   }
 };
 
-export const isSubsetOfLanes = (set, subset) => (set & subset) === subset;
+const isSubsetOfLanes = (set, subset) => (set & subset) === subset;
 
-export const mergeLanes = (a, b) => a | b;
+const mergeLanes = (a, b) => a | b;
 
 const pickArbitraryLaneIndex = (lane) => 31 - Math.clz32(lane);
 
-export const markRootUpdated = (root, updateLane, eventTime) => {
+const markRootUpdated = (root, updateLane, eventTime) => {
   root.pendingLanes |= updateLane;
 
   const higherPriorityLanes = updateLane - 1;
@@ -153,7 +152,7 @@ export const markRootUpdated = (root, updateLane, eventTime) => {
   eventTimes[index] = eventTime;
 };
 
-export const markRootSuspended = (root, suspendedLanes) => {
+const markRootSuspended = (root, suspendedLanes) => {
   root.suspendedLanes |= suspendedLanes;
   root.pingedLanes &= ~suspendedLanes;
 
@@ -170,7 +169,7 @@ export const markRootSuspended = (root, suspendedLanes) => {
   }
 };
 
-export const includesSomeLane = (a, b) => (a & b) !== NoLanes;
+const includesSomeLane = (a, b) => (a & b) !== NoLanes;
 
 let return_highestLanePriority = DefaultLanePriority;
 
@@ -251,7 +250,7 @@ const getLowestPriorityLane = (lanes) => {
   return index < 0 ? NoLanes : 1 << index;
 };
 
-export const getNextLanes = (root, wipLanes) => {
+const getNextLanes = (root, wipLanes) => {
   const pendingLanes = root.pendingLanes;
   if (pendingLanes === NoLanes) {
     return_highestLanePriority = NoLanePriority;
@@ -331,4 +330,68 @@ export const getNextLanes = (root, wipLanes) => {
   }
 
   return nextLanes;
+};
+
+const markRootFinished = (root, remainingLanes) => {
+  const noLongerPendingLanes = root.pendingLanes & ~remainingLanes;
+
+  root.pendingLanes = remainingLanes;
+
+  root.suspendedLanes = 0;
+  root.pingedLanes = 0;
+
+  root.expiredLanes &= remainingLanes;
+  root.mutableReadLanes &= remainingLanes;
+
+  root.entangledLanes &= remainingLanes;
+
+  const entanglements = root.entanglements;
+  const eventTimes = root.eventTimes;
+  const expirationTimes = root.expirationTimes;
+
+  let lanes = noLongerPendingLanes;
+  while (lanes > 0) {
+    const index = pickArbitraryLaneIndex(lanes);
+    const lane = 1 << index;
+
+    entanglements[index] = NoLanes;
+    eventTimes[index] = NoTimestamp;
+    expirationTimes[index] = NoTimestamp;
+
+    lanes &= ~lane;
+  }
+};
+
+const hasDiscreteLanes = (lanes) => (lanes & InputDiscreteLanes) !== NoLanes;
+
+export {
+  SyncLanePriority,
+  SyncBatchedLanePriority,
+  InputDiscreteLanePriority,
+  InputContinuousLanePriority,
+  DefaultLanePriority,
+  TransitionPriority,
+  NoLanePriority,
+  createLaneMap,
+  NoLanes,
+  NoLane,
+  SyncLane,
+  SyncBatchedLane,
+  InputDiscreteHydrationLane,
+  DefaultHydrationLane,
+  DefaultLanes,
+  IdleHydrationLane,
+  OffscreenLane,
+  NoTimestamp,
+  pickArbitraryLane,
+  findUpdateLane,
+  schedulerPriorityToLanePriority,
+  isSubsetOfLanes,
+  mergeLanes,
+  markRootUpdated,
+  markRootSuspended,
+  includesSomeLane,
+  getNextLanes,
+  markRootFinished,
+  hasDiscreteLanes,
 };

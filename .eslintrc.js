@@ -68,6 +68,10 @@ module.exports = {
     'no-nested-ternary': 'off',
     'no-unmodified-loop-condition': 'off',
     'no-fallthrough': 'off',
+    'no-prototype-builtins': 'off',
+    'no-control-regex': 'off',
+    'no-unused-expressions': 'off',
+    'no-unused-expressions': 'off',
     camelcase: 'off',
   },
 };

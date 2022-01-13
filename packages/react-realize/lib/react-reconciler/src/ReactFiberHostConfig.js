@@ -1,3 +1,5 @@
+import { getChildNamespace } from '../../DOMNamespaces';
+
 import {
   TEXT_NODE,
   ELEMENT_NODE,
@@ -9,55 +11,29 @@ import {
 import {
   diffProperties,
   diffHydratedProperties,
+  createElement,
+  setInitialProperties,
 } from '../../react-dom/src/client/ReactDOMComponent';
 import {
   precacheFiberNode,
   updateFiberProps,
 } from '../../react-dom/src/client/ReactDOMComponentTree';
+import {
+  isEnabled,
+  setEnabled,
+} from '../../react-dom/src/events/ReactDOMEventListener';
+import { getSelectionInformation } from '../../react-dom/src/client/ReactInputSelection';
 
-const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
-const MATH_NAMESPACE = 'http://www.w3.org/1998/Math/MathML';
-const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+const noTimeout = -1;
 
-const SUSPENSE_START_DATA = '$';
-const SUSPENSE_END_DATA = '/$';
-const SUSPENSE_PENDING_START_DATA = '$?';
-const SUSPENSE_FALLBACK_START_DATA = '$!';
+let eventsEnabled = null;
+let selectionInformation = null;
 
-export const Namespaces = {
-  html: HTML_NAMESPACE,
-  mathml: MATH_NAMESPACE,
-  svg: SVG_NAMESPACE,
-};
-
-export const noTimeout = -1;
-
-export const clearContainer = (container) => {
+const clearContainer = (container) => {
   container.children.splice(0);
 };
 
-export const getIntrinsicNamespace = (type) => {
-  switch (type) {
-    case 'svg':
-      return SVG_NAMESPACE;
-    case 'math':
-      return MATH_NAMESPACE;
-    default:
-      return HTML_NAMESPACE;
-  }
-};
-
-export const getChildNamespace = (parentNamespace, type) => {
-  if (parentNamespace == null || parentNamespace === HTML_NAMESPACE) {
-    return getIntrinsicNamespace(type);
-  }
-  if (parentNamespace === SVG_NAMESPACE && type === 'foreignObject') {
-    return HTML_NAMESPACE;
-  }
-  return parentNamespace;
-};
-
-export const getRootHostContext = (rootContainerInstance) => {
+const getRootHostContext = (rootContainerInstance) => {
   let type;
   let namespace;
   const nodeType = rootContainerInstance.nodeType;
@@ -84,7 +60,7 @@ export const getRootHostContext = (rootContainerInstance) => {
   return namespace;
 };
 
-export const getNextHydratable = (node) => {
+const getNextHydratable = (node) => {
   for (; node != null; node = node.nextSibling) {
     const nodeType = node.nodeType;
     if (nodeType === ELEMENT_NODE || nodeType === TEXT_NODE) {
@@ -94,10 +70,10 @@ export const getNextHydratable = (node) => {
   return node;
 };
 
-export const getFirstHydratableChild = (parentInstance) =>
+const getFirstHydratableChild = (parentInstance) =>
   getNextHydratable(parentInstance.firstChild);
 
-export const shouldSetTextContent = (type, props) => {
+const shouldSetTextContent = (type, props) => {
   return (
     type === 'textarea' ||
     type === 'option' ||
@@ -110,13 +86,11 @@ export const shouldSetTextContent = (type, props) => {
   );
 };
 
-export const getNextHydratableSibling = (instance) => {
+const getNextHydratableSibling = (instance) => {
   return getNextHydratable(instance.nextSibling);
 };
 
-export const getNextHydratableInstanceAfterSuspenseInstance = (
-  suspenseInstance
-) => {
+const getNextHydratableInstanceAfterSuspenseInstance = (suspenseInstance) => {
   let node = suspenseInstance.nextSibling;
 
   let depth = 0;
@@ -143,7 +117,7 @@ export const getNextHydratableInstanceAfterSuspenseInstance = (
   return null;
 };
 
-export const canHydrateInstance = (instance, type, props) => {
+const canHydrateInstance = (instance, type, props) => {
   if (
     instance.nodeType !== ELEMENT_NODE ||
     type.toLowerCase() !== instance.nodeName.toLowerCase()
@@ -154,7 +128,7 @@ export const canHydrateInstance = (instance, type, props) => {
   return instance;
 };
 
-export const prepareUpdate = (
+const prepareUpdate = (
   domElement,
   type,
   oldProps,
@@ -164,7 +138,7 @@ export const prepareUpdate = (
 ) =>
   diffProperties(domElement, type, oldProps, newProps, rootContainerInstance);
 
-export const hydrateInstance = (
+const hydrateInstance = (
   instance,
   type,
   props,
@@ -175,13 +149,82 @@ export const hydrateInstance = (
   precacheFiberNode(internalInstanceHandle, instance);
 
   updateFiberProps(instance, props);
-  const parentNamespace = hostContext;
 
   return diffHydratedProperties(
     instance,
     type,
     props,
-    parentNamespace,
+    hostContext,
     rootContainerInstance
   );
+};
+
+const createInstance = (
+  type,
+  props,
+  rootContainerInstance,
+  hostContext,
+  internalInstanceHandle
+) => {
+  const domElement = createElement(
+    type,
+    props,
+    rootContainerInstance,
+    hostContext
+  );
+  precacheFiberNode(internalInstanceHandle, domElement);
+  updateFiberProps(domElement, props);
+  return domElement;
+};
+
+const appendInitialChild = (parentInstance, child) => {
+  parentInstance.appendChild(child);
+};
+
+const shouldAutoFocusHostComponent = (type, props) => {
+  switch (type) {
+    case 'button':
+    case 'input':
+    case 'select':
+    case 'textarea':
+      return !!props.autoFocus;
+  }
+  return false;
+};
+
+const finalizeInitialChildren = (
+  domElement,
+  type,
+  props,
+  rootContainerInstance,
+  hostContext
+) => {
+  setInitialProperties(domElement, type, props, rootContainerInstance);
+  return shouldAutoFocusHostComponent(type, props);
+};
+
+const prepareForCommit = (containerInfo) => {
+  eventsEnabled = isEnabled();
+  selectionInformation = getSelectionInformation();
+
+  setEnabled(false);
+  return null;
+};
+
+export {
+  noTimeout,
+  clearContainer,
+  getRootHostContext,
+  getNextHydratable,
+  getFirstHydratableChild,
+  shouldSetTextContent,
+  getNextHydratableSibling,
+  getNextHydratableInstanceAfterSuspenseInstance,
+  canHydrateInstance,
+  prepareUpdate,
+  hydrateInstance,
+  createInstance,
+  appendInitialChild,
+  finalizeInitialChildren,
+  prepareForCommit,
 };

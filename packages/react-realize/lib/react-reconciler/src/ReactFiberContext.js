@@ -1,7 +1,7 @@
 import { ClassComponent, HostRoot } from './ReactWorkTags';
-import { createCursor, push } from './ReactFiberStack';
+import { createCursor, push, pop } from './ReactFiberStack';
 
-export const emptyContextObject = {};
+const emptyContextObject = {};
 
 const contextStackCursor = createCursor(emptyContextObject);
 const didPerformWorkStackCursor = createCursor(false);
@@ -11,7 +11,12 @@ const isContextProvider = (type) => {
   return childContextTypes !== null && childContextTypes !== undefined;
 };
 
-export const findCurrentUnmaskedContext = (fiber) => {
+const popContext = (fiber) => {
+  pop(didPerformWorkStackCursor, fiber);
+  pop(contextStackCursor, fiber);
+};
+
+const findCurrentUnmaskedContext = (fiber) => {
   let node = fiber;
 
   do {
@@ -53,7 +58,10 @@ const popTopLevelContextObject = (fiber) => {
 };
 
 export {
+  emptyContextObject,
   isContextProvider,
+  popContext,
+  findCurrentUnmaskedContext,
   processChildContext,
   hasContextChanged,
   pushTopLevelContextObject,

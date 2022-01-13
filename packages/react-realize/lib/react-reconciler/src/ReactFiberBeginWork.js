@@ -103,7 +103,7 @@ const updateHostRoot = (current, workInProgress, renderLanes) => {
   const nextState = workInProgress.memoizedState;
   const nextChildren = nextState.element;
 
-  console.log(prevChildren, nextChildren, '------prevChildren, nextChildren');
+  console.log(prevChildren, nextChildren, '--------prevChildren, nextChildren');
   if (nextChildren === prevChildren) {
     resetHydrationState();
     return bailoutOnAlreadyFinishedWork(current, workInProgress, renderLanes);
@@ -137,10 +137,6 @@ const updateHostRoot = (current, workInProgress, renderLanes) => {
     }
   } else {
     reconcileChildren(current, workInProgress, nextChildren, renderLanes);
-    console.log(
-      workInProgress,
-      'updateHostRoot>reconcileChildren:workInProgress'
-    );
     resetHydrationState();
   }
 

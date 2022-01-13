@@ -6,6 +6,14 @@ import {
 
 import { getEventPriorityForPluginSystem } from './DOMEventProperties';
 
+let _enabled = true;
+
+const setEnabled = (enabled) => {
+  _enabled = !!enabled;
+};
+
+const isEnabled = () => _enabled;
+
 const dispatchDiscreteEvent = (
   domEventName,
   eventSystemFlags,
@@ -25,7 +33,7 @@ const dispatchEvent = (
   nativeEvent
 ) => {};
 
-export const createEventListenerWrapperWithPriority = (
+const createEventListenerWrapperWithPriority = (
   targetContainer,
   domEventName,
   eventSystemFlags
@@ -52,4 +60,11 @@ export const createEventListenerWrapperWithPriority = (
     eventSystemFlags,
     targetContainer
   );
+};
+
+export {
+  _enabled,
+  setEnabled,
+  isEnabled,
+  createEventListenerWrapperWithPriority,
 };

@@ -69,7 +69,7 @@ export const updateContainer = (
   callback = callback === undefined ? null : callback;
 
   enqueueUpdate(current, update);
-  console.log(current, '-------updateContainer>enqueueUpdate: current');
+  console.log(current, '--------updateContainer>enqueueUpdate: current');
 
   scheduleUpdateOnFiber(current, lane, eventTime);
 

@@ -120,18 +120,12 @@ export const processUpdateQueue = (
 ) => {
   const queue = workInProgress.updateQueue;
 
-  console.log(
-    { ...queue },
-    '------processUpdateQueue(workInProgress.updateQueue)'
-  );
-
   hasForceUpdate = false;
 
   let firstBaseUpdate = queue.firstBaseUpdate;
   let lastBaseUpdate = queue.lastBaseUpdate;
 
   let pendingQueue = queue.shared.pending;
-  console.log({ ...pendingQueue }, '------processUpdateQueue: pendingQueue');
   
   if (pendingQueue !== null) {
     queue.shared.pending = null;

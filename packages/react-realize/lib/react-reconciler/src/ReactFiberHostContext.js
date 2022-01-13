@@ -1,5 +1,6 @@
 import { createCursor, push, pop } from './ReactFiberStack';
-import { getRootHostContext, getChildNamespace } from './ReactFiberHostConfig';
+import { getRootHostContext } from './ReactFiberHostConfig';
+import { getChildNamespace } from '../../DOMNamespaces';
 
 const invariant = require('invariant');
 
