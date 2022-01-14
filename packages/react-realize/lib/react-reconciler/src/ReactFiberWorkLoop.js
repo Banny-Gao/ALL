@@ -7,6 +7,7 @@ import {
   NoPriority as NoSchedulerPriority,
   NormalPriority as NormalSchedulerPriority,
   runWithPriority,
+  scheduleCallback,
 } from './SchedulerWithReactIntegration';
 import {
   NoTimestamp,
@@ -36,10 +37,11 @@ import {
   Incomplete,
   PerformedWork,
   HostEffectMask,
+  Snapshot,
+  Passive,
 } from './ReactFiberFlags';
 import { completeWork } from './ReactFiberCompleteWork';
 import { LegacyRoot } from './ReactRootTags';
-
 import {
   HostRoot,
   IndeterminateComponent,
@@ -56,23 +58,26 @@ import {
   ScopeComponent,
 } from './ReactWorkTags';
 import { resetContextDependencies } from './ReactFiberNewContext';
-
 import { noTimeout, clearContainer } from './ReactFiberHostConfig';
-
 import ReactSharedInternals from '../../ReactSharedInternals';
+import { doesFiberContain } from './ReactFiberTreeReflection';
+import {
+  isSuspenseBoundaryBeingHidden,
+  commitBeforeMutationLifeCycles,
+} from './ReactFiberCommitWork';
 
 const invariant = require('invariant');
 
 const { ReactCurrentDispatcher, ReactCurrentOwner, IsSomeRendererActing } =
   ReactSharedInternals;
 
-export const NoContext = 0b0000000;
+const NoContext = 0b0000000;
 const BatchedContext = 0b0000001;
 const LegacyUnbatchedContext = 0b0001000;
 const RenderContext = 0b0010000;
 const CommitContext = 0b0100000;
 const DiscreteEventContext = 0b0000100;
-export const RetryAfterError = 0b1000000;
+const RetryAfterError = 0b1000000;
 
 const RootIncomplete = 0;
 const RootFatalErrored = 1;
@@ -107,15 +112,24 @@ let subtreeRenderLanes = NoLanes;
 
 let workInProgressRootFatalError = null;
 
+let nextEffect = null;
+let hasUncaughtError = false;
+let firstUncaughtError = null;
+let legacyErrorBoundariesThatAlreadyFailed = null;
+
 let pendingPassiveEffectsRenderPriority = NoSchedulerPriority;
 let rootWithPendingPassiveEffects = null;
+let rootDoesHavePassiveEffects = false;
 
 let rootsWithPendingDiscreteUpdates = null;
+
+let focusedInstanceHandle = null;
+let shouldFireAfterActiveInstanceBlur = false;
 
 const resetRenderTimer = () =>
   (workInProgressRootRenderTargetTime = now() + RENDER_TIMEOUT_MS);
 
-export const unbatchedUpdates = (fn, a) => {
+const unbatchedUpdates = (fn, a) => {
   const prevExecutionContext = executionContext;
   executionContext &= BatchedContext;
   executionContext |= LegacyUnbatchedContext;
@@ -133,7 +147,7 @@ export const unbatchedUpdates = (fn, a) => {
   }
 };
 
-export const requestEventTime = () => {
+const requestEventTime = () => {
   if ((executionContext & (RenderContext | CommitContext)) !== NoContext)
     return now();
 
@@ -144,7 +158,7 @@ export const requestEventTime = () => {
   return currentEventTime;
 };
 
-export const requestUpdateLane = (fiber) => {
+const requestUpdateLane = (fiber) => {
   const { mode } = fiber;
   if ((mode & BlockingMode) === NoMode) return SyncLane;
   else if ((mode & ConcurrentMode) === NoMode)
@@ -228,7 +242,9 @@ const markRootSuspended = (root, suspendedLanes) => {
   markRootSuspendedDontCallThisOneDirectly(root, suspendedLanes);
 };
 
-export const flushPassiveEffects = () => {
+const flushPassiveEffectsImpl = () => {};
+
+const flushPassiveEffects = () => {
   if (pendingPassiveEffectsRenderPriority !== NoSchedulerPriority) {
     const priorityLevel =
       pendingPassiveEffectsRenderPriority > NormalSchedulerPriority
@@ -236,7 +252,7 @@ export const flushPassiveEffects = () => {
         : pendingPassiveEffectsRenderPriority;
     pendingPassiveEffectsRenderPriority = NoSchedulerPriority;
 
-    return runWithPriority(priorityLevel, () => {});
+    return runWithPriority(priorityLevel, flushPassiveEffectsImpl);
   }
   return false;
 };
@@ -411,6 +427,43 @@ const workLoopSync = () => {
 
 const handleError = (root, thrownValue) => {};
 
+const commitBeforeMutationEffects = () => {
+  while (nextEffect !== null) {
+    const current = nextEffect.alternate;
+
+    if (!shouldFireAfterActiveInstanceBlur && focusedInstanceHandle !== null) {
+      if ((nextEffect.flags & Deletion) !== NoFlags) {
+        if (doesFiberContain(nextEffect, focusedInstanceHandle)) {
+          shouldFireAfterActiveInstanceBlur = true;
+        }
+      } else {
+        if (
+          nextEffect.tag === SuspenseComponent &&
+          isSuspenseBoundaryBeingHidden(current, nextEffect) &&
+          doesFiberContain(nextEffect, focusedInstanceHandle)
+        ) {
+          shouldFireAfterActiveInstanceBlur = true;
+        }
+      }
+    }
+
+    const flags = nextEffect.flags;
+    if ((flags & Snapshot) !== NoFlags) {
+      commitBeforeMutationLifeCycles(current, nextEffect);
+    }
+    if ((flags & Passive) !== NoFlags) {
+      if (!rootDoesHavePassiveEffects) {
+        rootDoesHavePassiveEffects = true;
+        scheduleCallback(NormalSchedulerPriority, () => {
+          flushPassiveEffects();
+          return null;
+        });
+      }
+    }
+    nextEffect = nextEffect.nextEffect;
+  }
+};
+
 const commitRootImpl = (root, renderPriorityLevel) => {
   do {
     flushPassiveEffects();
@@ -468,7 +521,6 @@ const commitRootImpl = (root, renderPriorityLevel) => {
       firstEffect = finishedWork;
     }
   } else {
-    // There is no effect on the root.
     firstEffect = finishedWork.firstEffect;
   }
 
@@ -482,6 +534,18 @@ const commitRootImpl = (root, renderPriorityLevel) => {
 
     focusedInstanceHandle = prepareForCommit(root.containerInfo);
     shouldFireAfterActiveInstanceBlur = false;
+
+    nextEffect = firstEffect;
+
+    do {
+      try {
+        commitBeforeMutationEffects();
+      } catch (error) {
+        invariant(nextEffect !== null, 'Should be working on an effect.');
+        captureCommitPhaseError(nextEffect, error);
+        nextEffect = nextEffect.nextEffect;
+      }
+    } while (nextEffect !== null);
   }
 };
 
@@ -584,7 +648,7 @@ const performSyncWorkOnRoot = (root) => {
   return null;
 };
 
-export const scheduleUpdateOnFiber = (fiber, lane, eventTime) => {
+const scheduleUpdateOnFiber = (fiber, lane, eventTime) => {
   checkForNestedUpdates();
 
   const root = markUpdateLaneFromFiberToRoot(fiber, lane);
@@ -619,9 +683,20 @@ export const scheduleUpdateOnFiber = (fiber, lane, eventTime) => {
   }
 };
 
-export const markSkippedUpdateLanes = (lane) => {
+const markSkippedUpdateLanes = (lane) => {
   workInProgressRootSkippedLanes = mergeLanes(
     lane,
     workInProgressRootSkippedLanes
   );
+};
+
+export {
+  NoContext,
+  RetryAfterError,
+  unbatchedUpdates,
+  requestEventTime,
+  requestUpdateLane,
+  flushPassiveEffects,
+  scheduleUpdateOnFiber,
+  markSkippedUpdateLanes,
 };
