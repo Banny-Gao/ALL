@@ -2,6 +2,8 @@ import { NoLanes, includesSomeLane } from './ReactFiberLane';
 import {
   hasContextChanged,
   pushTopLevelContextObject,
+  isContextProvider,
+  pushContextProvider,
 } from './ReactFiberContext';
 import {
   NoFlags,
@@ -9,13 +11,10 @@ import {
   Placement,
   Hydrating,
   Ref,
-  ContentReset
+  ContentReset,
 } from './ReactFiberFlags';
 import { HostRoot, HostComponent } from './ReactWorkTags';
-import {
-  pushHostContainer,
-  pushHostContext,
-} from './ReactFiberHostContext';
+import { pushHostContainer, pushHostContext } from './ReactFiberHostContext';
 import { cloneUpdateQueue, processUpdateQueue } from './ReactUpdateQueue';
 import {
   resetHydrationState,
@@ -30,6 +29,14 @@ import {
 } from './ReactChildFiber';
 import { setWorkInProgressVersion } from './ReactMutableSource';
 import { shouldSetTextContent } from './ReactFiberHostConfig';
+import { resolveDefaultProps } from './ReactFiberLazyComponent';
+import { prepareToReadContext } from './ReactFiberNewContext';
+import {
+  constructClassInstance,
+  mountClassInstance,
+  resumeMountClassInstance,
+  updateClassInstance,
+} from './ReactFiberClassComponent';
 
 const invariant = require('invariant');
 
@@ -176,6 +183,65 @@ const updateHostComponent = (current, workInProgress, renderLanes) => {
   return workInProgress.child;
 };
 
+const finishClassComponent = () => {};
+
+const updateClassComponent = (
+  current,
+  workInProgress,
+  Component,
+  nextProps,
+  renderLanes
+) => {
+  let hasContext;
+  if (isContextProvider(Component)) {
+    hasContext = true;
+    pushContextProvider(workInProgress);
+  } else {
+    hasContext = false;
+  }
+  prepareToReadContext(workInProgress, renderLanes);
+
+  const instance = workInProgress.stateNode;
+  let shouldUpdate;
+  if (instance === null) {
+    if (current !== null) {
+      current.alternate = null;
+      workInProgress.alternate = null;
+      workInProgress.flags |= Placement;
+    }
+
+    constructClassInstance(workInProgress, Component, nextProps);
+    mountClassInstance(workInProgress, Component, nextProps, renderLanes);
+    shouldUpdate = true;
+  } else if (current === null) {
+    shouldUpdate = resumeMountClassInstance(
+      workInProgress,
+      Component,
+      nextProps,
+      renderLanes
+    );
+  } else {
+    shouldUpdate = updateClassInstance(
+      current,
+      workInProgress,
+      Component,
+      nextProps,
+      renderLanes
+    );
+  }
+
+  const nextUnitOfWork = finishClassComponent(
+    current,
+    workInProgress,
+    Component,
+    shouldUpdate,
+    hasContext,
+    renderLanes
+  );
+
+  return nextUnitOfWork;
+};
+
 const beginWork = (current, workInProgress, renderLanes) => {
   const updateLanes = workInProgress.lanes;
 
@@ -232,21 +298,21 @@ const beginWork = (current, workInProgress, renderLanes) => {
     //     renderLanes,
     //   );
     // }
-    // case ClassComponent: {
-    //   const Component = workInProgress.type;
-    //   const unresolvedProps = workInProgress.pendingProps;
-    //   const resolvedProps =
-    //     workInProgress.elementType === Component
-    //       ? unresolvedProps
-    //       : resolveDefaultProps(Component, unresolvedProps);
-    //   return updateClassComponent(
-    //     current,
-    //     workInProgress,
-    //     Component,
-    //     resolvedProps,
-    //     renderLanes,
-    //   );
-    // }
+    case ClassComponent: {
+      const Component = workInProgress.type;
+      const unresolvedProps = workInProgress.pendingProps;
+      const resolvedProps =
+        workInProgress.elementType === Component
+          ? unresolvedProps
+          : resolveDefaultProps(Component, unresolvedProps);
+      return updateClassComponent(
+        current,
+        workInProgress,
+        Component,
+        resolvedProps,
+        renderLanes
+      );
+    }
     case HostRoot:
       return updateHostRoot(current, workInProgress, renderLanes);
     case HostComponent:
@@ -354,4 +420,8 @@ const beginWork = (current, workInProgress, renderLanes) => {
   }
 };
 
-export { beginWork };
+const markWorkInProgressReceivedUpdate = () => {
+  didReceiveUpdate = true;
+};
+
+export { beginWork, markWorkInProgressReceivedUpdate };

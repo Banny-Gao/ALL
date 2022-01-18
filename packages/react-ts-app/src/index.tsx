@@ -3,12 +3,39 @@
 // import ReactDOM from 'react-dom';
 // import App from './App';
 
-import React from 'react-realize/lib/react';
+import React, { Component, Fragment } from 'react-realize/lib/react';
 import { render } from 'react-realize/lib/react-dom';
 
-render(<h1>hello word</h1>, document.querySelector('#root'), (context: any) => {
-  console.log(context);
-});
+interface IProp {
+  onClick?: () => void;
+}
+interface IState {
+  text: string;
+}
+class HelloWorld extends Component<IProp, IState> {
+  state = {
+    text: 'hello world',
+  };
+
+  render() {
+    const { onClick } = this.props;
+    const { text } = this.state;
+
+    return (
+      <Fragment>
+        <span onClick={onClick}>{text}</span>
+      </Fragment>
+    );
+  }
+}
+
+render(
+  <HelloWorld onClick={() => console.log('Hello World')} />,
+  document.querySelector('#root'),
+  (context: any) => {
+    console.log(context);
+  }
+);
 
 // import './index.css';
 

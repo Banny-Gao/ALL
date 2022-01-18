@@ -13,6 +13,8 @@ import {
   diffHydratedProperties,
   createElement,
   setInitialProperties,
+  trapClickOnNonInteractiveElement,
+  updateProperties,
 } from '../../react-dom/src/client/ReactDOMComponent';
 import {
   precacheFiberNode,
@@ -22,7 +24,12 @@ import {
   isEnabled,
   setEnabled,
 } from '../../react-dom/src/events/ReactDOMEventListener';
-import { getSelectionInformation } from '../../react-dom/src/client/ReactInputSelection';
+import {
+  getSelectionInformation,
+  restoreSelection,
+} from '../../react-dom/src/client/ReactInputSelection';
+import { setTextContent } from '../../react-dom/src/client/setTextContent';
+import { retryIfBlockedOn } from '../../react-dom/src/events/ReactDOMEventReplaying';
 
 const noTimeout = -1;
 
@@ -211,6 +218,64 @@ const prepareForCommit = (containerInfo) => {
   return null;
 };
 
+const resetTextContent = (domElement) => {
+  setTextContent(domElement, '');
+};
+
+const insertInContainerBefore = (container, child, beforeChild) => {
+  if (container.nodeType === COMMENT_NODE) {
+    container.parentNode.insertBefore(child, beforeChild);
+  } else {
+    container.insertBefore(child, beforeChild);
+  }
+};
+
+const appendChildToContainer = (container, child) => {
+  let parentNode;
+  if (container.nodeType === COMMENT_NODE) {
+    parentNode = container.parentNode;
+    parentNode.insertBefore(child, container);
+  } else {
+    parentNode = container;
+    parentNode.appendChild(child);
+  }
+
+  const reactRootContainer = container._reactRootContainer;
+  if (
+    (reactRootContainer === null || reactRootContainer === undefined) &&
+    parentNode.onclick === null
+  ) {
+    trapClickOnNonInteractiveElement(parentNode);
+  }
+};
+
+const commitUpdate = (
+  domElement,
+  updatePayload,
+  type,
+  oldProps,
+  newProps,
+  internalInstanceHandle
+) => {
+  updateFiberProps(domElement, newProps);
+  updateProperties(domElement, updatePayload, type, oldProps, newProps);
+};
+
+const commitTextUpdate = (textInstance, oldText, newText) => {
+  textInstance.nodeValue = newText;
+};
+
+const commitHydratedContainer = (container) => {
+  retryIfBlockedOn(container);
+};
+
+const resetAfterCommit = (containerInfo) => {
+  restoreSelection(selectionInformation);
+  setEnabled(eventsEnabled);
+  eventsEnabled = null;
+  selectionInformation = null;
+};
+
 export {
   noTimeout,
   clearContainer,
@@ -227,4 +292,11 @@ export {
   appendInitialChild,
   finalizeInitialChildren,
   prepareForCommit,
+  resetTextContent,
+  insertInContainerBefore,
+  appendChildToContainer,
+  commitUpdate,
+  commitTextUpdate,
+  commitHydratedContainer,
+  resetAfterCommit,
 };

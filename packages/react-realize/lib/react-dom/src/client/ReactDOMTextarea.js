@@ -64,4 +64,23 @@ const postMountWrapper = (element, props) => {
   }
 };
 
-export { initWrapperState, getHostProps, postMountWrapper };
+const updateWrapper = (element, props) => {
+  const node = element;
+  const value = getToStringValue(props.value);
+  const defaultValue = getToStringValue(props.defaultValue);
+  if (value != null) {
+    const newValue = toString(value);
+
+    if (newValue !== node.value) {
+      node.value = newValue;
+    }
+    if (props.defaultValue == null && node.defaultValue !== newValue) {
+      node.defaultValue = newValue;
+    }
+  }
+  if (defaultValue != null) {
+    node.defaultValue = toString(defaultValue);
+  }
+};
+
+export { initWrapperState, getHostProps, postMountWrapper, updateWrapper };

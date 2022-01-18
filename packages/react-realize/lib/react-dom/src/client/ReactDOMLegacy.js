@@ -85,7 +85,7 @@ const legacyRenderSubtreeIntoContainer = (
     originalCallback.callback(instance);
   };
 
-  runner(originalCallback);
+  // runner(originalCallback);
 
   return getPublicRootInstance(fiberRoot);
 };

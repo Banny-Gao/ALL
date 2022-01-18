@@ -1,4 +1,5 @@
 import { TEXT_NODE } from '../../../HTMLNodeType';
+import { getNodeForCharacterOffset } from './getNodeForCharacterOffset';
 
 const getModernOffsetsFromPoints = (
   outerNode,
@@ -99,4 +100,48 @@ const getOffsets = (outerNode) => {
   );
 };
 
-export { getOffsets, getModernOffsetsFromPoints };
+const setOffsets = (node, offsets) => {
+  const doc = node.ownerDocument || document;
+  const win = (doc && doc.defaultView) || window;
+
+  if (!win.getSelection) return;
+
+  const selection = win.getSelection();
+  const length = node.textContent.length;
+  let start = Math.min(offsets.start, length);
+  let end = offsets.end === undefined ? start : Math.min(offsets.end, length);
+
+  if (!selection.extend && start > end) {
+    const temp = end;
+    end = start;
+    start = temp;
+  }
+
+  const startMarker = getNodeForCharacterOffset(node, start);
+  const endMarker = getNodeForCharacterOffset(node, end);
+
+  if (startMarker && endMarker) {
+    if (
+      selection.rangeCount === 1 &&
+      selection.anchorNode === startMarker.node &&
+      selection.anchorOffset === startMarker.offset &&
+      selection.focusNode === endMarker.node &&
+      selection.focusOffset === endMarker.offset
+    )
+      return;
+
+    const range = doc.createRange();
+    range.setStart(startMarker.node, startMarker.offset);
+    selection.removeAllRanges();
+
+    if (start > end) {
+      selection.addRange(range);
+      selection.extend(endMarker.node, endMarker.offset);
+    } else {
+      range.setEnd(endMarker.node, endMarker.offset);
+      selection.addRange(range);
+    }
+  }
+};
+
+export { getOffsets, getModernOffsetsFromPoints, setOffsets };

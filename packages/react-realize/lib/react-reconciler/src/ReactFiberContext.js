@@ -6,6 +6,8 @@ const emptyContextObject = {};
 const contextStackCursor = createCursor(emptyContextObject);
 const didPerformWorkStackCursor = createCursor(false);
 
+let previousContext = emptyContextObject;
+
 const isContextProvider = (type) => {
   const { childContextTypes } = type;
   return childContextTypes !== null && childContextTypes !== undefined;
@@ -57,6 +59,24 @@ const popTopLevelContextObject = (fiber) => {
   pop(contextStackCursor, fiber);
 };
 
+const pushContextProvider = (workInProgress) => {
+  const instance = workInProgress.stateNode;
+
+  const memoizedMergedChildContext =
+    (instance && instance.__reactInternalMemoizedMergedChildContext) ||
+    emptyContextObject;
+
+  previousContext = contextStackCursor.current;
+  push(contextStackCursor, memoizedMergedChildContext, workInProgress);
+  push(
+    didPerformWorkStackCursor,
+    didPerformWorkStackCursor.current,
+    workInProgress
+  );
+
+  return true;
+};
+
 export {
   emptyContextObject,
   isContextProvider,
@@ -66,4 +86,5 @@ export {
   hasContextChanged,
   pushTopLevelContextObject,
   popTopLevelContextObject,
+  pushContextProvider,
 };

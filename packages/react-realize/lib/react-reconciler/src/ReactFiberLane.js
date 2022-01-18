@@ -4,6 +4,7 @@ import {
   NormalPriority as NormalSchedulerPriority,
   LowPriority as LowSchedulerPriority,
   IdlePriority as IdleSchedulerPriority,
+  NoPriority as NoSchedulerPriority,
 } from './SchedulerWithReactIntegration';
 
 const SyncLanePriority = 15;
@@ -364,6 +365,79 @@ const markRootFinished = (root, remainingLanes) => {
 
 const hasDiscreteLanes = (lanes) => (lanes & InputDiscreteLanes) !== NoLanes;
 
+const computeExpirationTime = (lane, currentTime) => {
+  getHighestPriorityLanes(lane);
+  const priority = return_highestLanePriority;
+  if (priority >= InputContinuousLanePriority) {
+    return currentTime + 250;
+  } else if (priority >= TransitionPriority) {
+    return currentTime + 5000;
+  } else {
+    return NoTimestamp;
+  }
+};
+
+const markStarvedLanesAsExpired = (root, currentTime) => {
+  const pendingLanes = root.pendingLanes;
+  const suspendedLanes = root.suspendedLanes;
+  const pingedLanes = root.pingedLanes;
+  const expirationTimes = root.expirationTimes;
+
+  let lanes = pendingLanes;
+  while (lanes > 0) {
+    const index = pickArbitraryLaneIndex(lanes);
+    const lane = 1 << index;
+
+    const expirationTime = expirationTimes[index];
+    if (expirationTime === NoTimestamp) {
+      if (
+        (lane & suspendedLanes) === NoLanes ||
+        (lane & pingedLanes) !== NoLanes
+      ) {
+        expirationTimes[index] = computeExpirationTime(lane, currentTime);
+      }
+    } else if (expirationTime <= currentTime) {
+      root.expiredLanes |= lane;
+    }
+
+    lanes &= ~lane;
+  }
+};
+
+const returnNextLanesPriority = () => return_highestLanePriority;
+
+const lanePriorityToSchedulerPriority = (lanePriority) => {
+  switch (lanePriority) {
+    case SyncLanePriority:
+    case SyncBatchedLanePriority:
+      return ImmediateSchedulerPriority;
+    case InputDiscreteHydrationLanePriority:
+    case InputDiscreteLanePriority:
+    case InputContinuousHydrationLanePriority:
+    case InputContinuousLanePriority:
+      return UserBlockingSchedulerPriority;
+    case DefaultHydrationLanePriority:
+    case DefaultLanePriority:
+    case TransitionHydrationPriority:
+    case TransitionPriority:
+    case SelectiveHydrationLanePriority:
+    case RetryLanePriority:
+      return NormalSchedulerPriority;
+    case IdleHydrationLanePriority:
+    case IdleLanePriority:
+    case OffscreenLanePriority:
+      return IdleSchedulerPriority;
+    case NoLanePriority:
+      return NoSchedulerPriority;
+    default:
+      invariant(
+        false,
+        'Invalid update priority: %s. This is a bug in React.',
+        lanePriority
+      );
+  }
+};
+
 export {
   SyncLanePriority,
   SyncBatchedLanePriority,
@@ -394,4 +468,7 @@ export {
   getNextLanes,
   markRootFinished,
   hasDiscreteLanes,
+  markStarvedLanesAsExpired,
+  returnNextLanesPriority,
+  lanePriorityToSchedulerPriority,
 };

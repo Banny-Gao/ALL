@@ -5,7 +5,7 @@ import {
   IdlePriority,
   LowPriority,
 } from './SchedulerPriorities';
-
+import { getCurrentTime, shouldYieldToHost } from './SchedulerHostConfig';
 import { peek, pop, push } from './SchedulerMinHeap';
 
 const IMMEDIATE_PRIORITY_TIMEOUT = -1;
@@ -17,10 +17,14 @@ const IDLE_PRIORITY_TIMEOUT = 1073741823;
 const taskQueue = [];
 const timerQueue = [];
 
+let currentTask = null;
 let currentPriorityLevel = NormalPriority;
 let taskIdCounter = 1;
 let isHostTimeoutScheduled = false;
-const isPerformingWork = false;
+let isHostCallbackScheduled = false;
+
+let isPerformingWork = false;
+const isSchedulerPaused = false;
 
 let _timeoutID;
 let _callback = null;
@@ -114,7 +118,69 @@ const handleTimeout = (currentTime) => {
   }
 };
 
-const flushWork = () => {};
+const workLoop = (hasTimeRemaining, initialTime) => {
+  let currentTime = initialTime;
+  advanceTimers(currentTime);
+  currentTask = peek(taskQueue);
+  while (currentTask !== null && !isSchedulerPaused) {
+    if (
+      currentTask.expirationTime > currentTime &&
+      (!hasTimeRemaining || shouldYieldToHost())
+    ) {
+      break;
+    }
+    const callback = currentTask.callback;
+    if (typeof callback === 'function') {
+      currentTask.callback = null;
+      currentPriorityLevel = currentTask.priorityLevel;
+      const didUserCallbackTimeout = currentTask.expirationTime <= currentTime;
+
+      const continuationCallback = callback(didUserCallbackTimeout);
+      currentTime = getCurrentTime();
+      if (typeof continuationCallback === 'function') {
+        currentTask.callback = continuationCallback;
+      } else {
+        if (currentTask === peek(taskQueue)) {
+          pop(taskQueue);
+        }
+      }
+      advanceTimers(currentTime);
+    } else {
+      pop(taskQueue);
+    }
+    currentTask = peek(taskQueue);
+  }
+
+  if (currentTask !== null) {
+    return true;
+  } else {
+    const firstTimer = peek(timerQueue);
+    if (firstTimer !== null) {
+      requestHostTimeout(handleTimeout, firstTimer.startTime - currentTime);
+    }
+    return false;
+  }
+};
+
+const flushWork = (hasTimeRemaining, initialTime) => {
+  isHostCallbackScheduled = false;
+
+  if (isHostTimeoutScheduled) {
+    isHostTimeoutScheduled = false;
+    cancelHostTimeout();
+  }
+
+  isPerformingWork = true;
+  const previousPriorityLevel = currentPriorityLevel;
+
+  try {
+    return workLoop(hasTimeRemaining, initialTime);
+  } finally {
+    currentTask = null;
+    currentPriorityLevel = previousPriorityLevel;
+    isPerformingWork = false;
+  }
+};
 
 const scheduleCallback = (priorityLevel, callback, options) => {
   const currentTime = Date.now();

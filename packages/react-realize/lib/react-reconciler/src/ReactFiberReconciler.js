@@ -68,6 +68,8 @@ export const updateContainer = (
 
   callback = callback === undefined ? null : callback;
 
+  if (callback) update.callback = callback;
+
   enqueueUpdate(current, update);
   console.log(current, '--------updateContainer>enqueueUpdate: current');
 

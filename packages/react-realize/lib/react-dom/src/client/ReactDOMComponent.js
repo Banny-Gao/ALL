@@ -8,6 +8,8 @@ import {
   initWrapperState as ReactDOMInputInitWrapperState,
   getHostProps as ReactDOMInputGetHostProps,
   postMountWrapper as ReactDOMInputPostMountWrapper,
+  updateChecked as ReactDOMInputUpdateChecked,
+  updateWrapper as ReactDOMInputUpdateWrapper,
 } from './ReactDOMInput';
 import {
   getHostProps as ReactDOMOptionGetHostProps,
@@ -17,11 +19,13 @@ import {
   initWrapperState as ReactDOMSelectInitWrapperState,
   getHostProps as ReactDOMSelectGetHostProps,
   postMountWrapper as ReactDOMSelectPostMountWrapper,
+  postUpdateWrapper as ReactDOMSelectPostUpdateWrapper,
 } from './ReactDOMSelect';
 import {
   initWrapperState as ReactDOMTextareaInitWrapperState,
   getHostProps as ReactDOMTextareaGetHostProps,
   postMountWrapper as ReactDOMTextareaPostMountWrapper,
+  updateWrapper as ReactDOMTextareaUpdateWrapper,
 } from './ReactDOMTextarea';
 import { setValueForStyles } from '../shared/CSSPropertyOperations';
 import { setInnerHTML } from './setInnerHTML';
@@ -157,10 +161,7 @@ const setInitialDOMProperties = (
     ) {
       // Noop
     } else if (propKey === AUTOFOCUS) {
-      // We polyfill it separately on the client during commit.
-      // We could have excluded it in the property list instead of
-      // adding a special case here, but then it wouldn't be emitted
-      // on server rendering (but we *do* want to emit it in SSR).
+      // 
     } else if (registrationNameDependencies.hasOwnProperty(propKey)) {
       if (nextProp != null) {
         if (propKey === 'onScroll') {
@@ -276,6 +277,64 @@ const setInitialProperties = (
   }
 };
 
+const updateDOMProperties = (
+  domElement,
+  updatePayload,
+  wasCustomComponentTag,
+  isCustomComponentTag,
+) => {
+  for (let i = 0; i < updatePayload.length; i += 2) {
+    const propKey = updatePayload[i];
+    const propValue = updatePayload[i + 1];
+    if (propKey === STYLE) {
+      setValueForStyles(domElement, propValue);
+    } else if (propKey === DANGEROUSLY_SET_INNER_HTML) {
+      setInnerHTML(domElement, propValue);
+    } else if (propKey === CHILDREN) {
+      setTextContent(domElement, propValue);
+    } else {
+      setValueForProperty(domElement, propKey, propValue, isCustomComponentTag);
+    }
+  }
+}
+
+const updateProperties = (
+  domElement,
+  updatePayload,
+  tag,
+  lastRawProps,
+  nextRawProps
+) => {
+  if (
+    tag === 'input' &&
+    nextRawProps.type === 'radio' &&
+    nextRawProps.name != null
+  ) {
+    ReactDOMInputUpdateChecked(domElement, nextRawProps);
+  }
+
+  const wasCustomComponentTag = isCustomComponent(tag, lastRawProps);
+  const isCustomComponentTag = isCustomComponent(tag, nextRawProps);
+  updateDOMProperties(
+    domElement,
+    updatePayload,
+    wasCustomComponentTag,
+    isCustomComponentTag
+  );
+
+  switch (tag) {
+    case 'input':
+      ReactDOMInputUpdateWrapper(domElement, nextRawProps);
+      break;
+    case 'textarea':
+      ReactDOMTextareaUpdateWrapper(domElement, nextRawProps);
+      break;
+    case 'select':
+      ReactDOMSelectPostUpdateWrapper(domElement, nextRawProps);
+      break;
+  }
+};
+
 export {
   diffProperties,
   diffHydratedProperties,
@@ -283,4 +342,5 @@ export {
   setInitialProperties,
   mediaEventTypes,
   trapClickOnNonInteractiveElement,
+  updateProperties,
 };

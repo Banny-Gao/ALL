@@ -64,4 +64,21 @@ const postMountWrapper = (element, props) => {
   }
 };
 
-export { initWrapperState, getHostProps, postMountWrapper };
+const postUpdateWrapper = (element, props) => {
+  const node = element;
+  const wasMultiple = node._wrapperState.wasMultiple;
+  node._wrapperState.wasMultiple = !!props.multiple;
+
+  const value = props.value;
+  if (value != null) {
+    updateOptions(node, !!props.multiple, value, false);
+  } else if (wasMultiple !== !!props.multiple) {
+    if (props.defaultValue != null) {
+      updateOptions(node, !!props.multiple, props.defaultValue, true);
+    } else {
+      updateOptions(node, !!props.multiple, props.multiple ? [] : '', false);
+    }
+  }
+};
+
+export { initWrapperState, getHostProps, postMountWrapper, postUpdateWrapper };

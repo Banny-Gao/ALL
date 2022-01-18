@@ -1,8 +1,8 @@
 # React 源码阅读
 
-## 从 build 开始
+## 工程配置
 
-## react
+## react 的 API
 
 ### ReactSymbols
 
@@ -95,3 +95,5 @@ console.log(mappedChildren);
 ### React Hooks
 
 - 调用 ReactCurrentDispatcher.current[hook]
+
+## 从 render 开始

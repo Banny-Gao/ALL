@@ -1,6 +1,6 @@
 import Scheduler from '../../scheduler';
 
-let immediateQueueCallbackNode = null;
+const fakeCallbackNode = {};
 
 const ImmediatePriority = 99;
 const UserBlockingPriority = 98;
@@ -8,6 +8,10 @@ const NormalPriority = 97;
 const LowPriority = 96;
 const IdlePriority = 95;
 const NoPriority = 90;
+
+let syncQueue = null;
+let immediateQueueCallbackNode = null;
+let isFlushingSyncQueue = false;
 
 const initialTimeMs = Date.now();
 
@@ -36,7 +40,38 @@ const runWithPriority = (reactPriorityLevel, fn) => {
   return Scheduler.runWithPriority(priorityLevel, fn);
 };
 
-const flushSyncCallbackQueueImpl = () => {};
+const flushSyncCallbackQueueImpl = () => {
+  if (!isFlushingSyncQueue && syncQueue !== null) {
+    isFlushingSyncQueue = true;
+    let i = 0;
+
+    try {
+      const isSync = true;
+      const queue = syncQueue;
+      runWithPriority(ImmediatePriority, () => {
+        for (; i < queue.length; i++) {
+          let callback = queue[i];
+          do {
+            callback = callback(isSync);
+          } while (callback !== null);
+        }
+      });
+      syncQueue = null;
+    } catch (error) {
+      if (syncQueue !== null) {
+        syncQueue = syncQueue.slice(i + 1);
+      }
+
+      Scheduler.scheduleCallback(
+        Scheduler.ImmediatePriority,
+        flushSyncCallbackQueue
+      );
+      throw error;
+    } finally {
+      isFlushingSyncQueue = false;
+    }
+  }
+};
 
 const flushSyncCallbackQueue = () => {
   if (immediateQueueCallbackNode !== null) {
@@ -69,6 +104,28 @@ const scheduleCallback = (reactPriorityLevel, callback, options) => {
   return Scheduler.scheduleCallback(priorityLevel, callback, options);
 };
 
+const scheduleSyncCallback = (callback) => {
+  if (syncQueue === null) {
+    syncQueue = [callback];
+    immediateQueueCallbackNode = Scheduler.scheduleCallback(
+      Scheduler.ImmediatePriority,
+      flushSyncCallbackQueueImpl
+    );
+  } else {
+    syncQueue.push(callback);
+  }
+  return fakeCallbackNode;
+};
+
+const cancelCallback = (callbackNode) => {
+  if (callbackNode !== fakeCallbackNode) {
+    Scheduler.cancelCallback(callbackNode);
+  }
+};
+
+const requestPaint =
+  Scheduler.requestPaint !== undefined ? Scheduler.requestPaint : () => {};
+
 export {
   ImmediatePriority,
   UserBlockingPriority,
@@ -81,4 +138,7 @@ export {
   flushSyncCallbackQueue,
   getCurrentPriorityLevel,
   scheduleCallback,
+  scheduleSyncCallback,
+  cancelCallback,
+  requestPaint,
 };

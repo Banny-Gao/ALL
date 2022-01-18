@@ -1,4 +1,6 @@
 import { getToStringValue, toString } from './ToStringValue';
+import { setValueForProperty } from './DOMPropertyOperations';
+import { getActiveElement } from './getActiveElement';
 
 const isControlled = (props) => {
   const usesChecked = props.type === 'checkbox' || props.type === 'radio';
@@ -64,4 +66,61 @@ const postMountWrapper = (element, props, isHydrating) => {
   }
 };
 
-export { initWrapperState, getHostProps, postMountWrapper };
+const updateChecked = (element, props) => {
+  const node = element;
+  const checked = props.checked;
+  if (checked != null) {
+    setValueForProperty(node, 'checked', checked, false);
+  }
+};
+
+const setDefaultValue = (node, type, value) => {
+  if (type !== 'number' || getActiveElement(node.ownerDocument) !== node) {
+    if (value == null) {
+      node.defaultValue = toString(node._wrapperState.initialValue);
+    } else if (node.defaultValue !== toString(value)) {
+      node.defaultValue = toString(value);
+    }
+  }
+};
+
+const updateWrapper = (element, props) => {
+  const node = element;
+
+  updateChecked(element, props);
+
+  const value = getToStringValue(props.value);
+  const type = props.type;
+
+  if (value != null) {
+    if (type === 'number') {
+      if ((value === 0 && node.value === '') || node.value != value) {
+        node.value = toString(value);
+      }
+    } else if (node.value !== toString(value)) {
+      node.value = toString(value);
+    }
+  } else if (type === 'submit' || type === 'reset') {
+    node.removeAttribute('value');
+    return;
+  }
+
+  if (props.hasOwnProperty('value')) {
+    setDefaultValue(node, props.type, value);
+  } else if (props.hasOwnProperty('defaultValue')) {
+    setDefaultValue(node, props.type, getToStringValue(props.defaultValue));
+  }
+
+  if (props.checked == null && props.defaultChecked != null) {
+    node.defaultChecked = !!props.defaultChecked;
+  }
+};
+
+export {
+  initWrapperState,
+  getHostProps,
+  postMountWrapper,
+  updateChecked,
+  setDefaultValue,
+  updateWrapper,
+};

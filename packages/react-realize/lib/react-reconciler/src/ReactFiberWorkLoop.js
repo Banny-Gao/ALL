@@ -6,8 +6,12 @@ import {
   UserBlockingPriority,
   NoPriority as NoSchedulerPriority,
   NormalPriority as NormalSchedulerPriority,
+  UserBlockingPriority as UserBlockingSchedulerPriority,
   runWithPriority,
   scheduleCallback,
+  cancelCallback,
+  scheduleSyncCallback,
+  requestPaint,
 } from './SchedulerWithReactIntegration';
 import {
   NoTimestamp,
@@ -25,6 +29,11 @@ import {
   getNextLanes,
   markRootFinished,
   hasDiscreteLanes,
+  markStarvedLanesAsExpired,
+  returnNextLanesPriority,
+  SyncLanePriority,
+  lanePriorityToSchedulerPriority,
+  SyncBatchedLanePriority,
 } from './ReactFiberLane';
 import { ConcurrentMode, BlockingMode, NoMode } from './ReactTypeOfMode';
 import { requestCurrentTransition, NoTransition } from './ReactFiberTransition';
@@ -39,37 +48,41 @@ import {
   HostEffectMask,
   Snapshot,
   Passive,
+  Deletion,
+  ContentReset,
+  Ref,
+  Placement,
+  Update,
+  Hydrating,
+  PlacementAndUpdate,
+  HydratingAndUpdate,
 } from './ReactFiberFlags';
 import { completeWork } from './ReactFiberCompleteWork';
 import { LegacyRoot } from './ReactRootTags';
 import {
   HostRoot,
-  IndeterminateComponent,
-  ClassComponent,
-  SuspenseComponent,
-  SuspenseListComponent,
-  FunctionComponent,
-  ForwardRef,
-  MemoComponent,
-  SimpleMemoComponent,
-  Block,
   OffscreenComponent,
   LegacyHiddenComponent,
-  ScopeComponent,
 } from './ReactWorkTags';
 import { resetContextDependencies } from './ReactFiberNewContext';
-import { noTimeout, clearContainer } from './ReactFiberHostConfig';
-import ReactSharedInternals from '../../ReactSharedInternals';
-import { doesFiberContain } from './ReactFiberTreeReflection';
 import {
-  isSuspenseBoundaryBeingHidden,
+  noTimeout,
+  clearContainer,
+  prepareForCommit,
+  resetAfterCommit,
+} from './ReactFiberHostConfig';
+import ReactSharedInternals from '../../ReactSharedInternals';
+import {
   commitBeforeMutationLifeCycles,
+  commitResetTextContent,
+  commitDetachRef,
+  commitPlacement,
+  commitWork,
 } from './ReactFiberCommitWork';
 
 const invariant = require('invariant');
 
-const { ReactCurrentDispatcher, ReactCurrentOwner, IsSomeRendererActing } =
-  ReactSharedInternals;
+const { ReactCurrentDispatcher, ReactCurrentOwner } = ReactSharedInternals;
 
 const NoContext = 0b0000000;
 const BatchedContext = 0b0000001;
@@ -80,9 +93,7 @@ const DiscreteEventContext = 0b0000100;
 const RetryAfterError = 0b1000000;
 
 const RootIncomplete = 0;
-const RootFatalErrored = 1;
 const RootErrored = 2;
-const RootSuspended = 3;
 const RootSuspendedWithDelay = 4;
 const RootCompleted = 5;
 
@@ -98,6 +109,8 @@ let currentEventWipLanes = NoLanes;
 const RENDER_TIMEOUT_MS = 500;
 
 const NESTED_UPDATE_LIMIT = 50;
+
+let nestedPassiveUpdateCount = 0;
 let nestedUpdateCount = 0;
 let rootWithNestedUpdates = null;
 
@@ -111,20 +124,21 @@ let workInProgressRootSkippedLanes = NoLanes;
 let subtreeRenderLanes = NoLanes;
 
 let workInProgressRootFatalError = null;
-
-let nextEffect = null;
+let legacyErrorBoundariesThatAlreadyFailed = null;
 let hasUncaughtError = false;
 let firstUncaughtError = null;
-let legacyErrorBoundariesThatAlreadyFailed = null;
+
+let nextEffect = null;
 
 let pendingPassiveEffectsRenderPriority = NoSchedulerPriority;
 let rootWithPendingPassiveEffects = null;
+let pendingPassiveEffectsLanes = NoLanes;
 let rootDoesHavePassiveEffects = false;
+let pendingPassiveHookEffectsUnmount = [];
 
 let rootsWithPendingDiscreteUpdates = null;
 
-let focusedInstanceHandle = null;
-let shouldFireAfterActiveInstanceBlur = false;
+let mostRecentlyUpdatedRoot = null;
 
 const resetRenderTimer = () =>
   (workInProgressRootRenderTargetTime = now() + RENDER_TIMEOUT_MS);
@@ -242,7 +256,49 @@ const markRootSuspended = (root, suspendedLanes) => {
   markRootSuspendedDontCallThisOneDirectly(root, suspendedLanes);
 };
 
-const flushPassiveEffectsImpl = () => {};
+const detachFiberAfterEffects = (fiber) => {
+  fiber.sibling = null;
+  fiber.stateNode = null;
+};
+
+const flushPassiveEffectsImpl = () => {
+  if (rootWithPendingPassiveEffects === null) return false;
+
+  const root = rootWithPendingPassiveEffects;
+  rootWithPendingPassiveEffects = null;
+  pendingPassiveEffectsLanes = NoLanes;
+
+  invariant(
+    (executionContext & (RenderContext | CommitContext)) === NoContext,
+    'Cannot flush passive effects while already rendering.'
+  );
+
+  const prevExecutionContext = executionContext;
+  executionContext |= CommitContext;
+
+  pendingPassiveHookEffectsUnmount = [];
+
+  pendingPassiveHookEffectsMount = [];
+
+  let effect = root.current.firstEffect;
+  while (effect !== null) {
+    const nextNextEffect = effect.nextEffect;
+    effect.nextEffect = null;
+    if (effect.flags & Deletion) {
+      detachFiberAfterEffects(effect);
+    }
+    effect = nextNextEffect;
+  }
+
+  executionContext = prevExecutionContext;
+
+  flushSyncCallbackQueue();
+
+  nestedPassiveUpdateCount =
+    rootWithPendingPassiveEffects === null ? 0 : nestedPassiveUpdateCount + 1;
+
+  return true;
+};
 
 const flushPassiveEffects = () => {
   if (pendingPassiveEffectsRenderPriority !== NoSchedulerPriority) {
@@ -425,27 +481,11 @@ const workLoopSync = () => {
   }
 };
 
-const handleError = (root, thrownValue) => {};
+const handleError = () => {};
 
 const commitBeforeMutationEffects = () => {
   while (nextEffect !== null) {
     const current = nextEffect.alternate;
-
-    if (!shouldFireAfterActiveInstanceBlur && focusedInstanceHandle !== null) {
-      if ((nextEffect.flags & Deletion) !== NoFlags) {
-        if (doesFiberContain(nextEffect, focusedInstanceHandle)) {
-          shouldFireAfterActiveInstanceBlur = true;
-        }
-      } else {
-        if (
-          nextEffect.tag === SuspenseComponent &&
-          isSuspenseBoundaryBeingHidden(current, nextEffect) &&
-          doesFiberContain(nextEffect, focusedInstanceHandle)
-        ) {
-          shouldFireAfterActiveInstanceBlur = true;
-        }
-      }
-    }
 
     const flags = nextEffect.flags;
     if ((flags & Snapshot) !== NoFlags) {
@@ -460,14 +500,78 @@ const commitBeforeMutationEffects = () => {
         });
       }
     }
+
     nextEffect = nextEffect.nextEffect;
   }
 };
+
+const commitMutationEffects = (root, renderPriorityLevel) => {
+  while (nextEffect !== null) {
+    const flags = nextEffect.flags;
+
+    if (flags & ContentReset) {
+      commitResetTextContent(nextEffect);
+    }
+
+    if (flags & Ref) {
+      const current = nextEffect.alternate;
+      if (current !== null) {
+        commitDetachRef(current);
+      }
+    }
+
+    const primaryFlags = flags & (Placement | Update | Deletion | Hydrating);
+    console.log(primaryFlags, '------commitMutationEffects:primaryFlags');
+    switch (primaryFlags) {
+      case Placement: {
+        commitPlacement(nextEffect);
+
+        nextEffect.flags &= ~Placement;
+        break;
+      }
+      case PlacementAndUpdate: {
+        commitPlacement(nextEffect);
+
+        nextEffect.flags &= ~Placement;
+
+        const current = nextEffect.alternate;
+        commitWork(current, nextEffect);
+        break;
+      }
+      case Hydrating: {
+        nextEffect.flags &= ~Hydrating;
+        break;
+      }
+      case HydratingAndUpdate: {
+        nextEffect.flags &= ~Hydrating;
+
+        const current = nextEffect.alternate;
+        commitWork(current, nextEffect);
+        break;
+      }
+      case Update: {
+        const current = nextEffect.alternate;
+        commitWork(current, nextEffect);
+        break;
+      }
+      case Deletion: {
+        commitDeletion(root, nextEffect, renderPriorityLevel);
+        break;
+      }
+    }
+
+    nextEffect = nextEffect.nextEffect;
+  }
+};
+
+const commitLayoutEffects = (root, committedLanes) => {};
 
 const commitRootImpl = (root, renderPriorityLevel) => {
   do {
     flushPassiveEffects();
   } while (rootWithPendingPassiveEffects !== null);
+
+  console.log(executionContext, '------commitRootImpl:executionContext');
 
   invariant(
     (executionContext & (RenderContext | CommitContext)) === NoContext,
@@ -506,10 +610,6 @@ const commitRootImpl = (root, renderPriorityLevel) => {
     workInProgressRoot = null;
     workInProgress = null;
     workInProgressRootRenderLanes = NoLanes;
-  } else {
-    // This indicates that the last root we worked on is not the same one that
-    // we're committing now. This most commonly happens when a suspended root
-    // times out.
   }
 
   let firstEffect;
@@ -525,15 +625,12 @@ const commitRootImpl = (root, renderPriorityLevel) => {
   }
 
   if (firstEffect !== null) {
-    let previousLanePriority;
-
     const prevExecutionContext = executionContext;
     executionContext |= CommitContext;
 
     ReactCurrentOwner.current = null;
 
-    focusedInstanceHandle = prepareForCommit(root.containerInfo);
-    shouldFireAfterActiveInstanceBlur = false;
+    prepareForCommit(root.containerInfo);
 
     nextEffect = firstEffect;
 
@@ -542,15 +639,102 @@ const commitRootImpl = (root, renderPriorityLevel) => {
         commitBeforeMutationEffects();
       } catch (error) {
         invariant(nextEffect !== null, 'Should be working on an effect.');
-        captureCommitPhaseError(nextEffect, error);
+        // captureCommitPhaseError(nextEffect, error);
         nextEffect = nextEffect.nextEffect;
       }
     } while (nextEffect !== null);
+
+    nextEffect = firstEffect;
+
+    console.log({ ...nextEffect }, '------commitMutationEffects>nextEffect');
+
+    do {
+      try {
+        commitMutationEffects(root, renderPriorityLevel);
+      } catch (error) {
+        invariant(nextEffect !== null, 'Should be working on an effect.');
+        // captureCommitPhaseError(nextEffect, error);
+        nextEffect = nextEffect.nextEffect;
+      }
+    } while (nextEffect !== null);
+
+    resetAfterCommit(root.containerInfo);
+
+    root.current = finishedWork;
+    nextEffect = firstEffect;
+
+    // do {
+    //   try {
+    //     commitLayoutEffects(root, lanes);
+    //   } catch (error) {
+    //     invariant(nextEffect !== null, 'Should be working on an effect.');
+
+    //     nextEffect = nextEffect.nextEffect;
+    //   }
+    // } while (nextEffect !== null);
+
+    nextEffect = null;
+
+    requestPaint();
+
+    executionContext = prevExecutionContext;
+  } else {
+    root.current = finishedWork;
   }
+
+  const rootDidHavePassiveEffects = rootDoesHavePassiveEffects;
+
+  if (rootDoesHavePassiveEffects) {
+    rootDoesHavePassiveEffects = false;
+    rootWithPendingPassiveEffects = root;
+    pendingPassiveEffectsLanes = lanes;
+    pendingPassiveEffectsRenderPriority = renderPriorityLevel;
+  } else {
+    nextEffect = firstEffect;
+    while (nextEffect !== null) {
+      const nextNextEffect = nextEffect.nextEffect;
+      nextEffect.nextEffect = null;
+      if (nextEffect.flags & Deletion) {
+        detachFiberAfterEffects(nextEffect);
+      }
+      nextEffect = nextNextEffect;
+    }
+  }
+
+  remainingLanes = root.pendingLanes;
+
+  legacyErrorBoundariesThatAlreadyFailed = null;
+
+  if (remainingLanes === SyncLane) {
+    if (root === rootWithNestedUpdates) {
+      nestedUpdateCount++;
+    } else {
+      nestedUpdateCount = 0;
+      rootWithNestedUpdates = root;
+    }
+  } else {
+    nestedUpdateCount = 0;
+  }
+
+  ensureRootIsScheduled(root, now());
+
+  if (hasUncaughtError) {
+    hasUncaughtError = false;
+    const error = firstUncaughtError;
+    firstUncaughtError = null;
+    throw error;
+  }
+
+  if ((executionContext & LegacyUnbatchedContext) !== NoContext) return null;
+
+  flushSyncCallbackQueue();
+
+  return null;
 };
 
 const commitRoot = (root) => {
   const renderPriorityLevel = getCurrentPriorityLevel();
+  console.log(renderPriorityLevel, '------commitRoot:renderPriorityLevel');
   runWithPriority(
     ImmediateSchedulerPriority,
     commitRootImpl.bind(null, root, renderPriorityLevel)
@@ -595,6 +779,56 @@ const renderRootSync = (root, lanes) => {
   return workInProgressRootExitStatus;
 };
 
+const ensureRootIsScheduled = (root, currentTime) => {
+  const existingCallbackNode = root.callbackNode;
+
+  markStarvedLanesAsExpired(root, currentTime);
+
+  const nextLanes = getNextLanes(
+    root,
+    root === workInProgressRoot ? workInProgressRootRenderLanes : NoLanes
+  );
+  const newCallbackPriority = returnNextLanesPriority();
+
+  if (nextLanes === NoLanes) {
+    if (existingCallbackNode !== null) {
+      cancelCallback(existingCallbackNode);
+      root.callbackNode = null;
+      root.callbackPriority = NoLanePriority;
+    }
+    return;
+  }
+
+  if (existingCallbackNode !== null) {
+    const existingCallbackPriority = root.callbackPriority;
+    if (existingCallbackPriority === newCallbackPriority) return;
+
+    cancelCallback(existingCallbackNode);
+  }
+
+  let newCallbackNode;
+  if (newCallbackPriority === SyncLanePriority) {
+    newCallbackNode = scheduleSyncCallback(
+      performSyncWorkOnRoot.bind(null, root)
+    );
+  } else if (newCallbackPriority === SyncBatchedLanePriority) {
+    newCallbackNode = scheduleCallback(
+      ImmediateSchedulerPriority,
+      performSyncWorkOnRoot.bind(null, root)
+    );
+  } else {
+    const schedulerPriorityLevel =
+      lanePriorityToSchedulerPriority(newCallbackPriority);
+    newCallbackNode = scheduleCallback(
+      schedulerPriorityLevel,
+      performConcurrentWorkOnRoot.bind(null, root)
+    );
+  }
+
+  root.callbackPriority = newCallbackPriority;
+  root.callbackNode = newCallbackNode;
+};
+
 const performSyncWorkOnRoot = (root) => {
   invariant(
     (executionContext & (RenderContext | CommitContext)) === NoContext,
@@ -625,8 +859,6 @@ const performSyncWorkOnRoot = (root) => {
     exitStatus = renderRootSync(root, lanes);
   }
 
-  console.log(exitStatus, root, '------renderRootSync->exitStatus,root');
-
   if (root.tag !== LegacyRoot && exitStatus === RootErrored) {
     executionContext |= RetryAfterError;
 
@@ -639,11 +871,11 @@ const performSyncWorkOnRoot = (root) => {
   const finishedWork = root.current.alternate;
   root.finishedWork = finishedWork;
   root.finishedLanes = lanes;
+
+  console.log({ ...root }, '------performSyncWorkOnRoot>commitRoot(root)');
   commitRoot(root);
 
-  // // Before exiting, make sure there's a callback scheduled for the next
-  // // pending level.
-  // ensureRootIsScheduled(root, now());
+  ensureRootIsScheduled(root, now());
 
   return null;
 };
@@ -669,8 +901,6 @@ const scheduleUpdateOnFiber = (fiber, lane, eventTime) => {
     }
   }
 
-  const priorityLevel = getCurrentPriorityLevel();
-
   if (lane === SyncLane) {
     if (
       (executionContext & LegacyUnbatchedContext) !== NoContext &&
@@ -678,9 +908,28 @@ const scheduleUpdateOnFiber = (fiber, lane, eventTime) => {
     ) {
       performSyncWorkOnRoot(root);
     } else {
-      //
+      ensureRootIsScheduled(root, eventTime);
+      if (executionContext === NoContext) {
+        resetRenderTimer();
+        flushSyncCallbackQueue();
+      }
     }
+  } else {
+    if (
+      (executionContext & DiscreteEventContext) !== NoContext &&
+      (priorityLevel === UserBlockingSchedulerPriority ||
+        priorityLevel === ImmediateSchedulerPriority)
+    ) {
+      if (rootsWithPendingDiscreteUpdates === null) {
+        rootsWithPendingDiscreteUpdates = new Set([root]);
+      } else {
+        rootsWithPendingDiscreteUpdates.add(root);
+      }
+    }
+    ensureRootIsScheduled(root, eventTime);
   }
+
+  mostRecentlyUpdatedRoot = root;
 };
 
 const markSkippedUpdateLanes = (lane) => {
@@ -689,6 +938,8 @@ const markSkippedUpdateLanes = (lane) => {
     workInProgressRootSkippedLanes
   );
 };
+
+const performConcurrentWorkOnRoot = (root) => {};
 
 export {
   NoContext,
