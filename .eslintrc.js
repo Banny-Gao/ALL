@@ -72,6 +72,7 @@ module.exports = {
     'no-control-regex': 'off',
     'no-unused-expressions': 'off',
     'no-unused-expressions': 'off',
+    'new-cap': 'off',
     camelcase: 'off',
   },
 };

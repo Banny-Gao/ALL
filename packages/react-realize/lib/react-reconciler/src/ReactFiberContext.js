@@ -77,6 +77,75 @@ const pushContextProvider = (workInProgress) => {
   return true;
 };
 
+const getUnmaskedContext = (
+  workInProgress,
+  Component,
+  didPushOwnContextIfProvider
+) => {
+  if (didPushOwnContextIfProvider && isContextProvider(Component)) {
+    return previousContext;
+  }
+  return contextStackCursor.current;
+};
+
+const cacheContext = (workInProgress, unmaskedContext, maskedContext) => {
+  const instance = workInProgress.stateNode;
+  instance.__reactInternalMemoizedUnmaskedChildContext = unmaskedContext;
+  instance.__reactInternalMemoizedMaskedChildContext = maskedContext;
+};
+
+const getMaskedContext = (workInProgress, unmaskedContext) => {
+  const type = workInProgress.type;
+  const contextTypes = type.contextTypes;
+  if (!contextTypes) return emptyContextObject;
+
+  const instance = workInProgress.stateNode;
+  if (
+    instance &&
+    instance.__reactInternalMemoizedUnmaskedChildContext === unmaskedContext
+  ) {
+    return instance.__reactInternalMemoizedMaskedChildContext;
+  }
+
+  const context = {};
+  for (const key in contextTypes) {
+    context[key] = unmaskedContext[key];
+  }
+
+  if (instance) {
+    cacheContext(workInProgress, unmaskedContext, context);
+  }
+
+  return context;
+};
+
+const invalidateContextProvider = (workInProgress, type, didChange) => {
+  const instance = workInProgress.stateNode;
+  invariant(
+    instance,
+    'Expected to have an instance by this point. ' +
+      'This error is likely caused by a bug in React. Please file an issue.'
+  );
+
+  if (didChange) {
+    const mergedContext = processChildContext(
+      workInProgress,
+      type,
+      previousContext
+    );
+    instance.__reactInternalMemoizedMergedChildContext = mergedContext;
+
+    pop(didPerformWorkStackCursor, workInProgress);
+    pop(contextStackCursor, workInProgress);
+
+    push(contextStackCursor, mergedContext, workInProgress);
+    push(didPerformWorkStackCursor, didChange, workInProgress);
+  } else {
+    pop(didPerformWorkStackCursor, workInProgress);
+    push(didPerformWorkStackCursor, didChange, workInProgress);
+  }
+};
+
 export {
   emptyContextObject,
   isContextProvider,
@@ -87,4 +156,8 @@ export {
   pushTopLevelContextObject,
   popTopLevelContextObject,
   pushContextProvider,
+  getUnmaskedContext,
+  getMaskedContext,
+  cacheContext,
+  invalidateContextProvider,
 };

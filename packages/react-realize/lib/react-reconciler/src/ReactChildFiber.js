@@ -11,11 +11,8 @@ import {
   REACT_LAZY_TYPE,
 } from '../../ReactSymbols';
 import { Placement, Deletion } from './ReactFiberFlags';
-import {
-  ClassComponent,
-  HostText,
-  Fragment,
-} from './ReactWorkTags';
+import { ClassComponent, HostText, Fragment } from './ReactWorkTags';
+import { emptyRefsObject } from './ReactFiberClassComponent';
 
 const invariant = require('invariant');
 

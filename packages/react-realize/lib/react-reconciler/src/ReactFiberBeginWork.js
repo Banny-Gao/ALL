@@ -4,6 +4,7 @@ import {
   pushTopLevelContextObject,
   isContextProvider,
   pushContextProvider,
+  invalidateContextProvider,
 } from './ReactFiberContext';
 import {
   NoFlags,
@@ -12,8 +13,9 @@ import {
   Hydrating,
   Ref,
   ContentReset,
+  DidCapture,
 } from './ReactFiberFlags';
-import { HostRoot, HostComponent } from './ReactWorkTags';
+import { HostRoot, HostComponent, ClassComponent } from './ReactWorkTags';
 import { pushHostContainer, pushHostContext } from './ReactFiberHostContext';
 import { cloneUpdateQueue, processUpdateQueue } from './ReactUpdateQueue';
 import {
@@ -183,7 +185,80 @@ const updateHostComponent = (current, workInProgress, renderLanes) => {
   return workInProgress.child;
 };
 
-const finishClassComponent = () => {};
+const forceUnmountCurrentAndReconcile = (
+  current,
+  workInProgress,
+  nextChildren,
+  renderLanes
+) => {
+  workInProgress.child = reconcileChildFibers(
+    workInProgress,
+    current.child,
+    null,
+    renderLanes
+  );
+
+  workInProgress.child = reconcileChildFibers(
+    workInProgress,
+    null,
+    nextChildren,
+    renderLanes
+  );
+};
+
+const finishClassComponent = (
+  current,
+  workInProgress,
+  Component,
+  shouldUpdate,
+  hasContext,
+  renderLanes
+) => {
+  markRef(current, workInProgress);
+
+  const didCaptureError = (workInProgress.flags & DidCapture) !== NoFlags;
+
+  if (!shouldUpdate && !didCaptureError) {
+    if (hasContext) {
+      invalidateContextProvider(workInProgress, Component, false);
+    }
+
+    return bailoutOnAlreadyFinishedWork(current, workInProgress, renderLanes);
+  }
+
+  const instance = workInProgress.stateNode;
+
+  ReactCurrentOwner.current = workInProgress;
+  let nextChildren;
+  if (
+    didCaptureError &&
+    typeof Component.getDerivedStateFromError !== 'function'
+  ) {
+    nextChildren = null;
+  } else {
+    nextChildren = instance.render();
+  }
+
+  workInProgress.flags |= PerformedWork;
+  if (current !== null && didCaptureError) {
+    forceUnmountCurrentAndReconcile(
+      current,
+      workInProgress,
+      nextChildren,
+      renderLanes
+    );
+  } else {
+    reconcileChildren(current, workInProgress, nextChildren, renderLanes);
+  }
+
+  workInProgress.memoizedState = instance.state;
+
+  if (hasContext) {
+    invalidateContextProvider(workInProgress, Component, true);
+  }
+
+  return workInProgress.child;
+};
 
 const updateClassComponent = (
   current,

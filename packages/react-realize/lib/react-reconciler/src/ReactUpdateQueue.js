@@ -2,14 +2,14 @@ import { NoLane, NoLanes, isSubsetOfLanes, mergeLanes } from './ReactFiberLane';
 import { Callback, ShouldCapture, DidCapture } from './ReactFiberFlags';
 import { markSkippedUpdateLanes } from './ReactFiberWorkLoop';
 
-export const UpdateState = 0;
-export const ReplaceState = 1;
-export const ForceUpdate = 2;
-export const CaptureUpdate = 3;
+const UpdateState = 0;
+const ReplaceState = 1;
+const ForceUpdate = 2;
+const CaptureUpdate = 3;
 
 let hasForceUpdate = false;
 
-export const createUpdate = (eventTime, lane) => {
+const createUpdate = (eventTime, lane) => {
   const update = {
     eventTime,
     lane,
@@ -23,7 +23,7 @@ export const createUpdate = (eventTime, lane) => {
   return update;
 };
 
-export const initializeUpdateQueue = (fiber) => {
+const initializeUpdateQueue = (fiber) => {
   const queue = {
     baseState: fiber.memoizedState,
     firstBaseUpdate: null,
@@ -37,7 +37,7 @@ export const initializeUpdateQueue = (fiber) => {
   fiber.updateQueue = queue;
 };
 
-export const enqueueUpdate = (fiber, update) => {
+const enqueueUpdate = (fiber, update) => {
   const { updateQueue } = fiber;
 
   if (!updateQueue) return;
@@ -54,7 +54,7 @@ export const enqueueUpdate = (fiber, update) => {
   sharedQueue.pending = update;
 };
 
-export const cloneUpdateQueue = (current, workInProgress) => {
+const cloneUpdateQueue = (current, workInProgress) => {
   const queue = workInProgress.updateQueue;
   const currentQueue = current.updateQueue;
   if (queue === currentQueue) {
@@ -112,12 +112,7 @@ const getStateFromUpdate = (
   return prevState;
 };
 
-export const processUpdateQueue = (
-  workInProgress,
-  props,
-  instance,
-  renderLanes
-) => {
+const processUpdateQueue = (workInProgress, props, instance, renderLanes) => {
   const queue = workInProgress.updateQueue;
 
   hasForceUpdate = false;
@@ -126,7 +121,9 @@ export const processUpdateQueue = (
   let lastBaseUpdate = queue.lastBaseUpdate;
 
   let pendingQueue = queue.shared.pending;
-  
+
+  console.log({ ...pendingQueue }, '------processUpdateQueue:pendingQueue');
+
   if (pendingQueue !== null) {
     queue.shared.pending = null;
 
@@ -252,8 +249,22 @@ export const processUpdateQueue = (
   }
 };
 
-export const resetHasForceUpdateBeforeProcessing = () => {
+const resetHasForceUpdateBeforeProcessing = () => {
   hasForceUpdate = false;
 };
 
-export const checkHasForceUpdateAfterProcessing = () => hasForceUpdate;
+const checkHasForceUpdateAfterProcessing = () => hasForceUpdate;
+
+export {
+  UpdateState,
+  ReplaceState,
+  ForceUpdate,
+  CaptureUpdate,
+  createUpdate,
+  initializeUpdateQueue,
+  enqueueUpdate,
+  cloneUpdateQueue,
+  processUpdateQueue,
+  resetHasForceUpdateBeforeProcessing,
+  checkHasForceUpdateAfterProcessing,
+};
