@@ -14,6 +14,7 @@ import {
   Ref,
   ContentReset,
   DidCapture,
+  PerformedWork,
 } from './ReactFiberFlags';
 import { HostRoot, HostComponent, ClassComponent } from './ReactWorkTags';
 import { pushHostContainer, pushHostContext } from './ReactFiberHostContext';
@@ -39,8 +40,11 @@ import {
   resumeMountClassInstance,
   updateClassInstance,
 } from './ReactFiberClassComponent';
+import ReactSharedInternals from '../../ReactSharedInternals';
 
 const invariant = require('invariant');
+
+const { ReactCurrentDispatcher, ReactCurrentOwner } = ReactSharedInternals;
 
 let didReceiveUpdate = false;
 
@@ -108,6 +112,10 @@ const updateHostRoot = (current, workInProgress, renderLanes) => {
   const prevChildren = prevState !== null ? prevState.element : null;
   cloneUpdateQueue(current, workInProgress);
   processUpdateQueue(workInProgress, nextProps, null, renderLanes);
+  console.log(
+    { ...workInProgress },
+    '------updateHostRoot>processUpdateQueue:workInProgress'
+  );
 
   const nextState = workInProgress.memoizedState;
   const nextChildren = nextState.element;
@@ -238,6 +246,8 @@ const finishClassComponent = (
   } else {
     nextChildren = instance.render();
   }
+
+  console.log({ ...nextChildren }, '-------finishClassComponent:nextChildren');
 
   workInProgress.flags |= PerformedWork;
   if (current !== null && didCaptureError) {

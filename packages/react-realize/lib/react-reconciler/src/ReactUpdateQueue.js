@@ -139,6 +139,7 @@ const processUpdateQueue = (workInProgress, props, instance, renderLanes) => {
     lastBaseUpdate = lastPendingUpdate;
 
     const current = workInProgress.alternate;
+    console.log({ ...current }, '------processUpdateQueue:current');
     if (current !== null) {
       const currentQueue = current.updateQueue;
       const currentLastBaseUpdate = currentQueue.lastBaseUpdate;

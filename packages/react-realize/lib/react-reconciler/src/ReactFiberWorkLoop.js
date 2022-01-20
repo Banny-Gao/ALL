@@ -476,9 +476,11 @@ const performUnitOfWork = (unitOfWork) => {
 };
 
 const workLoopSync = () => {
-  // while (workInProgress !== null) {
-  performUnitOfWork(workInProgress);
-  // }
+  let i = 0;
+  while (workInProgress !== null && i < 4) {
+    i++;
+    performUnitOfWork(workInProgress);
+  }
 };
 
 const handleError = () => {};

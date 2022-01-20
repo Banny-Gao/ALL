@@ -97,9 +97,14 @@ const constructClassInstance = (workInProgress, ctor, props) => {
     context = readContext(contextType);
   } else {
     unmaskedContext = getUnmaskedContext(workInProgress, ctor, true);
+
+    console.log(
+      { ...unmaskedContext },
+      '------constructClassInstance:unmaskedContext'
+    );
+
     const contextTypes = ctor.contextTypes;
-    isLegacyContextConsumer =
-      contextTypes !== null && contextTypes !== undefined;
+    isLegacyContextConsumer = !!contextTypes;
     context = isLegacyContextConsumer
       ? getMaskedContext(workInProgress, unmaskedContext)
       : emptyContextObject;
@@ -111,6 +116,7 @@ const constructClassInstance = (workInProgress, ctor, props) => {
       ? instance.state
       : null;
   adoptClassInstance(workInProgress, instance);
+  console.log(instance, '------constructClassInstance:instance')
 
   if (isLegacyContextConsumer) {
     cacheContext(workInProgress, unmaskedContext, context);
