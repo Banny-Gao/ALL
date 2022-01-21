@@ -201,6 +201,7 @@ const ChildReconciler = (shouldTrackSideEffects) => {
         element.key
       );
       created.return = returnFiber;
+
       return created;
     } else {
       const created = createFiberFromElement(element, returnFiber.mode, lanes);
