@@ -7,7 +7,7 @@ import React, { Component, Fragment } from 'react-realize/lib/react';
 import { render } from 'react-realize/lib/react-dom';
 
 interface IProp {
-  onClick?: () => void;
+  onClick?: (text?: string) => void;
 }
 interface IState {
   text: string;
@@ -17,20 +17,26 @@ class HelloWorld extends Component<IProp, IState> {
     text: 'hello world',
   };
 
+  static getDerivedStateFromProps(nextProps: any, prevState: any) {
+    console.log('getDerivedStateFromProps:', nextProps, prevState,);
+
+    return null
+  }
+
   render() {
     const { onClick } = this.props;
     const { text } = this.state;
 
     return (
       <Fragment>
-        <span onClick={onClick}>{text}</span>
+        <span onClick={() => onClick?.(text)}>{text}</span>
       </Fragment>
     );
   }
 }
 
 render(
-  <HelloWorld onClick={() => console.log('Hello World')} />,
+  <HelloWorld onClick={(text) => console.log(text)} />,
   document.querySelector('#root'),
   (context: any) => {
     console.log(context);

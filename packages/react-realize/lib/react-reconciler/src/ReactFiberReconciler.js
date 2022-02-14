@@ -52,7 +52,7 @@ export const updateContainer = (
   const current = container.current;
   const eventTime = requestEventTime();
 
-  const lane = requestUpdateLane(current); // SyncLane: 1
+  const lane = requestUpdateLane(current);
 
   const context = getContextForSubtree(parentComponent);
 

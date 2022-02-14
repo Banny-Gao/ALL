@@ -476,14 +476,12 @@ const performUnitOfWork = (unitOfWork) => {
 };
 
 const workLoopSync = () => {
-  let i = 0;
-  while (workInProgress !== null && i < 4) {
-    i++;
+  let i = 0
+  while (workInProgress !== null && i < 5) {
     performUnitOfWork(workInProgress);
+    i++
   }
 };
-
-const handleError = () => {};
 
 const commitBeforeMutationEffects = () => {
   while (nextEffect !== null) {

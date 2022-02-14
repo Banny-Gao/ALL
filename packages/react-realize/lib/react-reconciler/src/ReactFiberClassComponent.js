@@ -1,4 +1,5 @@
 import { Component } from '../../react';
+import { NoLanes } from './ReactFiberLane';
 import {
   cacheContext,
   getMaskedContext,
@@ -116,7 +117,7 @@ const constructClassInstance = (workInProgress, ctor, props) => {
       ? instance.state
       : null;
   adoptClassInstance(workInProgress, instance);
-  console.log(instance, '------constructClassInstance:instance')
+  console.log(instance, '------constructClassInstance:instance');
 
   if (isLegacyContextConsumer) {
     cacheContext(workInProgress, unmaskedContext, context);
