@@ -467,7 +467,7 @@ const performUnitOfWork = (unitOfWork) => {
   unitOfWork.memoizedProps = unitOfWork.pendingProps;
 
   if (next === null) {
-    // completeUnitOfWork(unitOfWork);
+    completeUnitOfWork(unitOfWork);
   } else {
     workInProgress = next;
   }
@@ -476,10 +476,8 @@ const performUnitOfWork = (unitOfWork) => {
 };
 
 const workLoopSync = () => {
-  let i = 0
-  while (workInProgress !== null && i < 5) {
+  while (workInProgress !== null) {
     performUnitOfWork(workInProgress);
-    i++
   }
 };
 
@@ -751,14 +749,14 @@ const renderRootSync = (root, lanes) => {
     prepareFreshStack(root, lanes);
   }
 
-  // do {
-  // try {
-  workLoopSync();
-  // break;
-  // } catch (thrownValue) {
-  //   handleError(root, thrownValue);
-  // }
-  // } while (true);
+  do {
+    try {
+      workLoopSync();
+      break;
+    } catch (thrownValue) {
+      // handleError(root, thrownValue);
+    }
+  } while (true);
 
   resetContextDependencies();
   executionContext = prevExecutionContext;
