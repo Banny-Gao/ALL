@@ -182,18 +182,19 @@ class Timer {
   - 反向代理服务器
 
 ## HTTP
-- HTTP方法： GET 、POST 、 PUT 、DELETE 、 OPTIONS(查询 URL 是否支持) 、HEAD(不返回主体) 、 CONNECT(加密传输)
-- HTTP状态码: 
+
+- HTTP 方法： GET 、POST 、 PUT 、DELETE 、 OPTIONS(查询 URL 是否支持) 、HEAD(不返回主体) 、 CONNECT(加密传输)
+- HTTP 状态码:
   - 1xx: Information (信息)
   - 2xx: Success (成功)
     - **200** OK
-    - **204** No Content 
-    - **204** No Content 
+    - **204** No Content
+    - **204** No Content
   - 3xx: Redirect (重定向)
     - **301** 永久性重定向
     - **302** 临时性重定向
-    - **303**  GET 方法临时性重定向
-    - **304** Not Modified，判断Request Header字段(If-Match，If-Modified-Since等)，不满足时返回
+    - **303** GET 方法临时性重定向
+    - **304** Not Modified，判断 Request Header 字段(If-Match，If-Modified-Since 等)，不满足时返回
   - 4xx: Client Error (客户端错误)
     - **400** Bad Request,语法错误
     - **401** Unauthorized，认证失败
@@ -203,10 +204,42 @@ class Timer {
     - **500** Internal Server Error
     - **503** Service Unavailable 超负载或无法处理请求
 
-## 布局和文档流
-- display
-  - block
+## 文档流和布局
 
+- 文档流：元素排列时所占得位置，自上而下(块级元素)，自左而右(内联元素)，normal flow(正常布局流)
+- 脱离文档流：float 和 定位会使元素脱离文档流
+- BFC：块级格式化上下文，独立的渲染区域
+  - 自上而下排布
+  - 同一 BFC 两块元素质检的 margin 会重叠
+  - BFC 区域不会与浮动元素重叠。
+  - float 元素也会参与高度计算
+  - 清除浮动即是触发父级 BFC
+
+```css
+.clearfix:after {
+  content: '';
+  visibility: hidden;
+  display: block;
+  height: 0;
+  clear: both;
+}
+```
+
+- display: none | initial | inherit | inline | block | flex | gird | table | table-cell | table-column | table-row | inline-block | inline-flex | inline-grid | inline-table | list-item
+- 定位：static | relative | absolute | fixed | sticky
+- Flex 布局
+  - 主轴（main axis）
+  - 交叉抽（cross axis）
+  - flex-direction：row | column | revert | row-reverse | column-reverse 指定主轴方向
+  - flex-wrap
+  - flex-flow: flex-direction 和 flex-wrap 的缩写
+  - flex-shrink: 默认宽度之和大于容器的时候才会发生收缩
+  - flex-basis: 元素在主轴方向上的初始大小
+  - flex: flex-flow 、 flex-shrink 、 flex-basis 的缩写
+  - align-items: 控制交叉轴，
+  - 子元素用 align-self 覆盖 align-items 规则, 通过 **order** 改变排序，而不影响 dom 树结构
+  - justify-content: 控制主轴
+- Grid 布局
 
 ## DevTools
 
