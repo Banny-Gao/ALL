@@ -279,19 +279,80 @@ class Timer {
 - Audits - 审计，自动化测试工具
 
 ## 盒模型 box-sizing
+
 - 标准盒模型: content-box，不包括 padding 和 margin
-- IE盒模型: border-box，包括 padding 和 margin
+- IE 盒模型: border-box，包括 padding 和 margin
 
 ## 自适应与响应式(Media Query)
+
 - 自适应：不同大小的终端上自适应显示
-  - vw 、vh 、 vmin 、 vmax 
+  - vw 、vh 、 vmin 、 vmax
   - 百分比
-  - rem 
+  - rem
 - 响应式: 不同终端下，显示效果不一样
   - meta viewport
   - @media screen and (min-width: 500px)
 
 ## 防抖节流
+
+- 防抖: 某个时间段内，函数只在最后一次执行
+- 节流: 过滤多次执行，变成每隔一段时间执行
+
+```js
+const debounce = (fn = () => {}, wait = 0, immediate = false) => {
+  let timer, context;
+
+  const later = (...args) => {
+    timer = setTimeout(() => {
+      !immediate && fn.apply(context, args);
+
+      clearTimeout(timer);
+      timer = null;
+    }, wait);
+  };
+
+  return function (...args) {
+    context = this;
+
+    if (!timer) immediate && fn.apply(this, args);
+    else clearTimeout(timer);
+
+    later(...args);
+  };
+};
+```
+
+```js
+const throttle = (fn = () => {}, wait = 0, leading = true) => {
+  let timer,
+    context,
+    lastTime = 0;
+
+  const later = (...args) => {
+    fn.apply(context, args);
+
+    clearTimeout(timer);
+    timer = null;
+
+    lastTime = leading ? Date.now() : 0;
+  };
+
+  return function () {
+    context = this;
+
+    const time = Date.now();
+
+    if (!timer && !leading) lastTime = time;
+
+    const remaining = wait - (time - lastTime);
+
+    if (remaining <= 0) later(...args);
+    else if (!timer && !leading) {
+      timer = setTimeout(() => later(...args), remaining);
+    }
+  };
+};
+```
 
 ## requestAnimationFrame
 
@@ -336,6 +397,7 @@ class Timer {
 ## 加密方式
 
 ## 上传与流文件下载
+
 - 上传
   - input file & formData: file | blob | base64
     - 分片上传: slice 分片
