@@ -381,6 +381,8 @@ const throttle = (fn = () => {}, wait = 0, leading = true) => {
   - Get 请求不对数据进行修改
   - 校验 Referer 字段
   - 校验 Token 、 验证码
+- undefined 是不安全的，undefined 可做变量
+- 隐形字符 「ㅤ」(十六进制格式为 0x3164),转义为 \u3164
 
 ## PWA
 
