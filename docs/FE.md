@@ -323,42 +323,97 @@ const debounce = (fn = () => {}, wait = 0, immediate = false) => {
 ```
 
 ```js
-const throttle = (fn = () => {}, wait = 0, leading = true) => {
+const throttle = (
+  fn,
+  wait,
+  { leading, trailing } = {
+    leading: true,
+    trailing: false,
+  }
+) => {
   let timer,
     context,
     lastTime = 0;
 
   const later = (...args) => {
-    fn.apply(context, args);
+    fn.apply(context, ...args);
 
     clearTimeout(timer);
     timer = null;
-
-    lastTime = leading ? Date.now() : 0;
+    lastTime = Date.now();
   };
 
-  return function () {
+  return function (...args) {
     context = this;
-
     const time = Date.now();
 
-    if (!timer && !leading) lastTime = time;
+    if (!timer && trailing) lastTime = time;
 
-    const remaining = wait - (time - lastTime);
+    const delay = wait - (time - lastTime);
 
-    if (remaining <= 0) later(...args);
-    else if (!timer && !leading) {
-      timer = setTimeout(() => later(...args), remaining);
+    if (leading && delay <= 0) later(...args);
+    else if (!timer && trailing) {
+      timer = setTimeout(() => later(...args), delay);
     }
   };
 };
 ```
 
-## requestAnimationFrame
+## requestAnimationFrame & cancelAnimationFrame
+
+- IE 10
+- 重绘之前调用回调函数
+- 与屏幕刷新评率有关，电脑越好性能越佳
+- 精度高，1ms
+- 运行在后台标签页或者隐藏的 <iframe> 里时，会被暂停调用
 
 ## IntersectionObserver 与 MutationObserver
 
+- intersectionObserver: 观察目标元素与其祖先元素或顶级文档视窗交叉状态
+- mutationObserver: 监视对 DOM 树所做更改
+
 ## requestIdleCallback
+
+- 在事件循环空闲时调用 callback，callback 接收参数 IdleDeadline，用来判断超时前 callback 是否被执行，以及还剩多少闲置时间可以执行耗时任务
+
+```js
+const handleCallback = (idleDeadline) => {
+  console.log(idleDeadline.didTimeout);
+
+  if (idleDeadline.timeRemaining() < 10)
+    return requestIdleCallback(handleCallback);
+
+  console.log('free callback start');
+
+  setTimeout(() => console.log('time in requestIdleCallback'));
+
+  console.log('free callback end');
+};
+
+const work = () => {
+  console.log('start');
+
+  requestIdleCallback(handleCallback);
+
+  console.log('mid');
+
+  setTimeout(() => console.log('time delay 1ms'));
+  setTimeout(() => console.log('time delay 10ms'), 10);
+  setTimeout(() => console.log('time after style delay 1s'), 1000);
+
+  requestIdleCallback(() => {
+    console.log('free 2');
+  });
+
+  console.log('end');
+};
+
+work();
+```
+
+- **React** 实现了自己的一套 requestIdleCallback，**Schedular** + **Lane**
+  - 处理兼容
+  - 多平台
 
 ## CSS 3D
 
@@ -390,6 +445,8 @@ const throttle = (fn = () => {}, wait = 0, leading = true) => {
 
 ## getter 、 setter 与 Object.defineProperty
 
+## valueOf 、 toString 与隐式转换
+
 ## 面向对象与原型链
 
 ## Promise
@@ -398,7 +455,7 @@ const throttle = (fn = () => {}, wait = 0, leading = true) => {
 
 ## 加密方式
 
-## 上传与流文件下载
+## 文件上传与下载
 
 - 上传
   - input file & formData: file | blob | base64
@@ -406,3 +463,5 @@ const throttle = (fn = () => {}, wait = 0, leading = true) => {
     - 断点上传: ${hash}-${i} 设置分片名，跳过已上传
   - onDrop 、 onDragOver: e.dataTransfer?.files
 - 下载
+  - blob: to array buffer + URL.createObjectURL + a 标签
+  - 
