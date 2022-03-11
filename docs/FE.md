@@ -73,7 +73,7 @@
     - **CSS 3D**, 加 z-index， 人为干扰复合层的排序
     - **CSS filter**
     - **CSS3 动画**
-    - <video>，<canvas> 和 <iframe> 节点
+    - \<video>，\<canvas> 和 \<iframe> 节点
     - will-change （最后的优化手段）
 
 ## Web Worker
@@ -98,7 +98,7 @@
 
 ## Event Loop
 
-- JS 执行环境会被加入执行栈
+- JS 执行环境会被加入执行**栈**
 - 异步任务被挂起到 Task
 - Task 分为 microtask 和 macrotask
   - 微任务: **promise** ，Object.observe ，IntersectionObserver 、 MutationObserver
@@ -365,7 +365,7 @@ const throttle = (
 - 重绘之前调用回调函数
 - 与屏幕刷新评率有关，电脑越好性能越佳
 - 精度高，1ms
-- 运行在后台标签页或者隐藏的 <iframe> 里时，会被暂停调用
+- 运行在后台标签页或者隐藏的 \<iframe> 里时，会被暂停调用
 
 ## IntersectionObserver 与 MutationObserver
 
@@ -417,13 +417,30 @@ work();
 
 ## CSS 3D
 
+- transform
+- transform-origin
+- transform-style: flat | preserve-3d
+- perspective: length | none
+- perspective-origin
+- backface-visibility: visible|hidden
+
 ## CSS filter
+
+- filter: none | blur(px) | brightness(%) | contrast(%) | drop-shadow(h-shadow v-shadow blur spread color) | grayscale(%) | hue-rotate(deg) | invert(%) | opacity(%) | saturate(%) | sepia(%) | url()
 
 ## CSS3 动画
 
+- @keyframes
+- animation: animation-name | animation-duration | animation-timing-function | animation-delay | animation-iteration-count |animation-direction | animation-fill-mode | animation-play-state
+
 ## canvas
+- 原生
+- konva
+- echarts | dataV | d3
+- 离屏渲染: 创建缓冲区，额外的 canvas
 
 ## iframe
+- 主域相同子域不同: 设置相同 document.domain 解决跨域
 
 ## web 存储
 
@@ -441,15 +458,52 @@ work();
 
 ## PWA
 
-## 深拷贝与浅拷贝
+## 深拷贝
+
+- JSON.parse(JSON.stringify(obj)): 不能处理函数、正则、 Error 、Date，NaN、Infinity 、undefined 、Symbol 以及 循环引用对象
+- Object.assign: 第一层深拷贝
+- MessageChannel: 异步 、 不能处理函数等
+- \_.cloneDeep
+- 深度优先克隆: Object.prototype.call 判断类型 、判断循环引用、递归克隆
+- 广度优先克隆
 
 ## getter 、 setter 与 Object.defineProperty
 
 ## valueOf 、 toString 与隐式转换
 
-## 面向对象与原型链
+## 面向对象与原型
+
+- 特点: 封装、继承、多态
+- 对象创建: 字段量、new Object 、工厂函数、构造函数、 class
+- 继承(子类能替换所有父类): 构造函数 call(this) 、 原型链继承 、组合继承、 class 的 extends
+- 原型链
+  - 对象 [[Prototype]] 指向其构造函数的 prototype
+  - 构造函数 prototype 的 [[Prototype]] 或 \_\_proto\_\_ 向其构造函数的 prototype
+  - 链式向上，直到指向 Object.prototype, Object.prototype 的 \_\_proto\_\_ 为 null
+  - constroctor 指向其本身
+- 设计模式
+  - 单例
+  - 工厂
+  - 享元
+  - 代理
+  - 策略
+  - 观察者 / 发布订阅
+  - 职责链
+  - 装饰者
+
+## new 与 instanceof
+
+## 观察者 / 发布订阅模式
+
+## 装饰器
+
+## 堆和栈
 
 ## Promise
+
+## async 与 generator
+
+## 状态机
 
 ## valueOf 与 隐式转换
 
@@ -463,5 +517,10 @@ work();
     - 断点上传: ${hash}-${i} 设置分片名，跳过已上传
   - onDrop 、 onDragOver: e.dataTransfer?.files
 - 下载
-  - blob: to array buffer + URL.createObjectURL + a 标签
-  - 
+  - URL.createObjectURL(可能会跨域) + a 标签
+
+## 跨域
+
+## 页面通信
+
+## 递归
