@@ -48,20 +48,21 @@
 
 ## 重绘回流（Repaint/Reflow）
 
-- 重绘: 更改外观而不影响布局, color
-- 回流: 布局或几何属性改变
-  - window 大小
-  - 字体
-  - 定位或浮动
-  - **盒模型**
+- 重绘: 更改界面外观而不影响布局
+  - 界面: color 、outline 、background 、box-shadow 、filter、opacity 、border-radius 、background-size 、visibility
+  - 文字: text 、font 、word
+- 回流(重排): 布局或几何属性改变，获取布局信息
+  - 布局: display 、float 、position
+  - 尺寸: margin、padding、border、width、height
+  - 获取布局信息: offsetTop 、 scrollTop、 clientTop 、getComputedStyle 、getBoundingClientRect
 - 回流必定会发生重绘，重绘不一定会引发回流，与 Event loop 有关
   - 执行完 microtask 后，判断 document 是否需要更新
   - 判断是否有 resize 或者 scroll, 触发事件， 16ms 一次，自带**节流**
-  - 判断是否触发 **media query**
+  - 判断是否触发 **Media Query**
   - 更新动画以及事件
   - 判断是否有全屏操作事件
   - 执行 **requestAnimationFrame** 回调
-  - 执行 **IntersectionObserver** 回调
+  - 执行 **IntersectionObserver** ，**MutationObserver** 回调
   - 以上是*一帧*，有空闲时间，执行 **requestIdleCallback** 回调
 - 优化
   - transform 替代定位
@@ -98,7 +99,7 @@
 
 ## Event Loop
 
-- JS 执行环境会被加入执行**栈**
+- **js 执行环境**会被加入执行**栈**
 - 异步任务被挂起到 Task
 - Task 分为 microtask 和 macrotask
   - 微任务: **promise** ，Object.observe ，IntersectionObserver 、 MutationObserver
@@ -278,6 +279,11 @@ class Timer {
 - Security - 安全分析
 - Audits - 审计，自动化测试工具
 
+## getComputedStyle 与 getBoundingClientRect
+
+- getComputedStyle: 获取元素计算属性，第二个参数指定**伪元素**，使用 getPropertyValue 获取属性值
+- getBoundingClientRect: 返回元素的大小及其相对于视口的位置
+
 ## 盒模型 box-sizing
 
 - 标准盒模型: content-box，不包括 padding 和 margin
@@ -291,12 +297,20 @@ class Timer {
   - rem
 - 响应式: 不同终端下，显示效果不一样
   - meta viewport
-  - @media screen and (min-width: 500px)
+  - @media screen
+    - and 、not 、 or
+    - min-width 、 min-device-pixel-radio
+  - 设备像素比: window.devicePixelRatio 物理像素分辨率与 CSS 像素分辨率之比， DPR = 设备像素 / 独立像素
+  - px: 不是一个确定的物理量也不是一个点，是抽象概念，是图像显示的基本单元
+  - pt: 绝对单位 1pt = 1/72(inch)
+  - dpi: CSS 像素 = 设备独立像素 = 逻辑像素
+  - ppi: 像素密度
 
 ## 防抖节流
 
 - 防抖: 某个时间段内，函数只在最后一次执行
 - 节流: 过滤多次执行，变成每隔一段时间执行
+- 实现: 闭包
 
 ```js
 const debounce = (fn = () => {}, wait = 0, immediate = false) => {
@@ -434,15 +448,28 @@ work();
 - animation: animation-name | animation-duration | animation-timing-function | animation-delay | animation-iteration-count |animation-direction | animation-fill-mode | animation-play-state
 
 ## canvas
+
 - 原生
 - konva
 - echarts | dataV | d3
 - 离屏渲染: 创建缓冲区，额外的 canvas
 
 ## iframe
-- 主域相同子域不同: 设置相同 document.domain 解决跨域
+
+- 主域相同子域不同: 设置相同 document.domain ，使用 postMessage 跨域通讯
+- 会阻塞页面加载
 
 ## web 存储
+
+- storage
+  - sessionStorage
+  - localStorage
+  - storage event
+- indexedDB
+  - 可存储结构化克隆对象
+  - 异步存储，webworker 支持同步 API
+  - localForage ，web 存储 Polyfill
+- webSQL: deprecated
 
 ## web 安全
 
@@ -469,7 +496,38 @@ work();
 
 ## getter 、 setter 与 Object.defineProperty
 
+- getter: 返回动态计算值的属性
+- setter: 改变属性值时被执行
+- defineProperty
+  - configurable: 是否可删除
+  - enumerable: 是否可枚举， for...in 遍历(包括继承的可枚举属性，除了 Symbol)
+    - 判断: hasOwnProperty 获取自身属性，propertyIsEnumerable 判断是否可枚举
+    - 访问: Object.keys 、 getOwnPropertySymbols 返回自身 Symbol
+  - writable: 是否可变
+  - value: 属性值，不与 get 、 set 共存
+
 ## valueOf 、 toString 与隐式转换
+
+- 原始类型转换: 调用转换函数 Number 、 String 、Boolean
+- 引用类型转换
+  - 预期转 Number ， 先 valueOf 后 toString
+  - 预期转 String，先 toString 后 valueOf
+  - 受 \[Symbol.toPrimitive] 影响
+  - symbol 不能转 string 或 number，使用 toString() 转字符串
+- 单运算与隐式转换
+  - 一元运算(+-\*/): 预期转 number
+  - 位非(~): 预期转 number
+  - 逻辑非(!): 预期转 boolean
+  - 递增/递减: 预期转 number
+- 表达式中的隐式转换
+  - 加号(+)运算
+    - 上下文有字符串: 转 string
+    - 上下文无字符串: 基本类型预期转 number，非基本类型预期转 string，注意 {} + undefined， {} 在前，作为代码块，与 ({}) + undefined 存在差异
+  - 其他运算: 预期转 number
+  - == 与 !=
+    - 转成相同类型再比较
+    - 类型相同的非基本类型，比较内存中的地址
+    - ![] == []，!Boolean([]) == []，false == []，0 == 0
 
 ## 面向对象与原型
 
@@ -490,12 +548,68 @@ work();
   - 观察者 / 发布订阅
   - 职责链
   - 装饰者
+- new 与 instanceof
+  - 创建一个新的对象
+  - \_\_proto\_\_ 连接原型
+  - **apply** 执行构造函数， 绑定 this，
+  - 返回对象
 
-## new 与 instanceof
+```js
+const create = (ctor, ...args) => {
+  const obj = new Object();
 
-## 观察者 / 发布订阅模式
+  obj.__proto__ = ctor.prototype;
 
-## 装饰器
+  const result = ctor.apply(obj, args);
+
+  return typeof result === 'object' ? result : obj;
+};
+```
+
+- instanceof
+- 沿着原型链，判断对象 \_\_proto\_\_ 是否等于 类型的 prototype
+
+```js
+const fakeInstanceof = (instance, Ctor) => {
+  let proto = instance.__proto__;
+
+  while (true) {
+    if (proto === null) return false;
+    if (proto === Ctor.prototype) return true;
+    proto = proto.__proto__;
+  }
+};
+```
+
+## 执行上下文与词法作作用域
+
+- 执行上下文
+  - 全局上下文
+  - 函数上下文
+  - eval 上下文
+- 词法作用域: 执行上下文创建，存储标识符和实际引用之间的映射，使用 with 改变
+  - 全局作用域
+  - 模块作用域
+  - 函数作用域
+
+```js
+var a = { b: 1, c: 2 };
+var b = 3;
+
+with (a) {
+  var c = 4;
+  console.log(b, this.b, c, a);
+  // 1,3,4,{ b: 1, c: 4 }
+}
+```
+
+## eval 实现
+
+```js
+function fakeEval(exp) {
+  return new Function('return ' + exp).call(this);
+}
+```
 
 ## 堆和栈
 
@@ -504,8 +618,6 @@ work();
 ## async 与 generator
 
 ## 状态机
-
-## valueOf 与 隐式转换
 
 ## 加密方式
 
@@ -519,8 +631,16 @@ work();
 - 下载
   - URL.createObjectURL(可能会跨域) + a 标签
 
+## css 选择器 、伪类与伪元素
+
 ## 跨域
 
 ## 页面通信
 
 ## 递归
+
+## call & apply & bind
+
+## 闭包
+
+## 浏览器垃圾回收机制
