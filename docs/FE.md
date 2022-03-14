@@ -567,7 +567,7 @@ const create = (ctor, ...args) => {
 ```
 
 - instanceof
-- 沿着原型链，判断对象 \_\_proto\_\_ 是否等于 类型的 prototype
+  - 沿着原型链，判断对象 \_\_proto\_\_ 是否等于 类型的 prototype
 
 ```js
 const fakeInstanceof = (instance, Ctor) => {
@@ -611,13 +611,224 @@ function fakeEval(exp) {
 }
 ```
 
-## 堆和栈
+## 栈和堆
 
-## Promise
+- 栈: 自动分配相对固定大小的内存空间, FILO(后进先出)
+  - 速度快，容量小
+  - 基本数据类型
+  - 值传递
+- 堆: 动态分配大小不固定不会自动释放的内存空间,无序树状结构，支持 key/value 存储方式
+  - 速度慢，容量大
+  - 引用数据类型
+  - 地址传递，地址指针存储在栈中
 
-## async 与 generator
+## 异步解决方案
+
+- callback
+- 事件监听
+
+发布订阅发布订阅实现 event bus
+
+```js
+const eventBus = () => {
+  subs = new Map();
+
+  return {
+    subs,
+    $on(type, callback) {
+      const sub = subs.get(type);
+      const isEmpty = sub && sub.push(callback);
+      if (!isEmpty) {
+        subs.set(type, [callback]);
+      }
+    },
+    $emit(type, ...payload) {
+      (subs.get(type) || []).forEach((fn) => {
+        fn(...payload);
+      });
+    },
+    $off(type, callback) {
+      const sub = subs.get(type);
+      if (sub) {
+        sub.splice(sub.indexOf(callback) >>> 0, 1);
+      }
+    },
+  };
+};
+```
+
+- generator/yield
+  - 返回 iterator 对象 Generator
+  - next
+    - value
+    - done
+  - return
+  - throw
+- async/await
+  - await Promise
+  - await Thenable Objects, { then: (resolve, reject) => {} }
+  - for await ... of,抛出异常会中断循环
+
+实现 async, 自执行 generator 包装函数
+
+```js
+const generatorRun = (genFunc) => {
+  return new Promise((resolve, reject) => {
+    const gen = genFunc();
+
+    const run = (next, prevValue) => {
+      try {
+        const { value, done } = next(prevValue);
+
+        if (done) return resolve(value);
+        else return Promise.resolve(value).then(() => run(next, value));
+      } catch (e) {
+        return reject(e);
+      }
+    };
+
+    run(gen.next.bind(gen));
+  });
+};
+```
+
+- ## promise
+- 三种状态: PENDING 、 FULFILLED 、 REJECTED
+- 六个静态方法: resolve 、 reject 、 any 、 race 、 all 、allSettled
+- 三个原型方法: then 、 catch 、 finally
+- 构造函数: 初始化状态、初始值、 fulfilled queues 、 rejected queues
+- 私有方法: #run 、 #resolve 、#reject
+
+```js
+const StatusMap = {
+  PENDING: 'pending',
+  FULFILLED: 'fulfilled',
+  REJECTED: 'rejected',
+};
+
+class Promise {
+  static resolve(value) {
+    return new Promise((resolve) => resolve(value));
+  }
+
+  static reject(value) {
+    return new Promise((resolve, reject) => reject(value));
+  }
+
+  static race(iterable) {
+    return new Promise((resolve, reject) => {
+      iterable.forEach((promise) => {
+        Promise.resolve(promise).then(resolve, reject);
+      });
+    });
+  }
+
+  static any(iterable) {
+    return new Promise((resolve, reject) => {
+      let results = [];
+      iterable.forEach((promise) => {
+        Promise.resolve(promise).then(resolve, (err) => {
+          results.push(err);
+          if (results.length === iterable.length) reject(results);
+        });
+      });
+    });
+  }
+
+  static all(iterable) {
+    return new Promise((resolve, reject) => {
+      let results = [];
+      Object.entries(iterable).forEach(([i, promise]) => {
+        Promise.resolve(promise).then((value) => {
+          results[i] = value;
+          if (results.length === iterable.length) resolve(results);
+        }, reject);
+      });
+    });
+  }
+
+  static allSettled(iterable) {
+    return new Promise((resolve, reject) => {
+      let results = [];
+      Object.entries(iterable).forEach(([i, promise]) => {
+        Promise.resolve(promise)
+          .then(
+            (value) => {
+              results[i] = { value, status: StatusMap.FULFILLED };
+            },
+            (err) => {
+              results[i] = { value: err, status: StatusMap.REJECTED };
+            }
+          )
+          .finally(
+            () => results.length === iterable.length && resolve(results)
+          );
+      });
+    });
+  }
+
+  constructor(handler) {
+    Object.assign(this, {
+      status: StatusMap.PENDING,
+      value: undefined,
+      fulfilledQueue: [],
+      rejectedQueue: [],
+    });
+
+    handler(this.#resolve.bind(this), this.#reject.bind(this));
+  }
+
+  #run(status, value, queue) {
+    Object.assign(this, {
+      status,
+      value,
+    });
+
+    let callback;
+    while ((callback = queue.shift())) {
+      callback(value);
+    }
+  }
+
+  #resolve(value) {
+    if (this.status === StatusMap.PENDING) return;
+    if (value instanceof Promise)
+      return value.then(this.#resolve.bind(this), this.#reject.bind(this));
+
+    setTimeout(() =>
+      this.#run(StatusMap.FULFILLED, value, this.fulfilledQueue)
+    );
+  }
+
+  #reject(err) {
+    if (this.status === StatusMap.PENDING) return;
+
+    setTimeout(() =>
+      this.#run(StatusMap.REJECTED, err, this.rejectedQueue)
+    );
+  }
+
+  then(onFulfilled, onRejected) {
+
+  }
+
+  catch(onRejected) {}
+
+  finally(callback) {}
+}
+```
 
 ## 状态机
+
+- 有限状态机
+- 无线状态机
+
+```js
+function* idMaker() {
+  let index = 0;
+  while (true) yield index++;
+}
+```
 
 ## 加密方式
 
