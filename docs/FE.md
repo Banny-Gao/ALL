@@ -631,23 +631,23 @@ function fakeEval(exp) {
 
 ```js
 class EventBus {
-  subs = new Map()
+  subs = new Map();
 
   on(type, event) {
-    const sub = this.subs.get(type) || []
-    subs.set(type, [...sub, event])
+    const sub = this.subs.get(type) || [];
+    subs.set(type, [...sub, event]);
   }
 
   emit(type, ...payload) {
-    const sub = this.subs.get(type) || []
+    const sub = this.subs.get(type) || [];
 
-    sub.forEach(event => event(...payload))
+    sub.forEach((event) => event(...payload));
   }
 
   off(type, event) {
-    const sub = this.subs.get(type) || []
+    const sub = this.subs.get(type) || [];
 
-    sub.splice(sub.indexOf(event) >>> 0, 1)
+    sub.splice(sub.indexOf(event) >>> 0, 1);
   }
 }
 ```
@@ -908,7 +908,24 @@ function* idMaker() {
 - 下载
   - URL.createObjectURL(可能会跨域) + a 标签
 
-## css 选择器 、伪类与伪元素
+## css 选择器
+
+- 基本选择器
+  - 通配符 \*
+  - 元素 h1
+  - id
+  - class
+  - 属性 [attr^=value]
+- 分组选择器
+  - A,B
+- 组合选择器
+  - 后代 A B
+  - 子代 A > B
+  - 兄弟 A ~ B
+  - 相邻 A + B
+- 伪选择器
+  - 伪类(未被包含在文档树中的状态信息): :active 、 :hover 、 :link 、 :checked 、 :visited 、 nth-child 、 :first-child 、 :last-child ...
+  - 伪元素(无法用 HTML 语义表达的实体): ::after (:after) 、 ::before (:before) 、 ::selection
 
 ## 跨域
 
@@ -965,6 +982,7 @@ Function.prototype._bind = function (context, ...args) {
 ```
 
 ## 函数柯理化
+
 - curry 函数接收一个定参函数，
 
 ```js
@@ -988,3 +1006,134 @@ const curry =
     - 引用计数，处理循环引用问题
 
 ## javascript 性能优化
+
+- 资源与网络优化
+  - GZIP 压缩
+  - CDN 加载
+  - 缓存
+    - 强缓存
+    - 协商缓存
+  - 使用 HTTP 2.0
+  - 预加载 preload，预渲染 prerender
+  - 图片优化，雪碧图
+  - 打包优化，webpack 优化
+- 耗时任务优化
+  - web worker
+  - 调度任务 + 时间切片，react scheduler
+    - 任务优先级
+    - requestIdleCallback
+- 过渡显示
+  - 骨架屏
+  - 占位图
+- 代码优化
+
+## ES6 新特性
+
+- ES6 泛指 ECMAScript 2015 及以后的版本
+
+### ES2015
+
+- 箭头函数
+
+  - 支持表达式和陈述式
+  - 与周围代码共享 this
+  - 无 arguments
+
+- Class
+
+  - 基于 prototype 的 extends
+  - constructor, super, static
+  - 声明会提升，但不会初始化赋值
+  - 方法不可枚举
+  - 方法没有 prototype，也没有[[construct]] 不能使用 new 调用
+
+- 对象属性增强
+
+  - 支持 **proto** 设置
+  - 简写
+  - super 调用
+  - 动态属性名
+
+- 模板字符串
+- 解构赋值
+- 函数参数默认值, rest 与 spread 参数
+- let & const
+
+  - 块级声明
+    - 暂时性死区，不会变量提升
+    - 作用域内有效
+    - 不可重复声明
+  - 循环中的块级作用域： 每次循环都会重新创建变量
+
+- Iterators + For..Of
+  - [Symbol.iterator](){}
+- Generators
+- Modules
+  - import
+  - export
+- Map + Set + WeakMap + WeakSet
+- Proxy
+- Symbols
+- API 扩展
+
+  - Number.EPSILON
+  - Number.isInteger(Infinity) // false
+  - Number.isNaN("NaN") // false
+  - "abcde".includes("cd") // true
+  - "abc".repeat(3) // "abcabcabc"
+  - Array.from(document.querySelectorAll("\*")) // Returns a real Array
+  - Array.of(1, 2, 3) // [1,2,3]
+  - [0, 0, 0].fill(7, 1) // [0,7,7]
+  - [1,2,3].findIndex(x => x == 2) // 1
+  - ["a", "b", "c"].entries() // iterator [0, "a"], [1,"b"], [2,"c"]
+  - ["a", "b", "c"].keys() // iterator 0, 1, 2
+  - ["a", "b", "c"].values() // iterator "a", "b", "c"
+  - Object.assign(Point, { origin: new Point(0,0) })
+
+- Promise
+- Reflect API
+
+- 函数尾调用优化
+
+### ES7
+
+- \*\* 取幂
+
+### ES8
+
+- async/await
+
+### ES9
+
+- generator async
+- dotAll: /./s
+- 命名捕获: (?<name>x)
+- 正则: Unicode 模式
+- 对象的 rest \ spread
+
+### ES10
+
+- optional-catch-binding: try {} catch {}
+
+### ES11
+
+- export 命名导出: export \* as name from ''
+- 空值合并操作符: ??
+- 可选链: ?.
+- dynamic import: import()
+- Number.MAX_SAFE_INTEGER
+
+### ES12
+
+- 逻辑判断赋值: a ||= b, a &&= b
+
+### ES13
+
+- class properties
+- class static block: 静态私有属性 static #x = 42;
+- 对象私有属性:{ #bar = "bar"}
+- top level await: babel 不支持，用 rollUp 或 webpack 5
+  ```js
+  const val = await promise;
+  export { val };
+  ```
