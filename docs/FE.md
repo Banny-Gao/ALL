@@ -306,6 +306,50 @@ class Timer {
   - dpi: CSS 像素 = 设备独立像素 = 逻辑像素
   - ppi: 像素密度
 
+```js
+!(function (window) {
+  /* 设计图文档宽度 */
+  var docWidth = 750;
+
+  var doc = window.document,
+    docEl = doc.documentElement,
+    resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
+
+  var recalc = (function refreshRem() {
+    var clientWidth = docEl.getBoundingClientRect().width;
+
+    /* 8.55：小于320px不再缩小，11.2：大于420px不再放大 */
+    docEl.style.fontSize =
+      Math.max(Math.min(20 * (clientWidth / docWidth), 11.2), 8.55) * 5 + 'px';
+
+    return refreshRem;
+  })();
+
+  /* 添加倍屏标识，安卓倍屏为1 */
+  docEl.setAttribute(
+    'data-dpr',
+    window.navigator.appVersion.match(/iphone/gi) ? window.devicePixelRatio : 1
+  );
+
+  if (/iP(hone|od|ad)/.test(window.navigator.userAgent)) {
+    /* 添加IOS标识 */
+    doc.documentElement.classList.add('ios');
+    /* IOS8以上给html添加hairline样式，以便特殊处理 */
+    if (
+      parseInt(
+        window.navigator.appVersion.match(/OS (\d+)_(\d+)_?(\d+)?/)[1],
+        10
+      ) >= 8
+    )
+      doc.documentElement.classList.add('hairline');
+  }
+
+  if (!doc.addEventListener) return;
+  window.addEventListener(resizeEvt, recalc, false);
+  doc.addEventListener('DOMContentLoaded', recalc, false);
+})(window);
+```
+
 ## 防抖节流
 
 - 防抖: 某个时间段内，函数只在最后一次执行
@@ -664,7 +708,7 @@ class EventBus {
   - await Thenable Objects, { then: (resolve, reject) => {} }
   - for await ... of,抛出异常会中断循环
 
-实现 async, 自执行 generator 包装函数
+async 实现, 自执行 generator 包装函数
 
 ```js
 const generatorRun = (genFunc) => {
@@ -983,7 +1027,7 @@ Function.prototype._bind = function (context, ...args) {
 
 ## 函数柯理化
 
-- curry 函数接收一个定参函数，
+- curry 函数接收一个函数 fn ，返回一个函数，函数执行
 
 ```js
 const curry =
