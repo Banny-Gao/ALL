@@ -630,31 +630,26 @@ function fakeEval(exp) {
 发布订阅发布订阅实现 event bus
 
 ```js
-const eventBus = () => {
-  subs = new Map();
+class EventBus {
+  subs = new Map()
 
-  return {
-    subs,
-    $on(type, callback) {
-      const sub = subs.get(type);
-      const isEmpty = sub && sub.push(callback);
-      if (!isEmpty) {
-        subs.set(type, [callback]);
-      }
-    },
-    $emit(type, ...payload) {
-      (subs.get(type) || []).forEach((fn) => {
-        fn(...payload);
-      });
-    },
-    $off(type, callback) {
-      const sub = subs.get(type);
-      if (sub) {
-        sub.splice(sub.indexOf(callback) >>> 0, 1);
-      }
-    },
-  };
-};
+  on(type, event) {
+    const sub = this.subs.get(type) || []
+    subs.set(type, [...sub, event])
+  }
+
+  emit(type, ...payload) {
+    const sub = this.subs.get(type) || []
+
+    sub.forEach(event => event(...payload))
+  }
+
+  off(type, event) {
+    const sub = this.subs.get(type) || []
+
+    sub.splice(sub.indexOf(event) >>> 0, 1)
+  }
+}
 ```
 
 - generator/yield
@@ -695,9 +690,23 @@ const generatorRun = (genFunc) => {
 - ## promise
 - 三种状态: PENDING 、 FULFILLED 、 REJECTED
 - 六个静态方法: resolve 、 reject 、 any 、 race 、 all 、allSettled
-- 三个原型方法: then 、 catch 、 finally
-- 构造函数: 初始化状态、初始值、 fulfilled queues 、 rejected queues
+  - resolve: 返回一个 fulfilled 状态的 Promise
+  - reject: 返回一个 rejected 状态的 Promise
+  - any: 接收 iterator, 一旦某个 promise 变为 fulfilled，执行 resolve。所有 promise 都为 rejected 执行 reject，返回数组
+  - race: 接收 iterator，一旦状态变更即返回
+  - all: 接收 iterator,所有 promise 变为 fulfilled 返回对应数组，否则 reject
+  - allSettled: 接收 iterator,返回对应对象数组，value 接收值， status 保存状
+- 构造函数: 初始化状态、初始值、 fulfilled queue 、 rejected queue
 - 私有方法: #run 、 #resolve 、#reject
+  - #run: 变更状态、值、从 queue.shift 执行 callback
+- 三个原型方法: then 、 catch 、 finally
+  - then: 接收 onFulfilled 、 onRejected
+    - 返回一个 Promise
+    - 内部 fulfilled 、rejected 两个方法
+      - fulfilled 接收 fulfilledQueue 的 callback 的结果作为 value, 判断 onFulfilled 非函数，resolve(fulfilledQueue) 传递，onFulfilled 为函数, 执行 onFulfilled(value)，判断执行结果 result 为 Promise 实例，result.then(resolve, reject)，否则 resolve(result)
+      - rejected 与 fulfilled 大致相同
+    - catch: 接收 onRejected， 返回 this.then(undefined, onRejected)
+    - finally: 接收 callback，返回 this.then,内部在 Promise.then 后执行 callback
 
 ```js
 const StatusMap = {
@@ -791,7 +800,6 @@ class Promise {
   }
 
   #resolve(value) {
-    if (this.status === StatusMap.PENDING) return;
     if (value instanceof Promise)
       return value.then(this.#resolve.bind(this), this.#reject.bind(this));
 
@@ -801,26 +809,80 @@ class Promise {
   }
 
   #reject(err) {
-    if (this.status === StatusMap.PENDING) return;
-
-    setTimeout(() =>
-      this.#run(StatusMap.REJECTED, err, this.rejectedQueue)
-    );
+    setTimeout(() => this.#run(StatusMap.REJECTED, err, this.rejectedQueue));
   }
 
   then(onFulfilled, onRejected) {
+    const { status, value } = this;
+    const { PENDING, FULFILLED, REJECTED } = StatusMap;
 
+    return new Promise((resolve, reject) => {
+      const fulfilled = (value) => {
+        try {
+          if (!(onFulfilled instanceof Function)) resolve(onFulfilled);
+          else {
+            const result = onFulfilled(value);
+
+            if (result instanceof Promise) result.then(resolve, reject);
+            else resolve(result);
+          }
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      const rejected = (err) => {
+        try {
+          if (!(onRejected instanceof Function)) {
+            reject(err);
+          } else {
+            let result = onRejected(err);
+
+            if (result instanceof Promise) result.then(undefined, reject);
+            else {
+              reject(res);
+            }
+          }
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      switch (status) {
+        case PENDING: {
+          this.fulfilledQueue.push(fulfilled);
+          this.rejectedQueue.push(rejected);
+          break;
+        }
+        case FULFILLED: {
+          fulfilled(value);
+          break;
+        }
+        default:
+          rejected(value);
+      }
+    });
   }
 
-  catch(onRejected) {}
+  catch(onRejected) {
+    return this.then(undefined, onRejected);
+  }
 
-  finally(callback) {}
+  finally(callback) {
+    return this.then(
+      (result) => Promise.resolve(callback()).then(() => result),
+      (error) =>
+        Promise.resolve(callback()).then(() => {
+          throw error;
+        })
+    );
+  }
 }
 ```
 
 ## 状态机
 
-- 有限状态机
+- 有限状态机，也就是策略模式的应用
 - 无线状态机
 
 ```js
@@ -831,6 +893,10 @@ function* idMaker() {
 ```
 
 ## 加密方式
+
+- md5
+- base64
+- rsa
 
 ## 文件上传与下载
 
@@ -846,12 +912,79 @@ function* idMaker() {
 
 ## 跨域
 
+- 受同源策略限制 cookie 无法访问，请求不能发出等。Protocol 协议相同, port 端口相同, host 域名相同
+  - jsonp 跨域， 动态 script 标签
+  - document.domain + iframe
+  - postMessage
+  - CORS: Access-Control-Allow-Origin
+  - node 代理
+
 ## 页面通信
 
-## 递归
+- BroadCast Channel
+- Service Worker
+- Shared Worker
+- LocalStorage: storageEvent
+
+## 递归和闭包
+
+- 递归: 函数的自调用
+- 闭包: 函数内部可以访问外部变量，内部作用域不会消失
+  - 容易导致内存泄漏
 
 ## call & apply & bind
 
-## 闭包
+- call & apply: 改变上下文,函数由传入的 context 执行
+- bind: 返回一个函数，函数内部由传入的 context 执行
+
+```js
+Function.prototype._call = function (context, ...args) {
+  context = context || window;
+  context.fn = this;
+
+  const result = context.fn(...args);
+
+  delete context.fn;
+
+  return result;
+};
+
+Function.prototype._apply = function (context, arg = []) {
+  context = context || window;
+  context.fn = this;
+
+  const result = context.fn(...arg);
+
+  delete context.fn;
+  return result;
+};
+
+Function.prototype._bind = function (context, ...args) {
+  return () => this.apply(context, args);
+};
+```
+
+## 函数柯理化
+- curry 函数接收一个定参函数，
+
+```js
+const curry =
+  (fn, ...pre) =>
+  (...args) =>
+  (...value) =>
+    (value.length === fn.length ? fn(...value) : curry(fn, ...value))(
+      ...pre,
+      args
+    );
+```
 
 ## 浏览器垃圾回收机制
+
+- 分代式垃圾回收
+  - 新生代: 周期短，效率高
+    - Scavenge 算法: 以空间换时间,有序排列，释放非活动对象。两次回收后还存在的转移到老生代
+  - 老生代
+    - 标记清除，清理边界碎片
+    - 引用计数，处理循环引用问题
+
+## javascript 性能优化
