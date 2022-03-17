@@ -233,7 +233,6 @@ class Timer {
 - 文档流: 元素排列时所占得位置，自上而下(块级元素)，自左而右(内联元素)，normal flow(正常布局流)
 - 脱离文档流: float 和 定位会使元素脱离文档流
 - BFC: 块级格式化上下文，独立的渲染区域
-  - 自上而下排布
   - 同一 BFC 两块元素质检的 margin 会重叠
   - BFC 区域不会与浮动元素重叠。
   - float 元素也会参与高度计算
@@ -253,7 +252,7 @@ class Timer {
 - 定位: static | relative | absolute | fixed | sticky
 - Flex 布局
   - 主轴（main axis）
-  - 交叉抽（cross axis）
+  - 交叉轴（cross axis）
   - flex-direction: row | column | revert | row-reverse | column-reverse 指定主轴方向
   - flex-wrap
   - flex-flow: flex-direction 和 flex-wrap 的缩写
