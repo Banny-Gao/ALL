@@ -613,7 +613,7 @@ const create = (ctor, ...args) => {
   - 沿着原型链，判断对象 \_\_proto\_\_ 是否等于 类型的 prototype
 
 ```js
-const fakeInstanceof = (instance, Ctor) => {
+const instanceof = (instance, Ctor) => {
   let proto = instance.__proto__;
 
   while (true) {
